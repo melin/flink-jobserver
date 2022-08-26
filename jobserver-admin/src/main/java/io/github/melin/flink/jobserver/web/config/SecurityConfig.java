@@ -1,15 +1,16 @@
 package io.github.melin.flink.jobserver.web.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig {
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable()
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity.csrf().disable()
                 .headers()
                 .frameOptions()
                 .disable()
@@ -21,5 +22,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/ok", "/profile", "/gitInfo", "/doc/**", "/driver/**").permitAll()
                 .anyRequest()
                 .authenticated();
+
+        return httpSecurity.build();
     }
 }
