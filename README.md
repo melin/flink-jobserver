@@ -26,7 +26,8 @@ mvn clean package -Prelease,cdh6 -DlibScope=provided
 ### 1、准备环境
 Flink 任务运行环境：Hadoop 2.7.7，Spark 3.3.0。为避免每次任务运行上传jar，提前把相关jar 上传到 hdfs 路径。根路径：/user/superior/flink-jobserver (可以在集群管理中通过，修改jobserver.driver.home 参数设置)，根路径下有不同jar 和 目录
 1. flink-jobserver-driver-0.1.0.jar  -- flink jobserver driver jar，jar 参考编译 flink jobserver 部分。
-2. flink-1.15.2  --flink 依赖所有jar，从flink 官网下载: flink-1.15.2-bin-scala_2.12.tgz, 解压后把lib 目录下所有jar 上传到 flink-1.15.2 目录。
+2. aspectjweaver-1.9.9.1.jar  -- aspectj 拦截spark 相关代码，实现功能增强，直接maven 仓库下载 
+3. flink-1.15.2  --flink 依赖所有jar，从flink 官网下载: flink-1.15.2-bin-scala_2.12.tgz, 解压后把lib 目录下所有jar 上传到 flink-1.15.2 目录。
 
 ### 2、Yarn 集群配置要求
 1. yarn 开启日志聚合，方便出现问题查看日志 
