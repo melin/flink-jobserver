@@ -88,9 +88,4 @@ public class FlinkJobSubmitService {
             }
         }
     }
-
-    public static void main(String[] args) throws Exception {
-        FlinkJobSubmitService submitService = new FlinkJobSubmitService();
-        submitService.submitJob();
-    }
 }
