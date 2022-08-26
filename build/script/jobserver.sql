@@ -1,5 +1,7 @@
-DROP TABLE IF EXISTS `sjs_job_instance`;
-CREATE TABLE `sjs_job_instance` (
+create database flink_jobserver;
+
+DROP TABLE IF EXISTS `fjs_job_instance`;
+CREATE TABLE `fjs_job_instance` (
   `id` int NOT NULL AUTO_INCREMENT,
   `workspace` varchar(45)  DEFAULT NULL COMMENT '项目code',
   `code` varchar(45)  NOT NULL,
@@ -34,10 +36,10 @@ CREATE TABLE `sjs_job_instance` (
 ) ENGINE=InnoDB COMMENT='作业实例表';
 
 -- ----------------------------
--- Table structure for sjs_job_instance_content
+-- Table structure for fjs_job_instance_content
 -- ----------------------------
-DROP TABLE IF EXISTS `sjs_job_instance_content`;
-CREATE TABLE `sjs_job_instance_content` (
+DROP TABLE IF EXISTS `fjs_job_instance_content`;
+CREATE TABLE `fjs_job_instance_content` (
   `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
   `code` varchar(45)  NOT NULL COMMENT '实例code',
   `job_text` longtext  COMMENT '作业内容',
@@ -50,8 +52,8 @@ CREATE TABLE `sjs_job_instance_content` (
 -- ----------------------------
 -- Table structure for sjs_job_instance_dependent
 -- ----------------------------
-DROP TABLE IF EXISTS `sjs_job_instance_dependent`;
-CREATE TABLE `sjs_job_instance_dependent` (
+DROP TABLE IF EXISTS `fjs_job_instance_dependent`;
+CREATE TABLE `fjs_job_instance_dependent` (
   `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
   `code` varchar(45)  NOT NULL COMMENT 'code',
   `parent_code` varchar(45)  NOT NULL,
@@ -62,10 +64,10 @@ CREATE TABLE `sjs_job_instance_dependent` (
 ) ENGINE=InnoDB COMMENT='实例依赖表';
 
 -- ----------------------------
--- Table structure for sjs_spark_driver
+-- Table structure for sjs_flink_driver
 -- ----------------------------
-DROP TABLE IF EXISTS `sjs_spark_driver`;
-CREATE TABLE `sjs_spark_driver` (
+DROP TABLE IF EXISTS `sjs_flink_driver`;
+CREATE TABLE `sjs_flink_driver` (
   `id` int NOT NULL AUTO_INCREMENT,
   `cluster_code` varchar(45) DEFAULT NULL COMMENT '集群Code',
   `version` int DEFAULT '0' COMMENT '乐观锁，避免重复提交',
@@ -89,7 +91,7 @@ CREATE TABLE `sjs_spark_driver` (
   KEY `idx_application_id` (`application_id`) USING BTREE
 ) ENGINE=InnoDB COMMENT='Job driver注册信息';
 
-CREATE TABLE `sjs_cluster` (
+CREATE TABLE `fjs_cluster` (
     `id` int NOT NULL AUTO_INCREMENT COMMENT '主键',
     `code` varchar(64) NOT NULL COMMENT 'code',
     `name` varchar(128) NOT NULL COMMENT 'name',
