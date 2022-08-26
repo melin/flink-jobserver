@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>jobserver-driver</artifactId>
+    <artifactId>flink-jobserver-driver</artifactId>
 
     <properties>
         <flink.deps.scope>provided</flink.deps.scope>

@@ -58,7 +58,6 @@ public class FlinkJobSubmitService {
         ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfig);
         deployer.run(flinkConfig, applicationConfiguration);
 
-
         // list job
         // flinkConfiguration.set(YarnConfigOptions.APPLICATION_ID, ConverterUtils.toString(appId));
         final ClusterClientFactory<ApplicationId> clusterClientFactory =
