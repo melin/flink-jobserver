@@ -30,4 +30,4 @@ BASE_JVM_ARGS_2="-XX:+UseParNewGC -XX:+UseFastAccessorMethods"
 BASE_JVM_ARGS_3="-XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=70 -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true"
 APP_JVM_ARGS="$BASE_JVM_ARGS_0 $BASE_JVM_ARGS_1 $BASE_JVM_ARGS_2 $BASE_JVM_ARGS_3 -cp $CLASSPATH"
 
-JPDA_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=60012"
+JPDA_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=60022"
