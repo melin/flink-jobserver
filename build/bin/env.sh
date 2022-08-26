@@ -12,7 +12,7 @@ fi
 JAVA=$JAVA_HOME/bin/java
 BASE_HOME=$BASE_DIR
 SERVER_NAME="flink-jobserver"
-APP_START_MAIN_CLASS="io.github.melin.flink.jobserver.SparkJobServerMain"
+APP_START_MAIN_CLASS="io.github.melin.flink.jobserver.FlinkJobServerMain"
 
 export CLASSPATH=$BASE_DIR/conf:$BASE_DIR/lib/*
 
