@@ -15,7 +15,7 @@
         <dependency>
             <groupId>io.github.melin.flink.jobserver</groupId>
             <artifactId>flink-jobserver-api</artifactId>
-            <version>0.1.0</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>

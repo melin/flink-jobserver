@@ -1,18 +1,12 @@
-### 依赖
-```xml
-<dependency>
-    <groupId>io.github.melin.flink.jobserver</groupId>
-    <artifactId>flink-jobserver-api</artifactId>
-    <version>0.1.0</version>
-</dependency>
-```
+package io.github.melin.flink.jobserver.examples;
 
-### Spark Jar 任务
-
-```java
 import io.github.melin.flink.jobserver.api.FlinkJob;
-import io.github.melin.flink.jobserver.api.LogUtils;
-import org.apache.spark.sql.SparkSession;
+import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.table.api.Table;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
+
+import java.util.Arrays;
 
 public class FlinkStreamDemo implements FlinkJob {
 
@@ -85,4 +79,3 @@ public class FlinkStreamDemo implements FlinkJob {
         }
     }
 }
-```
