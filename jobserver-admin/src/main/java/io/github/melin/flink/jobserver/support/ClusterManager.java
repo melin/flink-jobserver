@@ -254,7 +254,7 @@ public class ClusterManager implements InitializingBean {
             FileUtils.write(new File(destDir + "/yarn-site.xml"),
                     cluster.getYarnConfig(), StandardCharsets.UTF_8);
 
-            FileUtils.write(new File(destDir + "/spark.conf"),
+            FileUtils.write(new File(destDir + "/flink-conf.yaml"),
                     cluster.getSparkConfig(), StandardCharsets.UTF_8);
         } else {
             LOGGER.error("集群 " + cluster.getCode() + " hadoop config 有空");

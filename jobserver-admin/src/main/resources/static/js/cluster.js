@@ -5,7 +5,7 @@ var Cluster = function () {
     let dropdown = layui.dropdown;
     const maxInstanceCount = $("#maxInstanceCount").val();
 
-    let jobserverEditor, sparkEditor, coreEditor, hdfsEditor, yarnEditor, hiveEditor;
+    let jobserverEditor, flinkEditor, coreEditor, hdfsEditor, yarnEditor, hiveEditor;
 
     return {
         init: function () {
@@ -131,7 +131,7 @@ var Cluster = function () {
             });
 
             jobserverEditor = Cluster.getEditor(jobserverEditor, "jobserverEditor", "ace/mode/properties");
-            sparkEditor = Cluster.getEditor(sparkEditor, "sparkEditor", "ace/mode/properties");
+            flinkEditor = Cluster.getEditor(flinkEditor, "flinkEditor", "ace/mode/properties");
             coreEditor = Cluster.getEditor(coreEditor, "coreEditor", "ace/mode/xml");
             hdfsEditor = Cluster.getEditor(hdfsEditor, "hdfsEditor", "ace/mode/xml");
             yarnEditor = Cluster.getEditor(yarnEditor, "yarnEditor", "ace/mode/xml");
@@ -169,7 +169,7 @@ var Cluster = function () {
                             let data = result.data;
                             form.val('newClusterForm', data);
                             Cluster.setEditorValue(jobserverEditor, data.jobserverConfig)
-                            Cluster.setEditorValue(sparkEditor, data.sparkConfig)
+                            Cluster.setEditorValue(flinkEditor, data.flinkConfig)
                             Cluster.setEditorValue(coreEditor, data.coreConfig)
                             Cluster.setEditorValue(hdfsEditor, data.hdfsConfig)
                             Cluster.setEditorValue(yarnEditor, data.yarnConfig)
@@ -180,7 +180,7 @@ var Cluster = function () {
             } else {
                 form.val('newClusterForm', {code: "", name: "", yarnQueueName: "default"});
                 Cluster.setEditorValue(jobserverEditor, $("#confDefaultValue").val())
-                Cluster.setEditorValue(sparkEditor, "")
+                Cluster.setEditorValue(flinkEditor, "")
                 Cluster.setEditorValue(coreEditor, "")
                 Cluster.setEditorValue(hdfsEditor, "")
                 Cluster.setEditorValue(yarnEditor, "")
@@ -208,7 +208,7 @@ var Cluster = function () {
                     }
 
                     let jobserverConfig = $.trim(jobserverEditor.getValue());
-                    let sparkConfig = $.trim(sparkEditor.getValue());
+                    let flinkConfig = $.trim(flinkEditor.getValue());
                     let coreConfig = $.trim(coreEditor.getValue());
                     let hdfsConfig = $.trim(hdfsEditor.getValue());
                     let yarnConfig = $.trim(yarnEditor.getValue());
@@ -216,7 +216,7 @@ var Cluster = function () {
 
                     data.id = clusterId
                     data.jobserverConfig = jobserverConfig
-                    data.sparkConfig = sparkConfig
+                    data.flinkConfig = flinkConfig
                     data.coreConfig = coreConfig
                     data.hdfsConfig = hdfsConfig
                     data.yarnConfig = yarnConfig

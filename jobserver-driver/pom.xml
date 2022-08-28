@@ -16,6 +16,33 @@
         <start-class>io.github.melin.flink.jobserver.FlinkDriverApp</start-class>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>io.github.melin.flink.jobserver</groupId>
+            <artifactId>flink-jobserver-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>com.beust</groupId>
+            <artifactId>jcommander</artifactId>
+            <version>1.82</version>
+        </dependency>
+
+        <!-- 用2.3 避免引入commons-text 导致jar冲突 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-configuration2</artifactId>
+            <version>2.3</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <finalName>flink-jobserver-driver-${project.version}</finalName>
         <plugins>
