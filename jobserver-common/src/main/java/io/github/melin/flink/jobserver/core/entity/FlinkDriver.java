@@ -2,7 +2,6 @@ package io.github.melin.flink.jobserver.core.entity;
 
 import io.github.melin.flink.jobserver.core.enums.DriverResType;
 import io.github.melin.flink.jobserver.core.enums.DriverStatus;
-import io.github.melin.flink.jobserver.core.enums.DriverType;
 import com.gitee.melin.bee.model.IEntity;
 import com.gitee.melin.bee.util.NetUtils;
 import lombok.Getter;
@@ -16,7 +15,6 @@ import javax.persistence.*;
 import java.time.Instant;
 
 import static io.github.melin.flink.jobserver.core.enums.DriverResType.YARN_BATCH;
-import static io.github.melin.flink.jobserver.core.enums.DriverType.DRIVER_SERVER;
 
 @Getter
 @Setter
@@ -41,12 +39,6 @@ public class FlinkDriver implements IEntity {
 
     @Column(name = "server_port", nullable = false)
     private Integer serverPort;
-
-    @Column(name = "driver_type")
-    @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
-            parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
-                    value = "io.github.melin.spark.jobserver.core.enums.DriverType")})
-    private DriverType driverType;
 
     @Column(name = "driver_res_type")
     @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
@@ -125,7 +117,6 @@ public class FlinkDriver implements IEntity {
         jobServer.setServerMemory(0L);
         jobServer.setShareDriver(shareDriver);
         jobServer.setLogServer(hostName);
-        jobServer.setDriverType(DRIVER_SERVER);
         return jobServer;
     }
 }

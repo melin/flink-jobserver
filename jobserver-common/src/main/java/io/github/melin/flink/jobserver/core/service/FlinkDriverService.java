@@ -3,7 +3,6 @@ package io.github.melin.flink.jobserver.core.service;
 import io.github.melin.flink.jobserver.core.dao.SparkDriverDao;
 import io.github.melin.flink.jobserver.core.entity.FlinkDriver;
 import io.github.melin.flink.jobserver.core.enums.DriverStatus;
-import io.github.melin.flink.jobserver.core.enums.DriverType;
 import com.gitee.melin.bee.core.hibernate5.HibernateBaseDao;
 import com.gitee.melin.bee.core.service.BaseServiceImpl;
 import com.gitee.melin.bee.util.NetUtils;
@@ -175,15 +174,13 @@ public class FlinkDriverService extends BaseServiceImpl<FlinkDriver, Long> {
         Criterion statusCrt = Restrictions.eq("status", DriverStatus.IDLE);
         Criterion shareDriverCrt = Restrictions.eq("shareDriver", true);
         Criterion instanceCountCrt = Restrictions.lt("instanceCount", maxInstanceCount);
-        Criterion driverTypeCrt = Restrictions.eq("driverType", DriverType.DRIVER_SERVER);
 
         if (minJobserverId > 0) {
             Criterion idCrt = Restrictions.gt("id", minJobserverId);
             return findByCriterions(Order.asc("gmtCreated"), statusCrt, shareDriverCrt,
-                    instanceCountCrt, driverTypeCrt, idCrt);
+                    instanceCountCrt, idCrt);
         } else {
-            return findByCriterions(Order.asc("gmtCreated"), statusCrt, shareDriverCrt,
-                    instanceCountCrt, driverTypeCrt);
+            return findByCriterions(Order.asc("gmtCreated"), statusCrt, shareDriverCrt, instanceCountCrt);
         }
     }
 }

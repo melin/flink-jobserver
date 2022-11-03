@@ -3,7 +3,6 @@ package io.github.melin.flink.jobserver.driver;
 import com.beust.jcommander.JCommander;
 import io.github.melin.flink.jobserver.driver.model.DriverParam;
 import io.github.melin.flink.jobserver.driver.support.ConfigClient;
-import io.github.melin.spark.jobserver.driver.util.ConfigClient;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.Configuration;
 import org.slf4j.Logger;

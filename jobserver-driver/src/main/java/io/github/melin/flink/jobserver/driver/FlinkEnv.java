@@ -1,12 +1,13 @@
 package io.github.melin.flink.jobserver.driver;
 
 import io.github.melin.flink.jobserver.api.FlinkJobServerException;
-import jdk.jpackage.internal.Log;
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.ConfigOptions;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.DeploymentOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
+import org.apache.flink.yarn.configuration.YarnDeploymentTarget;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,18 +27,21 @@ public class FlinkEnv {
         if (tableEnvironment == null) {
             if (kerberosEnabled) {
                 UserGroupInformation.getLoginUser().doAs((PrivilegedExceptionAction<Object>) () -> {
-                    initSpark(flinkConf, hiveEnabled);
+                    initFlink(flinkConf, hiveEnabled);
                     return null;
                 });
             } else {
-                initSpark(flinkConf, hiveEnabled);
+                initFlink(flinkConf, hiveEnabled);
             }
         }
     }
 
-    private static void initSpark(Configuration flinkConf, boolean hiveEnabled) {
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(flinkConf);
+    private static void initFlink(Configuration flinkConf, boolean hiveEnabled) {
+        flinkConf.set(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName());
+        StreamExecutionEnvironment env = new StreamExecutionEnvironment(flinkConf);
         tableEnvironment = StreamTableEnvironment.create(env);
+        //@TODO 注册 hive catalog
+        //tableEnvironment.useCatalog();
         LOG.info("StreamTableEnvironment inited");
     }
 
@@ -55,7 +59,7 @@ public class FlinkEnv {
 
             // 从配置中获取applicationId
             String appId = configuration.get(applicationId);
-            Log.info("flink applicationId: " + appId);
+            LOG.info("flink applicationId: " + appId);
             return appId;
         } catch (Exception e) {
             throw new FlinkJobServerException("get yarn appId failed: " + e.getMessage(), e);

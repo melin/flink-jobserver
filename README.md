@@ -61,3 +61,6 @@ Flink 任务运行环境：Hadoop 2.7.7，Spark 3.3.0。为避免每次任务运
 4. https://github.com/melin/superior-sql-autocomplete
 5. https://github.com/melin/datatunnel
 6. https://github.com/melin/spark-jobserver
+
+## 五、参考资料
+1. [Flink SQL通过Hudi HMS Catalog读写Hudi并同步Hive表](https://mp.weixin.qq.com/s/WpvOvFv-iAzdCwmOO5oQ4Q)
