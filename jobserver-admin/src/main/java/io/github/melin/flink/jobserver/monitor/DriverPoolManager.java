@@ -6,7 +6,7 @@ import io.github.melin.flink.jobserver.core.entity.Cluster;
 import io.github.melin.flink.jobserver.core.entity.FlinkDriver;
 import io.github.melin.flink.jobserver.core.service.ClusterService;
 import io.github.melin.flink.jobserver.core.service.FlinkDriverService;
-import io.github.melin.flink.jobserver.deployment.YarnDriverSubmit;
+import io.github.melin.flink.jobserver.deployment.YarnFlinkDriverSubmit;
 import io.github.melin.flink.jobserver.support.ClusterConfig;
 import io.github.melin.flink.jobserver.support.YarnClientService;
 import io.github.melin.flink.jobserver.support.leader.LeaderTypeEnum;
@@ -52,7 +52,7 @@ public class DriverPoolManager implements InitializingBean {
     private ClusterConfig clusterConfig;
 
     @Autowired
-    private YarnDriverSubmit yarnDriverSubmit;
+    private YarnFlinkDriverSubmit yarnFlinkDriverSubmit;
 
     private final ScheduledExecutorService scheduledExecutorService =
             ThreadUtils.newDaemonSingleThreadScheduledExecutor("check-yarn-app");
@@ -123,7 +123,7 @@ public class DriverPoolManager implements InitializingBean {
             int minDriverCount = clusterConfig.getInt(cluster.getCode(), JOBSERVER_DRIVER_MIN_COUNT);
             long driverCount = driverService.queryCount();
             while (minDriverCount > driverCount) {
-                yarnDriverSubmit.buildJobServer(cluster);
+                //yarnFlinkDriverSubmit.buildJobServer(cluster);
                 driverCount = driverService.queryCount();
             }
         } catch (Throwable e) {

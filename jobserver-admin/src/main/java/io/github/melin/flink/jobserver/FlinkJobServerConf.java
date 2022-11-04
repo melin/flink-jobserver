@@ -67,7 +67,7 @@ public class FlinkJobServerConf extends BeeConf {
                     .doc("driver 部署 jar 文件名")
                     .version("3.3.0")
                     .stringConf()
-                    .createWithDefault("spark-jobserver-driver-0.1.0.jar");
+                    .createWithDefault("flink-jobserver-driver-0.1.0.jar");
 
     public static final ConfigEntry<String> JOBSERVER_DRIVER_YAEN_QUEUE_NAME =
             buildConf("jobserver.driver.yarn.queue.name")
@@ -120,19 +120,12 @@ public class FlinkJobServerConf extends BeeConf {
                     .stringConf()
                     .createWithDefault("/home/devops/anaconda3/bin/python");
 
-    public static final ConfigEntry<String> JOBSERVER_PYSPARK_PATH =
-            buildConf("jobserver.pyspark.path")
-                    .doc("pyspark 包路径 路径")
-                    .version("3.3.0")
-                    .stringConf()
-                    .createWithDefault("/home/devops/pyspark/3.3.0/pyspark.zip:/home/devops/pyspark/3.3.0/py4j-0.10.9.5-src.zip");
-
-    public static final ConfigEntry<String> JOBSERVER_SPARK_VERSION =
+    public static final ConfigEntry<String> JOBSERVER_FLINK_VERSION =
             buildConf("jobserver.spark.version")
                     .doc("jobserver spark verion")
-                    .version("3.3.0")
+                    .version("1.0.0")
                     .stringConf()
-                    .createWithDefault("3.3.0");
+                    .createWithDefault("1.16.0");
 
     public static final ConfigEntry<Integer> JOBSERVER_YARN_MIN_MEMORY_MB =
             buildConf("jobserver.yarn.min.memory.mb")
