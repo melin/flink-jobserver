@@ -31,8 +31,8 @@
 
         <flink.version>1.16.0</flink.version>
         <hive.version>2.3.9</hive.version>
-        <bee.version>1.4.18</bee.version>
-        <hibernate-validator.version>6.2.4.Final</hibernate-validator.version>
+        <bee.version>1.4.19</bee.version>
+        <hibernate-validator.version>6.2.5.Final</hibernate-validator.version>
         <shade.plugin.version>3.3.0</shade.plugin.version>
     </properties>
 

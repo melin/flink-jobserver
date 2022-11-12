@@ -52,7 +52,9 @@ public class FlinkStreamDemo implements FlinkJob {
     /** Simple POJO. */
     public static class Order {
         public Long user;
+
         public String product;
+
         public int amount;
 
         // for POJO detection in DataStream API
