@@ -21,7 +21,7 @@ CREATE TABLE `fjs_job_instance` (
   `max_retry_count` int DEFAULT NULL COMMENT '最大重试次数',
   `retry_count` int DEFAULT '0',
   `failure_count` int DEFAULT NULL COMMENT '失败次数',
-  `application_id` varchar(128)  DEFAULT 'spark app id',
+  `application_id` varchar(128)  DEFAULT 'flink app id',
   `client_name` varchar(128)  DEFAULT '实例创建客户端名',
   `gmt_created` datetime NOT NULL,
   `gmt_modified` datetime DEFAULT NULL,
@@ -66,8 +66,8 @@ CREATE TABLE `fjs_job_instance_dependent` (
 -- ----------------------------
 -- Table structure for sjs_flink_driver
 -- ----------------------------
-DROP TABLE IF EXISTS `sjs_flink_driver`;
-CREATE TABLE `sjs_flink_driver` (
+DROP TABLE IF EXISTS `fjs_flink_driver`;
+CREATE TABLE `fjs_flink_driver` (
   `id` int NOT NULL AUTO_INCREMENT,
   `cluster_code` varchar(45) DEFAULT NULL COMMENT '集群Code',
   `version` int DEFAULT '0' COMMENT '乐观锁，避免重复提交',
@@ -77,7 +77,7 @@ CREATE TABLE `sjs_flink_driver` (
   `driver_res_type` varchar(45)  DEFAULT NULL COMMENT '作业计算类型：yarn_batch、yarn_stream、k8s_batch、k8s_stream',
   `status` varchar(45)  NOT NULL COMMENT '状态',
   `application_id` varchar(64)  NOT NULL,
-  `log_server` varchar(64)  DEFAULT NULL COMMENT 'spark 日志拉取server ip',
+  `log_server` varchar(64)  DEFAULT NULL COMMENT 'flink 日志拉取server ip',
   `instance_count` int DEFAULT '0' COMMENT '运行实例数量',
   `server_cores` int NOT NULL COMMENT 'application占用core数',
   `server_memory` int NOT NULL COMMENT 'Application占用内存大小',
@@ -91,6 +91,7 @@ CREATE TABLE `sjs_flink_driver` (
   KEY `idx_application_id` (`application_id`) USING BTREE
 ) ENGINE=InnoDB COMMENT='Job driver注册信息';
 
+DROP TABLE IF EXISTS `fjs_cluster`;
 CREATE TABLE `fjs_cluster` (
     `id` int NOT NULL AUTO_INCREMENT COMMENT '主键',
     `code` varchar(64) NOT NULL COMMENT 'code',
@@ -102,7 +103,7 @@ CREATE TABLE `fjs_cluster` (
     `kerberos_user` varchar(128) DEFAULT NULL COMMENT 'kerberos用户',
     `scheduler_type` varchar(45) DEFAULT 'YARN' COMMENT '调度框架:YARN、K8S',
     `jobserver_config` longtext COMMENT 'jobserver config',
-    `spark_config` longtext COMMENT 'spark config',
+    `flink_config` longtext COMMENT 'flink config',
     `core_config` longtext COMMENT 'core-site配置',
     `hdfs_config` longtext COMMENT 'hdfs-site配置',
     `yarn_config` longtext COMMENT 'yarn-site配置',

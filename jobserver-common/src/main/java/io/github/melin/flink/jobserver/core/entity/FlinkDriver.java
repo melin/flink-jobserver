@@ -43,12 +43,12 @@ public class FlinkDriver implements IEntity {
     @Column(name = "driver_res_type")
     @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
             parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
-                    value = "io.github.melin.spark.jobserver.core.enums.DriverResType")})
+                    value = "io.github.melin.flink.jobserver.core.enums.DriverResType")})
     private DriverResType driverResType;
 
     @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
             parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
-                    value = "io.github.melin.spark.jobserver.core.enums.DriverStatus")})
+                    value = "io.github.melin.flink.jobserver.core.enums.DriverStatus")})
     @Column(name = "status", nullable = false, length = 45)
     private DriverStatus status;
 
@@ -85,7 +85,7 @@ public class FlinkDriver implements IEntity {
     @Column(name = "gmt_modified")
     private Instant gmtModified;
 
-    @Formula("(select p.code from sjs_job_instance p where p.application_id = application_id and p.status='RUNNING' limit 1)")
+    @Formula("(select p.code from fjs_job_instance p where p.application_id = application_id and p.status='RUNNING' limit 1)")
     private String instanceCode;
 
     @Transient

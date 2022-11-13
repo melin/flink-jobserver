@@ -96,7 +96,7 @@ public class ClusterController {
                 old.setName(cluster.getName());
                 old.setSchedulerType(cluster.getSchedulerType());
                 old.setJobserverConfig(cluster.getJobserverConfig());
-                old.setSparkConfig(cluster.getSparkConfig());
+                old.setFlinkConfig(cluster.getFlinkConfig());
                 old.setCoreConfig(cluster.getCoreConfig());
                 old.setHdfsConfig(cluster.getHdfsConfig());
                 old.setYarnConfig(cluster.getYarnConfig());

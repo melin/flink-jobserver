@@ -65,7 +65,7 @@ public class DriverPoolManager implements InitializingBean {
             if (redisLeaderElection.checkLeader(LeaderTypeEnum.DRIVER_POOL_MANAGER)) {
                 List<Cluster> clusters = clusterService.findByNamedParam("status", 1);
                 for (Cluster cluster : clusters) {
-                    LOG.info("monitor driver pool");
+                    LOG.debug("monitor driver pool: {}", cluster.getCode());
 
                     stopMaxIdleJobserver(cluster);
                     startMinJobServer(cluster);
@@ -123,7 +123,7 @@ public class DriverPoolManager implements InitializingBean {
             int minDriverCount = clusterConfig.getInt(cluster.getCode(), JOBSERVER_DRIVER_MIN_COUNT);
             long driverCount = driverService.queryCount();
             while (minDriverCount > driverCount) {
-                //yarnFlinkDriverSubmit.buildJobServer(cluster);
+                yarnFlinkDriverSubmit.buildJobServer(cluster);
                 driverCount = driverService.queryCount();
             }
         } catch (Throwable e) {

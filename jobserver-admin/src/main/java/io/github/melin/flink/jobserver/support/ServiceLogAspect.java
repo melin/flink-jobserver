@@ -24,7 +24,7 @@ public class ServiceLogAspect {
 
     private static final Logger LOG = LoggerFactory.getLogger("accessLog");
 
-    @Pointcut("execution(public * io.github.melin.spark.jobserver.service.JobServerServiceImpl.*(..))")
+    @Pointcut("execution(public * io.github.melin.flink.jobserver.service.JobServerServiceImpl.*(..))")
     public void serviceAccessLog(){}
 
     @Around("serviceAccessLog()")

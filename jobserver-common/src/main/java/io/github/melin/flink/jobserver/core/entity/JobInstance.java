@@ -44,13 +44,13 @@ public class JobInstance implements IEntity {
     @Column(name = "job_type", length = 32)
     @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
             parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
-                    value = "io.github.melin.spark.jobserver.core.enums.JobType")})
+                    value = "io.github.melin.flink.jobserver.core.enums.JobType")})
     private JobType jobType;
 
     @Column(name = "instance_type", nullable = false, length = 32)
     @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
             parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
-                    value = "io.github.melin.spark.jobserver.core.enums.InstanceType")})
+                    value = "io.github.melin.flink.jobserver.core.enums.InstanceType")})
     private InstanceType instanceType;
 
     @lombok.Builder.Default
@@ -60,7 +60,7 @@ public class JobInstance implements IEntity {
     @Column(name = "status", nullable = false)
     @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
             parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
-                    value = "io.github.melin.spark.jobserver.core.enums.InstanceStatus")})
+                    value = "io.github.melin.flink.jobserver.core.enums.InstanceStatus")})
     private InstanceStatus status;
 
     @Column(name = "schedule_time")

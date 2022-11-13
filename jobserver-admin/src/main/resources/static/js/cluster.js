@@ -131,7 +131,7 @@ var Cluster = function () {
             });
 
             jobserverEditor = Cluster.getEditor(jobserverEditor, "jobserverEditor", "ace/mode/properties");
-            flinkEditor = Cluster.getEditor(flinkEditor, "flinkEditor", "ace/mode/properties");
+            flinkEditor = Cluster.getEditor(flinkEditor, "flinkEditor", "ace/mode/yaml");
             coreEditor = Cluster.getEditor(coreEditor, "coreEditor", "ace/mode/xml");
             hdfsEditor = Cluster.getEditor(hdfsEditor, "hdfsEditor", "ace/mode/xml");
             yarnEditor = Cluster.getEditor(yarnEditor, "yarnEditor", "ace/mode/xml");

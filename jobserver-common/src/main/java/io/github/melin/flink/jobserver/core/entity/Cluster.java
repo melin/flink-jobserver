@@ -31,13 +31,13 @@ public class Cluster implements IEntity {
     @Column(name = "storage_type")
     @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
             parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
-                    value = "io.github.melin.spark.jobserver.core.enums.StorageType")})
+                    value = "io.github.melin.flink.jobserver.core.enums.StorageType")})
     private StorageType storageType = StorageType.HDFS; //存储类型:HDFS、OBS、OSS、S3等文件系统
 
     @Column(name = "scheduler_type")
     @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
             parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
-                    value = "io.github.melin.spark.jobserver.core.enums.SchedulerType")})
+                    value = "io.github.melin.flink.jobserver.core.enums.SchedulerType")})
     private SchedulerType schedulerType; // 调度框架:YARN、K8S
 
     @Column(name = "kerberos_enabled")
@@ -58,8 +58,8 @@ public class Cluster implements IEntity {
     @Column(name = "jobserver_config")
     private String jobserverConfig;
 
-    @Column(name = "spark_config")
-    private String sparkConfig;
+    @Column(name = "flink_config")
+    private String flinkConfig;
 
     @Column(name = "core_config")
     private String coreConfig;

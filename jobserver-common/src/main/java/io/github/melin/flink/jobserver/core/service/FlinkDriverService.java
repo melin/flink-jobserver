@@ -67,7 +67,7 @@ public class FlinkDriverService extends BaseServiceImpl<FlinkDriver, Long> {
     @Transactional
     public void updateServerFinished(String appId) {
         try {
-            String hql = "update SparkDriver set status=:afterStatus, gmtModified=:gmtModified " +
+            String hql = "update FlinkDriver set status=:afterStatus, gmtModified=:gmtModified " +
                     "where status=:beforeStatus and applicationId=:appId";
 
             int batch = this.deleteOrUpdateByHQL(hql,
@@ -83,8 +83,8 @@ public class FlinkDriverService extends BaseServiceImpl<FlinkDriver, Long> {
 
     @Transactional(readOnly = true)
     public List<FlinkDriver> queryAllIdleDrivers(String clusterCode) {
-        return findByNamedParamAndOrder(new String[] {"driverType", "status", "clusterCode"},
-                new Object[]{"driverServer", DriverStatus.IDLE, clusterCode},
+        return findByNamedParamAndOrder(new String[] {"status", "clusterCode"},
+                new Object[]{DriverStatus.IDLE, clusterCode},
                 Order.asc("gmtModified"));
     }
 
@@ -123,7 +123,7 @@ public class FlinkDriverService extends BaseServiceImpl<FlinkDriver, Long> {
     @Transactional
     public void clearCurrentLogServer() {
         try {
-            String hql = "update SparkDriver set logServer = null where logServer = :logServer";
+            String hql = "update FlinkDriver set logServer = null where logServer = :logServer";
             int count = this.deleteOrUpdateByHQL(hql, "logServer", hostName);
             LOG.info("清空log server count: {}", count);
         } catch (Exception e) {
@@ -134,7 +134,7 @@ public class FlinkDriverService extends BaseServiceImpl<FlinkDriver, Long> {
     @Transactional
     public boolean lockCurrentLogServer(String appId) {
         try {
-            String hql = "update SparkDriver set logServer=:logServer where logServer is null and applicationId=:appId";
+            String hql = "update FlinkDriver set logServer=:logServer where logServer is null and applicationId=:appId";
             int count = this.deleteOrUpdateByHQL(hql, new String[]{"logServer", "appId"},
                     new Object[]{hostName, appId});
             if (count > 0) {
@@ -151,13 +151,12 @@ public class FlinkDriverService extends BaseServiceImpl<FlinkDriver, Long> {
     @Transactional
     public List<FlinkDriver> queryEmptyLogServers() {
         Criterion logServerCtr = Restrictions.isNull("logServer");
-        Criterion driverTypeCtr = Restrictions.eq("driverType", "driverServer");
-        return findByCriterions(logServerCtr, driverTypeCtr);
+        return findByCriterions(logServerCtr);
     }
 
     @Transactional
     public int updateServerLocked(String applicationId, int version) {
-        String hql = "update SparkDriver set status=:afterStatus, gmtModified=:gmtModified, version=:afterVersion " +
+        String hql = "update FlinkDriver set status=:afterStatus, gmtModified=:gmtModified, version=:afterVersion " +
                 "where status=:beforeStatus and applicationId=:applicationId and version =:beforeVersion";
 
         int batch = this.deleteOrUpdateByHQL(hql, new String[]{"afterStatus", "gmtModified", "afterVersion",

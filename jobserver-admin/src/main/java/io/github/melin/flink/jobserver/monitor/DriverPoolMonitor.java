@@ -2,7 +2,7 @@ package io.github.melin.flink.jobserver.monitor;
 
 import com.gitee.melin.bee.util.ThreadUtils;
 import io.github.melin.flink.jobserver.monitor.task.CheckJobSubmitTimoutTask;
-import io.github.melin.flink.jobserver.monitor.task.CheckSparkDriverTask;
+import io.github.melin.flink.jobserver.monitor.task.CheckFlinkDriverTask;
 import io.github.melin.flink.jobserver.monitor.task.UpdateDriverResourceTask;
 import io.github.melin.flink.jobserver.support.leader.LeaderTypeEnum;
 import io.github.melin.flink.jobserver.support.leader.RedisLeaderElection;
@@ -34,7 +34,7 @@ public class DriverPoolMonitor implements InitializingBean {
     private CheckJobSubmitTimoutTask checkJobSubmitTimoutTask;
 
     @Autowired
-    private CheckSparkDriverTask checkSparkDriverTask;
+    private CheckFlinkDriverTask checkFlinkDriverTask;
 
     private final ScheduledExecutorService jobServerCheckExecutorService =
             ThreadUtils.newDaemonSingleThreadScheduledExecutor("check-jobserver");
@@ -49,7 +49,7 @@ public class DriverPoolMonitor implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
         redisLeaderElection.buildLeader(LeaderTypeEnum.DRIVER_POOL_MONITOR);
 
-        jobServerCheckExecutorService.scheduleAtFixedRate(checkSparkDriverTask,
+        jobServerCheckExecutorService.scheduleAtFixedRate(checkFlinkDriverTask,
                 1, 60, TimeUnit.SECONDS);
 
         //作业实例提交超时

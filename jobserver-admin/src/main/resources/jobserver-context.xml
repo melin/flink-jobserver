@@ -8,7 +8,7 @@
        http://www.springframework.org/schema/context/spring-context.xsd
        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
-    <context:component-scan base-package="io.github.melin.spark.jobserver"/>
+    <context:component-scan base-package="io.github.melin.flink.jobserver"/>
 
     <!-- 对任何带有@Repository 注解的对象自动激活其数据访问异常转换 -->
     <bean id="persistenceManager" class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" >
@@ -20,7 +20,7 @@
         <property name="dataSource" ref="dataSource" />
         <property name="packagesToScan">
             <list>
-                <value>io.github.melin.spark.jobserver.core.entity</value>
+                <value>io.github.melin.flink.jobserver.core.entity</value>
             </list>
         </property>
         <property name="hibernateProperties">
