@@ -101,7 +101,7 @@ public class YarnFlinkDriverSubmit {
                 }
             }
 
-            DriverController.sparkLauncherFailedMsg = "";
+            DriverController.flinkLauncherFailedMsg = "";
         } catch (Throwable e) {
             LOG.info("启动jobserver 失败" + e.getMessage(), e);
             if (driverId != null) {
@@ -109,7 +109,7 @@ public class YarnFlinkDriverSubmit {
                 driverService.deleteEntity(driverId);
             }
 
-            DriverController.sparkLauncherFailedMsg = "启动jobserver 失败: " + e.getMessage();
+            DriverController.flinkLauncherFailedMsg = "启动jobserver 失败: " + e.getMessage();
 
             try {
                 TimeUnit.SECONDS.sleep(10);

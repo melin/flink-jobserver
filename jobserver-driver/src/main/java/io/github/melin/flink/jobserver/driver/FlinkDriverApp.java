@@ -26,7 +26,7 @@ import java.util.Base64;
  */
 @ImportResource(locations = {"classpath*:*-context.xml"})
 @SpringBootApplication(exclude = {HibernateJpaAutoConfiguration.class, GsonAutoConfiguration.class,
-        EmbeddedWebServerFactoryCustomizerAutoConfiguration.JettyWebServerFactoryCustomizerConfiguration.class})
+        EmbeddedWebServerFactoryCustomizerAutoConfiguration.class})
 @EnableScheduling
 @EnableTransactionManagement
 public class FlinkDriverApp extends SpringBootServletInitializer {

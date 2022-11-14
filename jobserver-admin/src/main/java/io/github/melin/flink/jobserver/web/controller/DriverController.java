@@ -77,7 +77,7 @@ public class DriverController implements InitializingBean {
     @Value("${spring.profiles.active}")
     protected String profiles;
 
-    public static String sparkLauncherFailedMsg = "";
+    public static String flinkLauncherFailedMsg = "";
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -88,7 +88,7 @@ public class DriverController implements InitializingBean {
     public String home(ModelMap model) {
         List<Cluster> clusters = clusterService.queryValidClusters();
 
-        model.addAttribute("sparkLauncherFailedMsg", sparkLauncherFailedMsg);
+        model.addAttribute("flinkLauncherFailedMsg", flinkLauncherFailedMsg);
         model.addAttribute("clusters", clusters);
         return "driver";
     }
