@@ -5,7 +5,7 @@ import com.google.common.collect.Maps;
 import io.github.melin.flink.jobserver.ConfigProperties;
 import io.github.melin.flink.jobserver.core.entity.FlinkDriver;
 import io.github.melin.flink.jobserver.core.entity.JobInstance;
-import io.github.melin.flink.jobserver.core.enums.DriverResType;
+import io.github.melin.flink.jobserver.core.enums.ComputeType;
 import io.github.melin.flink.jobserver.core.service.FlinkDriverService;
 import io.github.melin.flink.jobserver.core.service.JobInstanceService;
 import io.github.melin.flink.jobserver.deployment.dto.JobInstanceInfo;
@@ -29,9 +29,9 @@ import java.util.concurrent.TimeUnit;
  * Created by admin on 2019/10/29 11:43 上午
  */
 @Service
-public class SparkLogService implements ApplicationContextAware, InitializingBean, DisposableBean {
+public class FlinkLogService implements ApplicationContextAware, InitializingBean, DisposableBean {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SparkLogService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlinkLogService.class);
 
     @Autowired
     private FlinkDriverService driverService;
@@ -70,12 +70,12 @@ public class SparkLogService implements ApplicationContextAware, InitializingBea
                 list.forEach(driver -> {
                     boolean flag = driverService.lockCurrentLogServer(driver.getApplicationId());
                     if (flag) {
-                        DriverResType driverResType = driver.getDriverResType();
+                        ComputeType computeType = driver.getComputeType();
                         String appId = driver.getApplicationId();
-                        String sparkDriverUrl = driver.getFlinkDriverUrl();
+                        String flinkDriverUrl = driver.getFlinkDriverUrl();
                         boolean shareDriver = driver.isShareDriver();
 
-                        if (DriverResType.YARN_BATCH == driverResType) {
+                        if (ComputeType.YARN_BATCH == computeType) {
                             JobInstance instance = instanceService.queryInstanceByAppId(appId);
                             if (instance != null) {
                                 JobInstanceInfo instanceInfo = new JobInstanceInfo();
@@ -87,11 +87,11 @@ public class SparkLogService implements ApplicationContextAware, InitializingBea
                                 instanceInfo.setJobType(instance.getJobType());
                                 instanceInfo.setOwner(instance.getOwner());
 
-                                this.createSparkJobLog(instanceInfo, appId, shareDriver, sparkDriverUrl);
+                                this.createSparkJobLog(instanceInfo, appId, shareDriver, flinkDriverUrl);
                                 this.startJobLogThread(instanceCode);
                             }
                         } else {
-                            throw new UnsupportedOperationException("driverResType not supported");
+                            throw new UnsupportedOperationException("compute type not supported");
                         }
                     }
 
@@ -118,7 +118,7 @@ public class SparkLogService implements ApplicationContextAware, InitializingBea
     }
 
     public void createSparkJobLog(JobInstanceInfo instanceInfo, String applicationId,
-                                  boolean shareDriver, String sparkDriverUrl) {
+                                  boolean shareDriver, String flinkDriverUrl) {
 
         String instanceCode = instanceInfo.getInstanceCode();
         LogTaskDto logTaskDto = LogTaskDto.builder()
@@ -129,10 +129,10 @@ public class SparkLogService implements ApplicationContextAware, InitializingBea
                 .setInstanceType(instanceInfo.getInstanceType())
                 .setJobType(instanceInfo.getJobType())
                 .setShareDriver(shareDriver)
-                .setSparkDriverUrl(sparkDriverUrl)
+                .setFlinkDriverUrl(flinkDriverUrl)
                 .setOwner(instanceInfo.getOwner())
                 .build();
-        SparkTaskLogThread logThread = new SparkTaskLogThread(applicationContext, logTaskDto);
+        FlinkTaskLogThread logThread = new FlinkTaskLogThread(applicationContext, logTaskDto);
         logThread.setName("batch-" + applicationId);
         logThreadMap.put(instanceCode, logThread);
         LOGGER.info("create instance log thread: {}", instanceCode);

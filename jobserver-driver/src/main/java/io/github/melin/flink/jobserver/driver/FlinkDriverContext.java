@@ -29,7 +29,7 @@ public class FlinkDriverContext {
     @Autowired
     private FlinkDriverService driverService;
 
-    public void initSparkDriver(Long driverId) {
+    public void initFlinkDriver(Long driverId) {
         updateJobServerIdle(driverId);
     }
 
@@ -44,8 +44,6 @@ public class FlinkDriverContext {
         driver.setServerIp(NetUtils.getLocalHost());
         driver.setServerPort(serverPortService.getPort());
         driver.setStatus(DriverStatus.IDLE);
-        String applicationId = "";
-        driver.setApplicationId(applicationId);
         driver.setCreater("admin");
 
         Instant nowDate = Instant.now();

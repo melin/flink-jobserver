@@ -1,6 +1,6 @@
 package io.github.melin.flink.jobserver.core.service;
 
-import io.github.melin.flink.jobserver.core.dao.SparkDriverDao;
+import io.github.melin.flink.jobserver.core.dao.FlinkDriverDao;
 import io.github.melin.flink.jobserver.core.entity.FlinkDriver;
 import io.github.melin.flink.jobserver.core.enums.DriverStatus;
 import com.gitee.melin.bee.core.hibernate5.HibernateBaseDao;
@@ -28,7 +28,7 @@ public class FlinkDriverService extends BaseServiceImpl<FlinkDriver, Long> {
     private static final Logger LOG = LoggerFactory.getLogger(FlinkDriverService.class);
 
     @Autowired
-    private SparkDriverDao sparkDriverDao;
+    private FlinkDriverDao flinkDriverDao;
 
     private String hostName = "";
 
@@ -38,7 +38,7 @@ public class FlinkDriverService extends BaseServiceImpl<FlinkDriver, Long> {
 
     @Override
     public HibernateBaseDao<FlinkDriver, Long> getHibernateBaseDao() {
-        return sparkDriverDao;
+        return flinkDriverDao;
     }
 
     @Transactional(readOnly = true)

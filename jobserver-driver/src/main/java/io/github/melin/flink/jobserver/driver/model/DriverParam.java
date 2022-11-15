@@ -7,6 +7,9 @@ public class DriverParam {
     @Parameter(names = "-j", description = "driverId", required = true)
     private Long driverId;
 
+    @Parameter(names = "-c", description = "clusterCode", required = true)
+    private String clusterCode;
+
     @Parameter(names = "-conf", description = "driver config", required = true)
     private String config;
 
@@ -17,7 +20,7 @@ public class DriverParam {
     private String kerberosUser;
 
     @Parameter(names = "-hive", description = "hive enabled", required = false)
-    private boolean hiveEnable = true;
+    private boolean hiveEnable = false;
 
     public Long getDriverId() {
         return driverId;
@@ -25,6 +28,14 @@ public class DriverParam {
 
     public void setDriverId(Long driverId) {
         this.driverId = driverId;
+    }
+
+    public String getClusterCode() {
+        return clusterCode;
+    }
+
+    public void setClusterCode(String clusterCode) {
+        this.clusterCode = clusterCode;
     }
 
     public String getConfig() {

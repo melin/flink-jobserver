@@ -1,6 +1,8 @@
 package io.github.melin.flink.jobserver.driver;
 
 import com.beust.jcommander.JCommander;
+import io.github.melin.flink.jobserver.core.entity.Cluster;
+import io.github.melin.flink.jobserver.core.service.ClusterService;
 import io.github.melin.flink.jobserver.driver.model.DriverParam;
 import io.github.melin.flink.jobserver.driver.support.ConfigClient;
 import org.apache.commons.lang3.StringUtils;
@@ -35,7 +37,7 @@ public class FlinkDriverApp extends SpringBootServletInitializer {
 
     public static void main(String[] args) throws Exception {
         DriverParam driverParam = new DriverParam();
-        LOG.info("args: {}", StringUtils.join(args, ","));
+        LOG.info("flink app args: {}", StringUtils.join(args, ","));
         JCommander.newBuilder().addObject(driverParam).build().parse(args);
 
         Long driverId = driverParam.getDriverId();
@@ -43,15 +45,17 @@ public class FlinkDriverApp extends SpringBootServletInitializer {
         String configText = new String(asBytes, StandardCharsets.UTF_8);
 
         ApplicationContext applicationContext = SpringApplication.run(FlinkDriverApp.class);
-        FlinkDriverContext sparkDriverContext = applicationContext.getBean(FlinkDriverContext.class);
+        FlinkDriverContext flinkDriverContext = applicationContext.getBean(FlinkDriverContext.class);
+        ClusterService clusterService = applicationContext.getBean(ClusterService.class);
+        Cluster cluster = clusterService.getClusterByCode(driverParam.getClusterCode());
 
         boolean kerberosEnabled = driverParam.isKerberosEnabled();
         boolean hiveEnabled = driverParam.isHiveEnable();
         Configuration flinkConf = new Configuration();
         ConfigClient.init(configText, flinkConf);
-        FlinkEnv.init(flinkConf, kerberosEnabled, hiveEnabled);
+        FlinkEnv.init(flinkConf, cluster, kerberosEnabled, hiveEnabled);
 
-        sparkDriverContext.initSparkDriver(driverId);
+        flinkDriverContext.initFlinkDriver(driverId);
 
         FlinkEnv.waitDriver();
         LOG.info("application finished");

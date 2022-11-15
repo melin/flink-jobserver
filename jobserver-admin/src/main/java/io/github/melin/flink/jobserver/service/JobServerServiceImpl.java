@@ -188,7 +188,7 @@ public class JobServerServiceImpl implements InitializingBean {
         if (StringUtils.isNotBlank(appId)) {
             String driverUrl = driverService.queryDriverAddressByAppId(appId);
             if (StringUtils.isNotBlank(driverUrl)) {
-                driverUrl = driverUrl + "/sparkDriver/killJob";
+                driverUrl = driverUrl + "/flinkDriver/killJob";
                 try {
                     Result<String> result = RestTemplateUtils.postEntry(restTemplate, driverUrl, "instanceCode", instanceCode);
 

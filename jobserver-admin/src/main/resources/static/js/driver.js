@@ -42,9 +42,9 @@ var Driver = function () {
                         width: 220,
                         templet: function(record) {
                             const applicationId = record.applicationId;
-                            const sparkYarnProxyUri = record.sparkYarnProxyUri;
+                            const flinkYarnProxyUri = record.flinkYarnProxyUri;
                             if (applicationId && "null" !== applicationId) {
-                                return '<a href="' + sparkYarnProxyUri + '/proxy/' + applicationId + '" target="_blank">' + applicationId + '</a>';
+                                return '<a href="' + flinkYarnProxyUri + '/proxy/' + applicationId + '/" target="_blank">' + applicationId + '</a>';
                             } else {
                                 return "";
                             }

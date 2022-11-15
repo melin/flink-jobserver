@@ -26,7 +26,7 @@ import static io.github.melin.flink.jobserver.core.enums.InstanceStatus.*;
 /**
  * Created by admin on 2017/7/1.
  */
-public class SparkTaskLogThread extends Thread {
+public class FlinkTaskLogThread extends Thread {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("jobinstancelogs");
 
@@ -34,7 +34,7 @@ public class SparkTaskLogThread extends Thread {
 
     private final YarnClientService yarnClientService;
 
-    private final SparkLogService sparkLogService;
+    private final FlinkLogService flinkLogService;
 
     private final DriverClientService driverClient;
 
@@ -44,10 +44,10 @@ public class SparkTaskLogThread extends Thread {
 
     private boolean driverRestarted = false;
 
-    public SparkTaskLogThread(ApplicationContext applicationContext, LogTaskDto logTaskDto) {
+    public FlinkTaskLogThread(ApplicationContext applicationContext, LogTaskDto logTaskDto) {
         this.instanceService = applicationContext.getBean(JobInstanceService.class);
         this.yarnClientService = applicationContext.getBean(YarnClientService.class);
-        this.sparkLogService = applicationContext.getBean(SparkLogService.class);
+        this.flinkLogService = applicationContext.getBean(FlinkLogService.class);
         this.driverClient = applicationContext.getBean(DriverClientService.class);
         ConfigProperties configProperties = applicationContext.getBean(ConfigProperties.class);
         this.logTaskDto = logTaskDto;
@@ -61,7 +61,7 @@ public class SparkTaskLogThread extends Thread {
         final JobType jobType = logTaskDto.getJobType();
         final InstanceType instanceType = logTaskDto.getInstanceType();
         final String instanceCode = logTaskDto.getInstanceCode();
-        final String sparkDriverUrl = logTaskDto.getSparkDriverUrl();
+        final String flinkDriverUrl = logTaskDto.getFlinkDriverUrl();
         final String clusterCode = logTaskDto.getClusterCode();
         final String applicationId = logTaskDto.getApplicationId();
         final String scheduleDate = DateUtils.formateDate(logTaskDto.getScheduleTime());
@@ -77,7 +77,7 @@ public class SparkTaskLogThread extends Thread {
             OUT:
             while (true) {
                 int msgCount = 0;
-                List<LogRecord> logs = driverClient.getServerLog(sparkDriverUrl, instanceCode);
+                List<LogRecord> logs = driverClient.getServerLog(flinkDriverUrl, instanceCode);
                 if (logs != null) {
                     if (driverRestarted) {
                         driverRestarted = false;
@@ -103,9 +103,9 @@ public class SparkTaskLogThread extends Thread {
                         }
                     }
                 } else {
-                    boolean isRun = driverClient.isSparkJobRunning(sparkDriverUrl, instanceCode, applicationId);
+                    boolean isRun = driverClient.isFlinkJobRunning(flinkDriverUrl, instanceCode, applicationId);
                     if (!isRun) {
-                        LOGGER.info("{} spark job not running {}", instanceCode, sparkDriverUrl);
+                        LOGGER.info("{} spark job not running {}", instanceCode, flinkDriverUrl);
                         if (checkInstanceStatusCount >= 2) {
                             if (JobType.isBatchJob(jobType)) {
                                 checkInstanceStatus(instanceCode, applicationId);
@@ -152,7 +152,7 @@ public class SparkTaskLogThread extends Thread {
             LOGGER.error(ExceptionUtils.getStackTrace(e));
         } finally {
             yarnClientService.closeJobServer(clusterCode, applicationId, logTaskDto.isShareDriver());
-            sparkLogService.removeLogThread(instanceCode);
+            flinkLogService.removeLogThread(instanceCode);
         }
     }
 

@@ -11,9 +11,9 @@
 ## 一、Build
 
 ```
-mvn clean package -Prelease,hadoop-2
-mvn clean package -Prelease,hadoop-3
-mvn clean package -Prelease,cdh6
+mvn clean package -Prelease,hadoop-2 -DlibScope=provided
+mvn clean package -Prelease,hadoop-3 -DlibScope=provided
+mvn clean package -Prelease,cdh6 -DlibScope=provided
 ```
 
 ## 二、作业实例接口

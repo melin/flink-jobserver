@@ -350,7 +350,7 @@ public class InstanceController {
         if (StringUtils.isNotBlank(appId)) {
             String driverUrl = driverService.queryDriverAddressByAppId(appId);
             if (StringUtils.isNotBlank(driverUrl)) {
-                driverUrl = driverUrl + "/sparkDriver/killJob";
+                driverUrl = driverUrl + "/flinkDriver/killJob";
                 try {
                     restTemplate.postForObject(driverUrl + "?instanceCode=" + instanceCode,
                             null, String.class);

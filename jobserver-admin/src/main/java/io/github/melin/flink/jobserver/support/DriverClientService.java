@@ -32,8 +32,8 @@ public class DriverClientService {
     @Autowired
     private RestTemplate restTemplate;
 
-    public List<LogRecord> getServerLog(String sparkDriverUrl, String instanceCode) {
-        String uri = sparkDriverUrl + "/sparkDriver/getServerLog?instanceCode=" + instanceCode;
+    public List<LogRecord> getServerLog(String flinkDriverUrl, String instanceCode) {
+        String uri = flinkDriverUrl + "/flinkDriver/getServerLog?instanceCode=" + instanceCode;
         try {
             ResponseEntity<List<LogRecord>> response = restTemplate.exchange(
                     uri,
@@ -51,8 +51,8 @@ public class DriverClientService {
         }
     }
 
-    public Boolean isSparkJobRunning(String sparkDriverUrl, String instanceCode, String applicationId) {
-        String url = sparkDriverUrl + "/sparkDriver/isJobRunning?instanceCode=" + instanceCode;
+    public Boolean isFlinkJobRunning(String flinkDriverUrl, String instanceCode, String applicationId) {
+        String url = flinkDriverUrl + "/flinkDriver/isJobRunning?instanceCode=" + instanceCode;
         try {
             return restTemplate.postForObject(url, null, Boolean.class);
         } catch (Exception e) {
@@ -60,8 +60,8 @@ public class DriverClientService {
             if (driver != null) {
                 YarnApplicationState state = yarnClientService.getApplicationStatus(driver.getClusterCode(), applicationId);
 
-                String newSparkDriverUrl = driver.getFlinkDriverUrl();
-                if (!newSparkDriverUrl.equals(sparkDriverUrl)) {
+                String newFlinkDriverUrl = driver.getFlinkDriverUrl();
+                if (!newFlinkDriverUrl.equals(flinkDriverUrl)) {
                     LOG.info("driver 重启，切换到新的节点：{}: {}", driver.getServerIp(), driver.getServerPort());
                 }
 

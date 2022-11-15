@@ -141,16 +141,16 @@ public class FlinkJobServerConf extends BeeConf {
                     .stringConf()
                     .createWithDefault("");
 
-    public static final ConfigEntry<String> JOBSERVER_JOB_DRIVER_EXTRA_JAVA_OPTIONS =
-            buildConf("jobserver.job.driver.extraJavaOptions")
-                    .doc("driver jvm 参数")
+    public static final ConfigEntry<String> JOBSERVER_JOB_JOBMANAGER_JAVA_OPTS =
+            buildConf("jobserver.job.jobmanager.java.opts")
+                    .doc("jobmanager jvm 参数")
                     .version("1.0.0")
                     .stringConf()
                     .createWithDefault("");
 
-    public static final ConfigEntry<String> JOBSERVER_JOB_EXECUTOR_EXTRA_JAVA_OPTIONS =
-            buildConf("jobserver.job.executor.extraJavaOptions")
-                    .doc("executor jvm 参数")
+    public static final ConfigEntry<String> JOBSERVER_JOB_TASKMANAGER_JAVA_OPTS =
+            buildConf("jobserver.job.taskmanager.java.opts")
+                    .doc("taskmanager jvm 参数")
                     .version("1.0.0")
                     .stringConf()
                     .createWithDefault("");

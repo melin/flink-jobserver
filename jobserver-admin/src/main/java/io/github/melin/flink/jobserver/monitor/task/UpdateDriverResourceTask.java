@@ -42,9 +42,9 @@ public class UpdateDriverResourceTask implements Runnable {
 
         List<FlinkDriver> drivers = driverService.findAllEntity();
         drivers.forEach(driver -> {
-            String sparkDriverUrl = driver.getFlinkDriverUrl();
-            if (StringUtils.isNotBlank(sparkDriverUrl)) {
-                String uri = sparkDriverUrl + "/sparkDriver/getDriverResource";
+            String flinkDriverUrl = driver.getFlinkDriverUrl();
+            if (StringUtils.isNotBlank(flinkDriverUrl)) {
+                String uri = flinkDriverUrl + "/flinkDriver/getDriverResource";
                 try {
                     Result<Map<String, Long>> result = restTemplate.exchange(uri, HttpMethod.GET, null,
                             new ParameterizedTypeReference<Result<Map<String, Long>>>() {

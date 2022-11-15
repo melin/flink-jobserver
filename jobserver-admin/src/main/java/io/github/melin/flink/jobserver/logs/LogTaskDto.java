@@ -29,7 +29,7 @@ public class LogTaskDto {
 
     private boolean shareDriver; //driver 是否共享
 
-    private String sparkDriverUrl;
+    private String flinkDriverUrl;
 
     private Instant scheduleTime;
 }

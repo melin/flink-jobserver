@@ -10,13 +10,13 @@ public class SubmitYarnResult {
 
     private String applicationId;
 
-    private String sparkDriverUrl;
+    private String flinkDriverUrl;
 
     private String yarnQueue;
 
-    public SubmitYarnResult(String applicationId, String sparkDriverUrl, String yarnQueue) {
+    public SubmitYarnResult(String applicationId, String flinkDriverUrl, String yarnQueue) {
         this.applicationId = applicationId;
-        this.sparkDriverUrl = sparkDriverUrl;
+        this.flinkDriverUrl = flinkDriverUrl;
         this.yarnQueue = yarnQueue;
     }
 }

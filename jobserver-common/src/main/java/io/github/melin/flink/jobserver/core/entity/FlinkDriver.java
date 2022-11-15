@@ -1,6 +1,6 @@
 package io.github.melin.flink.jobserver.core.entity;
 
-import io.github.melin.flink.jobserver.core.enums.DriverResType;
+import io.github.melin.flink.jobserver.core.enums.ComputeType;
 import io.github.melin.flink.jobserver.core.enums.DriverStatus;
 import com.gitee.melin.bee.model.IEntity;
 import com.gitee.melin.bee.util.NetUtils;
@@ -14,7 +14,7 @@ import org.hibernate.annotations.Type;
 import javax.persistence.*;
 import java.time.Instant;
 
-import static io.github.melin.flink.jobserver.core.enums.DriverResType.YARN_BATCH;
+import static io.github.melin.flink.jobserver.core.enums.ComputeType.YARN_BATCH;
 
 @Getter
 @Setter
@@ -40,11 +40,11 @@ public class FlinkDriver implements IEntity {
     @Column(name = "server_port", nullable = false)
     private Integer serverPort;
 
-    @Column(name = "driver_res_type")
+    @Column(name = "compute_type")
     @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
             parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
-                    value = "io.github.melin.flink.jobserver.core.enums.DriverResType")})
-    private DriverResType driverResType;
+                    value = "io.github.melin.flink.jobserver.core.enums.ComputeType")})
+    private ComputeType computeType;
 
     @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
             parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
@@ -106,7 +106,7 @@ public class FlinkDriver implements IEntity {
         jobServer.setVersion(0);
         jobServer.setServerIp("0.0.0.0");
         jobServer.setServerPort(-1);
-        jobServer.setDriverResType(YARN_BATCH);
+        jobServer.setComputeType(YARN_BATCH);
         jobServer.setStatus(DriverStatus.INIT);
         jobServer.setApplicationId("");
         jobServer.setCreater("");

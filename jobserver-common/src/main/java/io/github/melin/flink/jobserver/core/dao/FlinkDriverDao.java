@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
  * huaixin 2022/3/28 11:57 AM
  */
 @Repository
-public class SparkDriverDao extends HibernateBaseDaoImpl<FlinkDriver, Long> {
+public class FlinkDriverDao extends HibernateBaseDaoImpl<FlinkDriver, Long> {
 }

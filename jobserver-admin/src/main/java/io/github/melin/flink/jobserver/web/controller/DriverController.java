@@ -3,7 +3,7 @@ package io.github.melin.flink.jobserver.web.controller;
 import io.github.melin.flink.jobserver.ConfigProperties;
 import io.github.melin.flink.jobserver.FlinkJobServerConf;
 import io.github.melin.flink.jobserver.core.entity.FlinkDriver;
-import io.github.melin.flink.jobserver.logs.SparkLogService;
+import io.github.melin.flink.jobserver.logs.FlinkLogService;
 import io.github.melin.flink.jobserver.support.ClusterConfig;
 import io.github.melin.flink.jobserver.support.YarnClientService;
 import io.github.melin.flink.jobserver.core.entity.Cluster;
@@ -63,7 +63,7 @@ public class DriverController implements InitializingBean {
     private YarnClientService yarnClientService;
 
     @Autowired
-    private SparkLogService sparkLogService;
+    private FlinkLogService flinkLogService;
 
     @Autowired
     private ConfigProperties configProperties;
@@ -132,7 +132,7 @@ public class DriverController implements InitializingBean {
     @ResponseBody
     public Result<String> startJobLogThread(String instanceCode) {
         LOG.info("startJobLogThread: {}", instanceCode);
-        boolean result = sparkLogService.startJobLogThread(instanceCode);
+        boolean result = flinkLogService.startJobLogThread(instanceCode);
         if (result) {
             return Result.successResult();
         } else {
@@ -171,7 +171,7 @@ public class DriverController implements InitializingBean {
     public void downloadYarnLog(String applicationId, HttpServletResponse response) throws Exception {
         FlinkDriver driver = driverService.queryDriverByAppId(applicationId);
         if (driver != null) {
-            String urlStr = driver.getFlinkDriverUrl() + "/sparkDriver/downloadYarnLog";
+            String urlStr = driver.getFlinkDriverUrl() + "/flinkDriver/downloadYarnLog";
             LOG.info("下载yarn log: {}", urlStr);
             String downFilename = applicationId + ".log"; //要下载的文件名称
             response.setContentType("application/x-download");
