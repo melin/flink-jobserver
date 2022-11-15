@@ -51,6 +51,12 @@ var Driver = function () {
                         }
                     },
                     {
+                        title: '计算类型',
+                        field: 'computeType',
+                        align: 'left',
+                        width: 80
+                    },
+                    {
                         title: '状态',
                         field: 'status',
                         align: 'left',
@@ -91,7 +97,7 @@ var Driver = function () {
                         title: '创建时间',
                         field: 'gmtCreated',
                         align: 'left',
-                        width: 100
+                        width: 120
                     },
                     {
                         title: 'CPU',
