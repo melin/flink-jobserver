@@ -10,6 +10,7 @@ CREATE TABLE `fjs_job_instance` (
   `yarn_queue` varchar(128)  DEFAULT NULL,
   `dependent_code` varchar(1024)  DEFAULT 'START' COMMENT '依赖上一个实例code',
   `job_type` varchar(32)  NOT NULL,
+  `run_mode` varchar(32)  NOT NULL,
   `instance_type` varchar(32)  NOT NULL COMMENT 'dev、schedule',
   `version` int NOT NULL DEFAULT '0',
   `status` varchar(45)  NOT NULL DEFAULT '0',

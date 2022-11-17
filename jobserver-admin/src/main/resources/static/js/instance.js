@@ -47,19 +47,25 @@ var Instance = function () {
                         title: '作业类型',
                         field: 'jobType',
                         align: 'center',
-                        width: 90
+                        width: 80
+                    },
+                    {
+                        title: '运行模式',
+                        field: 'runMode',
+                        align: 'center',
+                        width: 80
                     },
                     {
                         title: '实例类型',
                         field: 'instanceType',
                         align: 'center',
-                        width: 90
+                        width: 80
                     },
                     {
                         title: '客户端',
                         field: 'clientName',
                         align: 'center',
-                        width: 90
+                        width: 80
                     },
                     {
                         title: '负责人',
@@ -202,13 +208,6 @@ var Instance = function () {
                 return false;
             });
 
-            form.on('select(jobType)', function(data){
-                const jobType = data.value;
-                if ("SPARK_PYTHON" === jobType) {
-                    Instance.setEditorValue(jobTextEditor, "def main(sparkSession):\n    ")
-                }
-            });
-
             jobTextEditor = Instance.getEditor(jobTextEditor, "jobTextEditor", "ace/mode/sql");
             jobConfigEditor = Instance.getEditor(jobConfigEditor, "jobConfigEditor", "ace/mode/properties");
             Instance.queryInstanceStatistics();
@@ -346,7 +345,7 @@ var Instance = function () {
                     if (result.success) {
                         layer.close(index);
                         Instance.refresh();
-                        toastr.error("保存成功");
+                        toastr.success("保存成功");
                     } else {
                         toastr.error(result.message);
                     }

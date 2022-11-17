@@ -2,6 +2,7 @@ package io.github.melin.flink.jobserver.logs;
 
 import io.github.melin.flink.jobserver.core.enums.InstanceType;
 import io.github.melin.flink.jobserver.core.enums.JobType;
+import io.github.melin.flink.jobserver.core.enums.RunMode;
 import lombok.Builder;
 import lombok.Data;
 
@@ -22,6 +23,8 @@ public class LogTaskDto {
     private String instanceCode;
 
     private JobType jobType;
+
+    private RunMode runMode;
 
     private InstanceType instanceType;
 

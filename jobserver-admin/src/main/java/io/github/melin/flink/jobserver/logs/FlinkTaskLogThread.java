@@ -5,6 +5,7 @@ import io.github.melin.flink.jobserver.api.LogLevel;
 import io.github.melin.flink.jobserver.core.entity.JobInstance;
 import io.github.melin.flink.jobserver.core.enums.InstanceType;
 import io.github.melin.flink.jobserver.core.enums.JobType;
+import io.github.melin.flink.jobserver.core.enums.RunMode;
 import io.github.melin.flink.jobserver.core.service.JobInstanceService;
 import io.github.melin.flink.jobserver.core.util.LogRecord;
 import io.github.melin.flink.jobserver.support.DriverClientService;
@@ -59,6 +60,7 @@ public class FlinkTaskLogThread extends Thread {
     @Override
     public void run() {
         final JobType jobType = logTaskDto.getJobType();
+        final RunMode runMode = logTaskDto.getRunMode();
         final InstanceType instanceType = logTaskDto.getInstanceType();
         final String instanceCode = logTaskDto.getInstanceCode();
         final String flinkDriverUrl = logTaskDto.getFlinkDriverUrl();
@@ -107,7 +109,7 @@ public class FlinkTaskLogThread extends Thread {
                     if (!isRun) {
                         LOGGER.info("{} spark job not running {}", instanceCode, flinkDriverUrl);
                         if (checkInstanceStatusCount >= 2) {
-                            if (JobType.isBatchJob(jobType)) {
+                            if (RunMode.BATCH == runMode) {
                                 checkInstanceStatus(instanceCode, applicationId);
                             } else {
                                 //@TODO 支持流任务
@@ -141,7 +143,7 @@ public class FlinkTaskLogThread extends Thread {
                 String message = "Spark driver 可能因为内存不足退出运行，请调整driver内存";
                 LOGGER.error("jobtype: {}, task: {}, run fail: {}", jobType, instanceCode, message);
 
-                if (JobType.isBatchJob(jobType)) {
+                if (RunMode.BATCH == runMode) {
                     updateInstanceStatus(logTaskDto, instanceType, message);
                 } else {
                     //@TODO 支持流任务

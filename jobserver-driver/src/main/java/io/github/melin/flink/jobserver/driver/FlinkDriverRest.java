@@ -96,10 +96,10 @@ public class FlinkDriverRest {
                 instanceDto.getInstanceCode(), instanceDto.getSparkJobServerUrl());
 
         JobType jobType = instanceDto.getJobType();
-        if (JobType.FLINK_BATCH_SQL == jobType || JobType.FLINK_STREAM_SQL == jobType) {
+        if (JobType.FLINK_SQL == jobType) {
             flinkDriverContext.startDriver();
             return flinkSqlTask.runTask(instanceDto);
-        } else if (JobType.FLINK_BATCH_JAR == jobType || JobType.FLINK_STREAM_JAR == jobType) {
+        } else if (JobType.FLINK_APP == jobType) {
             flinkDriverContext.startDriver();
             return flinkJarTask.runTask(instanceDto);
         } else {
@@ -129,9 +129,9 @@ public class FlinkDriverRest {
             flinkDriverContext.setUserStopTask(true);
 
             JobType jobType = InstanceContext.getJobType();
-            if (JobType.FLINK_BATCH_SQL == jobType || JobType.FLINK_STREAM_SQL == jobType) {
+            if (JobType.FLINK_SQL == jobType) {
                 flinkSqlTask.killJob(instanceCode);
-            } else if (JobType.FLINK_BATCH_JAR == jobType || JobType.FLINK_STREAM_JAR == jobType) {
+            } else if (JobType.FLINK_APP == jobType) {
                 flinkJarTask.killJob(instanceCode);
             }
 

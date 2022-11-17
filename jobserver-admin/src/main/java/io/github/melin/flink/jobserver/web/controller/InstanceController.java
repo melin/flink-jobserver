@@ -7,6 +7,7 @@ import io.github.melin.flink.jobserver.core.entity.JobInstanceContent;
 import io.github.melin.flink.jobserver.core.enums.InstanceStatus;
 import io.github.melin.flink.jobserver.core.enums.InstanceType;
 import io.github.melin.flink.jobserver.core.enums.JobType;
+import io.github.melin.flink.jobserver.core.enums.RunMode;
 import io.github.melin.flink.jobserver.core.service.ClusterService;
 import io.github.melin.flink.jobserver.core.service.JobInstanceContentService;
 import io.github.melin.flink.jobserver.core.service.JobInstanceService;
@@ -82,7 +83,7 @@ public class InstanceController {
     @PostMapping("/instance/saveJobInstance")
     @ResponseBody
     @Transactional
-    public Result<Void> saveJobInstance(Long id, JobType jobType, String name, String jobText,
+    public Result<Void> saveJobInstance(Long id, JobType jobType, RunMode runMode, String name, String jobText,
                                         String clusterCode, String jobConfig, boolean isRun) {
         if (id == null) {
             String instanceCode = RandomUniqueIdGenerator.getNewString(32);
@@ -91,6 +92,7 @@ public class InstanceController {
                     .setCode(instanceCode)
                     .setName(name)
                     .setJobType(jobType)
+                    .setRunMode(runMode)
                     .setInstanceType(InstanceType.API)
                     .setOwner("jobserver")
                     .setMaxRetryCount(0)
@@ -106,6 +108,7 @@ public class InstanceController {
         } else {
             JobInstance instance = instanceService.getEntity(id);
             instance.setJobType(jobType);
+            instance.setRunMode(runMode);
             instance.setName(name);
             instance.setGmtModified(Instant.now());
             if (isRun) {

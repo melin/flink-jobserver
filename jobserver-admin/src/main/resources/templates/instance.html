@@ -130,9 +130,17 @@
             </div>
             <div class="layui-col-md2">
                 <select lay-verify="required" name="jobType" id="jobType" lay-filter="jobType">
-                    <option value="SPARK_SQL" selected>Spark SQL</option>
-                    <option value="SPARK_JAR">Spark Jar</option>
-                    <option value="SPARK_PYTHON">Spark Python</option>
+                    <option value="FLINK_SQL" selected>FLINK SQL</option>
+                    <option value="FLINK_APP">Flink App</option>
+                </select>
+            </div>
+            <div class="layui-col-md1">
+                <label class="layui-form-label form-label">运行模式:</label>
+            </div>
+            <div class="layui-col-md2">
+                <select lay-verify="required" name="runMode" id="runMode" lay-filter="runMode">
+                    <option value="BATCH" selected>批</option>
+                    <option value="STREAM">流</option>
                 </select>
             </div>
             <div class="layui-col-md1">
@@ -147,7 +155,7 @@
             <div class="layui-col-md1">
                 <label class="layui-form-label form-label"><span style="color: red">*</span>作业名称:</label>
             </div>
-            <div class="layui-col-md5">
+            <div class="layui-col-md2">
                 <input placeholder="实例名称" value="" class="layui-input" name="name" autocomplete="off">
             </div>
         </div>
