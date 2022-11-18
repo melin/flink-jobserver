@@ -13,7 +13,7 @@
 
     <properties>
         <flink.deps.scope>provided</flink.deps.scope>
-        <start-class>io.github.melin.flink.jobserver.FlinkDriverApp</start-class>
+        <start-class>io.github.melin.flink.jobserver.FlinkDriverServer</start-class>
 
         <hadoop.version>3.3.4</hadoop.version>
         <hadoop-client-api.artifact>hadoop-client-api</hadoop-client-api.artifact>

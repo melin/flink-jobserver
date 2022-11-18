@@ -31,9 +31,9 @@ import java.util.Base64;
         EmbeddedWebServerFactoryCustomizerAutoConfiguration.class})
 @EnableScheduling
 @EnableTransactionManagement
-public class FlinkDriverApp extends SpringBootServletInitializer {
+public class FlinkDriverServer extends SpringBootServletInitializer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(FlinkDriverApp.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FlinkDriverServer.class);
 
     public static void main(String[] args) throws Exception {
         DriverParam driverParam = new DriverParam();
@@ -44,7 +44,7 @@ public class FlinkDriverApp extends SpringBootServletInitializer {
         byte[] asBytes = Base64.getDecoder().decode(driverParam.getConfig());
         String configText = new String(asBytes, StandardCharsets.UTF_8);
 
-        ApplicationContext applicationContext = SpringApplication.run(FlinkDriverApp.class);
+        ApplicationContext applicationContext = SpringApplication.run(FlinkDriverServer.class);
         FlinkDriverContext flinkDriverContext = applicationContext.getBean(FlinkDriverContext.class);
         ClusterService clusterService = applicationContext.getBean(ClusterService.class);
         Cluster cluster = clusterService.getClusterByCode(driverParam.getClusterCode());
