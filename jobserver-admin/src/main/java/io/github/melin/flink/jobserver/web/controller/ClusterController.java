@@ -1,6 +1,5 @@
 package io.github.melin.flink.jobserver.web.controller;
 
-import io.github.melin.flink.jobserver.ConfigProperties;
 import io.github.melin.flink.jobserver.FlinkJobServerConf;
 import io.github.melin.flink.jobserver.core.entity.Cluster;
 import io.github.melin.flink.jobserver.core.service.ClusterService;
@@ -32,9 +31,6 @@ public class ClusterController {
 
     @Autowired
     protected RestTemplate restTemplate;
-
-    @Autowired
-    private ConfigProperties configProperties;
 
     @RequestMapping("/cluster")
     public String cluster(ModelMap model) throws Exception {
@@ -96,13 +92,15 @@ public class ClusterController {
                 old.setName(cluster.getName());
                 old.setSchedulerType(cluster.getSchedulerType());
                 old.setJobserverConfig(cluster.getJobserverConfig());
-                old.setFlinkConfig(cluster.getFlinkConfig());
+                old.setFlinkAppConfig(cluster.getFlinkAppConfig());
+                old.setFlinkSessionEnabled(cluster.isFlinkSessionEnabled());
+                old.setFlinkSessionConfig(cluster.getFlinkSessionConfig());
                 old.setCoreConfig(cluster.getCoreConfig());
                 old.setHdfsConfig(cluster.getHdfsConfig());
                 old.setYarnConfig(cluster.getYarnConfig());
                 old.setHiveConfig(cluster.getHiveConfig());
                 old.setKerberosConfig(cluster.getKerberosConfig());
-                old.setKerberosEnabled(cluster.getKerberosEnabled());
+                old.setKerberosEnabled(cluster.isKerberosEnabled());
                 old.setYarnQueueName(cluster.getYarnQueueName());
                 clusterService.updateEntity(old);
             }

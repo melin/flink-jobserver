@@ -56,6 +56,12 @@ var Instance = function () {
                         width: 80
                     },
                     {
+                        title: '部署模式',
+                        field: 'deploymentMode',
+                        align: 'center',
+                        width: 80
+                    },
+                    {
                         title: '实例类型',
                         field: 'instanceType',
                         align: 'center',

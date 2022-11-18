@@ -6,9 +6,9 @@ import com.gitee.melin.bee.core.enums.BaseStringEnum;
 import com.gitee.melin.bee.core.enums.jackson.JacksonEnumStringSerializer;
 
 @JsonSerialize(using = JacksonEnumStringSerializer.class)
-public enum RuntimeMode implements BaseStringEnum {
-    BATCH,
-    STREAMING;
+public enum DeploymentMode implements BaseStringEnum {
+    APPLICATION,
+    SESSION;
 
     @JsonValue
     @Override

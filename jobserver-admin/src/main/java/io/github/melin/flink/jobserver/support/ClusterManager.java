@@ -78,7 +78,7 @@ public class ClusterManager implements InitializingBean {
         LOGGER.info("清理本地配置数据");
         FileUtils.deleteQuietly(new File(LOCAL_HADOOP_CONFIG_DIR));
 
-        List<Cluster> clusters = clusterService.findByNamedParam("status", 1);
+        List<Cluster> clusters = clusterService.findByNamedParam("status", true);
 
         for (Cluster cluster : clusters) {
             LOGGER.info("========================= load {} ==============================", cluster.getCode());
@@ -94,7 +94,7 @@ public class ClusterManager implements InitializingBean {
                     }
                 }
 
-                List<Cluster> clusterList = clusterService.findByNamedParam("status", 1);
+                List<Cluster> clusterList = clusterService.findByNamedParam("status", true);
                 for (Cluster cluster : clusterList) {
                     long updateTime = clusterService.getClusterUpdateTime(cluster.getCode());
                     Long cacheUpdateTime = clusterUpdateTimeMap.get(cluster.getCode());
@@ -254,8 +254,10 @@ public class ClusterManager implements InitializingBean {
             FileUtils.write(new File(destDir + "/yarn-site.xml"),
                     cluster.getYarnConfig(), StandardCharsets.UTF_8);
 
-            FileUtils.write(new File(destDir + "/flink-conf.yaml"),
-                    cluster.getFlinkConfig(), StandardCharsets.UTF_8);
+            FileUtils.write(new File(destDir + "/flink-application-conf.yaml"),
+                    cluster.getFlinkAppConfig(), StandardCharsets.UTF_8);
+            FileUtils.write(new File(destDir + "/flink-session-conf.yaml"),
+                    cluster.getFlinkSessionConfig(), StandardCharsets.UTF_8);
         } else {
             LOGGER.error("集群 " + cluster.getCode() + " hadoop config 有空");
         }

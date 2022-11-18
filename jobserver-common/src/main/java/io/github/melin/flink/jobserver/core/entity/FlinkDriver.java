@@ -1,6 +1,7 @@
 package io.github.melin.flink.jobserver.core.entity;
 
 import io.github.melin.flink.jobserver.core.enums.ComputeType;
+import io.github.melin.flink.jobserver.core.enums.DeploymentMode;
 import io.github.melin.flink.jobserver.core.enums.DriverStatus;
 import com.gitee.melin.bee.model.IEntity;
 import com.gitee.melin.bee.util.NetUtils;
@@ -76,6 +77,12 @@ public class FlinkDriver implements IEntity {
             parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
                     value = "io.github.melin.flink.jobserver.core.enums.RuntimeMode")})
     private RuntimeMode runtimeMode;
+
+    @Column(name = "deployment_mode", length = 32)
+    @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
+            parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
+                    value = "io.github.melin.flink.jobserver.core.enums.DeploymentMode")})
+    private DeploymentMode deploymentMode;
 
     @Column(name = "yarn_queue")
     private String yarnQueue;

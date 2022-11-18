@@ -5,12 +5,12 @@ var Cluster = function () {
     let dropdown = layui.dropdown;
     const maxInstanceCount = $("#maxInstanceCount").val();
 
-    let jobserverEditor, flinkEditor, coreEditor, hdfsEditor, yarnEditor, hiveEditor;
+    let jobserverEditor, flinkAppEditor, flinkSessionEditor, coreEditor, hdfsEditor, yarnEditor, hiveEditor;
 
     return {
         init: function () {
-            winWidth = $(window).width() * 0.9;
-            winHeight = $(window).height() * 0.9;
+            winWidth = $(window).width() * 0.95;
+            winHeight = $(window).height() * 0.95;
 
             let cols = [
                 [{
@@ -21,19 +21,32 @@ var Cluster = function () {
                         title: '集群Code',
                         field: 'code',
                         align: 'left',
-                        width: 100
+                        width: 120
                     },
                     {
                         title: '集群名称',
                         field: 'name',
                         align: 'left',
-                        width: 100,
+                        width: 120,
                     },
                     {
                         title: '调度类型',
                         field: 'schedulerType',
                         align: 'left',
                         width: 100,
+                    },
+                    {
+                        title: '启用Session模式',
+                        field: 'schedulerType',
+                        align: 'left',
+                        width: 120,
+                        templet: function(record) {
+                            if (record.flinkSessionEnabled) {
+                                return '<span style="font-weight:bold; color: #5FB878">启用</span>'
+                            } else {
+                                return '<span style="font-weight:bold;color: #FF5722">关闭</span>'
+                            }
+                        }
                     },
                     {
                         title: '开启kerberos',
@@ -56,7 +69,7 @@ var Cluster = function () {
                         width: 80,
                         templet: function(record) {
                             const status = record.status;
-                            if (status === 1) {
+                            if (status) {
                                 return '<span style="font-weight:bold; color: #5FB878">启用</span>'
                             } else {
                                 return '<span style="font-weight:bold;color: #FF5722">关闭</span>'
@@ -131,7 +144,8 @@ var Cluster = function () {
             });
 
             jobserverEditor = Cluster.getEditor(jobserverEditor, "jobserverEditor", "ace/mode/properties");
-            flinkEditor = Cluster.getEditor(flinkEditor, "flinkEditor", "ace/mode/yaml");
+            flinkAppEditor = Cluster.getEditor(flinkAppEditor, "flinkAppEditor", "ace/mode/yaml");
+            flinkSessionEditor = Cluster.getEditor(flinkSessionEditor, "flinkSessionEditor", "ace/mode/yaml");
             coreEditor = Cluster.getEditor(coreEditor, "coreEditor", "ace/mode/xml");
             hdfsEditor = Cluster.getEditor(hdfsEditor, "hdfsEditor", "ace/mode/xml");
             yarnEditor = Cluster.getEditor(yarnEditor, "yarnEditor", "ace/mode/xml");
@@ -167,9 +181,25 @@ var Cluster = function () {
                     success: function (result) {
                         if (result.success) {
                             let data = result.data;
+                            if (data.kerberosEnabled) {
+                                data.kerberosEnabled = 1;
+                            } else {
+                                data.kerberosEnabled = 0;
+                            }
+                            if (data.flinkSessionEnabled) {
+                                data.flinkSessionEnabled = 1;
+                            } else {
+                                data.flinkSessionEnabled = 0;
+                            }
+                            if (data.status) {
+                                data.status = 1;
+                            } else {
+                                data.status = 0;
+                            }
                             form.val('newClusterForm', data);
                             Cluster.setEditorValue(jobserverEditor, data.jobserverConfig)
-                            Cluster.setEditorValue(flinkEditor, data.flinkConfig)
+                            Cluster.setEditorValue(flinkAppEditor, data.flinkAppConfig)
+                            Cluster.setEditorValue(flinkSessionEditor, data.flinkSessionConfig)
                             Cluster.setEditorValue(coreEditor, data.coreConfig)
                             Cluster.setEditorValue(hdfsEditor, data.hdfsConfig)
                             Cluster.setEditorValue(yarnEditor, data.yarnConfig)
@@ -180,7 +210,8 @@ var Cluster = function () {
             } else {
                 form.val('newClusterForm', {code: "", name: "", yarnQueueName: "default"});
                 Cluster.setEditorValue(jobserverEditor, $("#confDefaultValue").val())
-                Cluster.setEditorValue(flinkEditor, "")
+                Cluster.setEditorValue(flinkAppEditor, "")
+                Cluster.setEditorValue(flinkSessionEditor, "")
                 Cluster.setEditorValue(coreEditor, "")
                 Cluster.setEditorValue(hdfsEditor, "")
                 Cluster.setEditorValue(yarnEditor, "")
@@ -208,7 +239,8 @@ var Cluster = function () {
                     }
 
                     let jobserverConfig = $.trim(jobserverEditor.getValue());
-                    let flinkConfig = $.trim(flinkEditor.getValue());
+                    let flinkAppConfig = $.trim(flinkAppEditor.getValue());
+                    let flinkSessionConfig = $.trim(flinkSessionEditor.getValue());
                     let coreConfig = $.trim(coreEditor.getValue());
                     let hdfsConfig = $.trim(hdfsEditor.getValue());
                     let yarnConfig = $.trim(yarnEditor.getValue());
@@ -216,7 +248,8 @@ var Cluster = function () {
 
                     data.id = clusterId
                     data.jobserverConfig = jobserverConfig
-                    data.flinkConfig = flinkConfig
+                    data.flinkAppConfig = flinkAppConfig
+                    data.flinkSessionConfig = flinkSessionConfig
                     data.coreConfig = coreConfig
                     data.hdfsConfig = hdfsConfig
                     data.yarnConfig = yarnConfig

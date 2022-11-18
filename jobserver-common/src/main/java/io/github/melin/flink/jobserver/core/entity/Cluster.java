@@ -1,5 +1,6 @@
 package io.github.melin.flink.jobserver.core.entity;
 
+import com.gitee.melin.bee.core.hibernate5.type.BooleanToIntConverter;
 import io.github.melin.flink.jobserver.core.enums.SchedulerType;
 import io.github.melin.flink.jobserver.core.enums.StorageType;
 import com.gitee.melin.bee.model.IEntity;
@@ -41,7 +42,8 @@ public class Cluster implements IEntity {
     private SchedulerType schedulerType; // 调度框架:YARN、K8S
 
     @Column(name = "kerberos_enabled")
-    private Integer kerberosEnabled;
+    @Convert(converter = BooleanToIntConverter.class)
+    private boolean kerberosEnabled = false;
 
     @Column(name = "kerberos_keytab")
     private byte[] kerberosKeytab;
@@ -58,8 +60,15 @@ public class Cluster implements IEntity {
     @Column(name = "jobserver_config")
     private String jobserverConfig;
 
-    @Column(name = "flink_config")
-    private String flinkConfig;
+    @Column(name = "flink_app_config")
+    private String flinkAppConfig;
+
+    @Column(name = "flink_session_enabled")
+    @Convert(converter = BooleanToIntConverter.class)
+    private boolean flinkSessionEnabled = false;
+
+    @Column(name = "flink_session_config")
+    private String flinkSessionConfig;
 
     @Column(name = "core_config")
     private String coreConfig;
@@ -79,7 +88,8 @@ public class Cluster implements IEntity {
     @Column(name = "yarn_queue_name")
     private String yarnQueueName;
 
-    private Integer status = 1;
+    @Convert(converter = BooleanToIntConverter.class)
+    private boolean status = true;
 
     @Column(name = "creater", length = 45)
     private String creater;
@@ -92,12 +102,4 @@ public class Cluster implements IEntity {
 
     @Column(name = "gmt_modified")
     private Instant gmtModified;
-
-    public boolean isKerberosEnabled() {
-        if (kerberosEnabled != null && kerberosEnabled == 1) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 }

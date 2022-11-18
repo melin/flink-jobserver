@@ -7,10 +7,6 @@
     <link rel="stylesheet" href="/component/pear/css/pear.css" />
     <link rel="stylesheet" href="/component/toast/toast.min.css" />
     <style>
-        .form-label {
-            padding: 9px 5px;
-            width: 70px;
-        }
         .layui-tab {
             margin: 10px 10px;
         }
@@ -45,18 +41,22 @@
     <div class="layui-card-body">
         <form class="layui-form" action="">
             <div class="layui-form-item">
-                <label class="layui-form-label">集群Code</label>
-                <div class="layui-input-inline">
+                <div class="layui-col-md1">
+                    <label class="layui-form-label">集群Code</label>
+                </div>
+                <div class="layui-col-md2">
                     <input type="text" name="code" placeholder="" class="layui-input">
                 </div>
-                <button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="user-query">
-                    <i class="layui-icon layui-icon-search"></i>
-                    查询
-                </button>
-                <button type="reset" class="pear-btn pear-btn-md">
-                    <i class="layui-icon layui-icon-refresh"></i>
-                    重置
-                </button>
+                <div class="layui-col-md2" style="padding-left: 10px">
+                    <button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="user-query">
+                        <i class="layui-icon layui-icon-search"></i>
+                        查询
+                    </button>
+                    <button type="reset" class="pear-btn pear-btn-md">
+                        <i class="layui-icon layui-icon-refresh"></i>
+                        重置
+                    </button>
+                </div>
             </div>
         </form>
     </div>
@@ -100,21 +100,30 @@
                 <input type="text" name="yarnQueueName" hover placeholder="集群默认使用队列" autocomplete="off" value="default" class="layui-input">
             </div>
             <div class="layui-col-md1">
-                <label class="layui-form-label form-label">Kerberos</label>
+                <label class="layui-form-label form-label">支持Session</label>
             </div>
             <div class="layui-col-md3">
-                <select name="kerberosEnabled" class="layui-input">
+                <select name="flinkSessionEnabled" class="layui-input">
                     <option value="0">关闭</option>
-                    <!--<option value="1">启用</option>-->
+                    <option value="1">启用</option>
                 </select>
             </div>
             <div class="layui-col-md1">
-                <label class="layui-form-label form-label">集群状态</label>
+                <label class="layui-form-label form-label">启用集群</label>
             </div>
             <div class="layui-col-md3">
                 <select name="status" class="layui-input">
                     <option value="1">启用</option>
                     <option value="0">关闭</option>
+                </select>
+            </div>
+            <div class="layui-col-md1">
+                <label class="layui-form-label form-label">Kerberos认证</label>
+            </div>
+            <div class="layui-col-md3">
+                <select name="kerberosEnabled" class="layui-input">
+                    <option value="0">关闭</option>
+                    <!--<option value="1">启用</option>-->
                 </select>
             </div>
         </div>
@@ -123,7 +132,8 @@
     <div class="layui-tab">
         <ul class="layui-tab-title">
             <li class="layui-this">jobserver.properties</li>
-            <li>flink-conf.yaml</li>
+            <li>【Application】flink-conf.yaml</li>
+            <li>【Session】flink-conf.yaml</li>
             <li>core-site.xml</li>
             <li>hdfs-site.xml</li>
             <li>yarn-site.xml</li>
@@ -134,7 +144,10 @@
                 <div id="jobserverEditor" style="width: 100%;" class="editor"></div>
             </div>
             <div class="layui-tab-item">
-                <div id="flinkEditor" style="width: 100%;" class="editor"></div>
+                <div id="flinkAppEditor" style="width: 100%;" class="editor"></div>
+            </div>
+            <div class="layui-tab-item">
+                <div id="flinkSessionEditor" style="width: 100%;" class="editor"></div>
             </div>
             <div class="layui-tab-item">
                 <div id="coreEditor" style="width: 100%;" class="editor"></div>

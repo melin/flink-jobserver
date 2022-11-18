@@ -63,6 +63,12 @@ var Driver = function () {
                         width: 80
                     },
                     {
+                        title: '部署模式',
+                        field: 'deploymentMode',
+                        align: 'center',
+                        width: 80
+                    },
+                    {
                         title: '状态',
                         field: 'status',
                         align: 'left',
