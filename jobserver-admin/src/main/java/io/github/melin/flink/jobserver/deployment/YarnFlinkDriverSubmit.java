@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import io.github.melin.flink.jobserver.ConfigProperties;
 import io.github.melin.flink.jobserver.core.entity.FlinkDriver;
 import io.github.melin.flink.jobserver.core.enums.DriverStatus;
+import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
 import io.github.melin.flink.jobserver.core.exception.ResouceLimitException;
 import io.github.melin.flink.jobserver.core.exception.FlinkJobException;
 import io.github.melin.flink.jobserver.core.service.FlinkDriverService;
@@ -85,7 +86,7 @@ public class YarnFlinkDriverSubmit {
         this.clusterClientServiceLoader = new DefaultClusterClientServiceLoader();
     }
 
-    public void buildJobServer(Cluster cluster) {
+    public void buildJobServer(Cluster cluster, RuntimeMode runtimeMode) {
         Long driverId = null;
         String clusterCode = cluster.getCode();
         try {
@@ -100,7 +101,7 @@ public class YarnFlinkDriverSubmit {
             LOG.info("预启动 driver Id: {}", driverId);
 
             long appSubmitTime = System.currentTimeMillis();
-            String applicationId = startApplication(jobInstanceInfo, cluster.getCode(), driverId, yarnQueue);
+            String applicationId = startApplication(jobInstanceInfo, cluster.getCode(), driverId, yarnQueue, runtimeMode);
 
             Long times = (System.currentTimeMillis() - appSubmitTime) / 1000L;
             LOG.info("start share jobserver: {}, times: {}s", applicationId, times);
@@ -130,7 +131,7 @@ public class YarnFlinkDriverSubmit {
     }
 
     protected String startApplication(JobInstanceInfo jobInstanceInfo, String clusterCode,
-                                    Long driverId, String yarnQueue) throws Exception {
+                                    Long driverId, String yarnQueue, RuntimeMode runtimeMode) throws Exception {
 
         final ApplicationDeployer deployer =
                 new ApplicationClusterDeployer(clusterClientServiceLoader);
@@ -186,7 +187,8 @@ public class YarnFlinkDriverSubmit {
         ConfigUtils.encodeCollectionToConfig(flinkConfig, PipelineOptions.JARS, jobJars, Object::toString);
 
         final String conf = Base64.getEncoder().encodeToString("{}".getBytes(StandardCharsets.UTF_8));
-        List<String> programArgs = Lists.newArrayList("-j", String.valueOf(driverId), "-conf", conf, "-c", clusterCode);
+        List<String> programArgs = Lists.newArrayList("-j", String.valueOf(driverId), "-conf", conf,
+                "-c", clusterCode, "mode", runtimeMode.getValue());
         boolean hiveEnabled = clusterConfig.getBoolean(clusterCode, JOBSERVER_DRIVER_HIVE_ENABLED);
         if (hiveEnabled) {
             programArgs.add("-hive");

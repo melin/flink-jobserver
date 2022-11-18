@@ -4,6 +4,7 @@ import io.github.melin.flink.jobserver.core.enums.ComputeType;
 import io.github.melin.flink.jobserver.core.enums.DriverStatus;
 import com.gitee.melin.bee.model.IEntity;
 import com.gitee.melin.bee.util.NetUtils;
+import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -69,6 +70,12 @@ public class FlinkDriver implements IEntity {
 
     @Column(name = "share_driver")
     private boolean shareDriver = true;
+
+    @Column(name = "runtime_mode", length = 32)
+    @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
+            parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
+                    value = "io.github.melin.flink.jobserver.core.enums.RuntimeMode")})
+    private RuntimeMode runtimeMode;
 
     @Column(name = "yarn_queue")
     private String yarnQueue;

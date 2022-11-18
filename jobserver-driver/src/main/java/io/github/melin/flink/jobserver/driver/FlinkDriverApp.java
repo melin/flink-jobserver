@@ -49,15 +49,13 @@ public class FlinkDriverApp extends SpringBootServletInitializer {
         ClusterService clusterService = applicationContext.getBean(ClusterService.class);
         Cluster cluster = clusterService.getClusterByCode(driverParam.getClusterCode());
 
-        boolean kerberosEnabled = driverParam.isKerberosEnabled();
-        boolean hiveEnabled = driverParam.isHiveEnable();
         Configuration flinkConf = new Configuration();
         ConfigClient.init(configText, flinkConf);
-        FlinkEnv.init(flinkConf, cluster, kerberosEnabled, hiveEnabled);
+        FlinkDriverEnv.init(flinkConf, cluster, driverParam);
 
         flinkDriverContext.initFlinkDriver(driverId);
 
-        FlinkEnv.waitDriver();
+        FlinkDriverEnv.waitDriver();
         LOG.info("application finished");
     }
 }

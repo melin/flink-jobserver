@@ -4,7 +4,7 @@ import io.github.melin.flink.jobserver.core.enums.InstanceStatus;
 import io.github.melin.flink.jobserver.core.enums.InstanceType;
 import io.github.melin.flink.jobserver.core.enums.JobType;
 import com.gitee.melin.bee.model.IEntity;
-import io.github.melin.flink.jobserver.core.enums.RunMode;
+import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
 import lombok.*;
 import lombok.experimental.Tolerate;
 import org.hibernate.annotations.Type;
@@ -48,11 +48,11 @@ public class JobInstance implements IEntity {
                     value = "io.github.melin.flink.jobserver.core.enums.JobType")})
     private JobType jobType;
 
-    @Column(name = "run_mode", length = 32)
+    @Column(name = "runtime_mode", length = 32)
     @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
             parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
-                    value = "io.github.melin.flink.jobserver.core.enums.RunMode")})
-    private RunMode runMode;
+                    value = "io.github.melin.flink.jobserver.core.enums.RuntimeMode")})
+    private RuntimeMode runtimeMode;
 
     @Column(name = "instance_type", nullable = false, length = 32)
     @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",

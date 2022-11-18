@@ -1,6 +1,8 @@
 package io.github.melin.flink.jobserver.driver.model;
 
 import com.beust.jcommander.Parameter;
+import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
+import org.apache.flink.api.common.RuntimeExecutionMode;
 
 public class DriverParam {
 
@@ -9,6 +11,9 @@ public class DriverParam {
 
     @Parameter(names = "-c", description = "clusterCode", required = true)
     private String clusterCode;
+
+    @Parameter(names = "-mode", description = "Flink run mode", required = true, converter = RuntimeModeConverter.class)
+    private RuntimeExecutionMode runtimeMode;
 
     @Parameter(names = "-conf", description = "driver config", required = true)
     private String config;
@@ -44,6 +49,14 @@ public class DriverParam {
 
     public void setConfig(String config) {
         this.config = config;
+    }
+
+    public RuntimeExecutionMode getRuntimeMode() {
+        return runtimeMode;
+    }
+
+    public void setRuntimeMode(RuntimeExecutionMode runtimeMode) {
+        this.runtimeMode = runtimeMode;
     }
 
     public boolean isKerberosEnabled() {

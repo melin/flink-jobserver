@@ -51,7 +51,7 @@ var Instance = function () {
                     },
                     {
                         title: '运行模式',
-                        field: 'runMode',
+                        field: 'runtimeMode',
                         align: 'center',
                         width: 80
                     },

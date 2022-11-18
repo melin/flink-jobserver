@@ -7,6 +7,7 @@
 3. 预启动 Flink Driver，提高Job 启动速度，Driver 共享运行多个Job(同时只有一个job运行)
 4. 支持多集群部署，Client 提交Job 到指定集群运行，不是模式只支持 flink yarn application
 5. Driver 定制化，可以实现比较多能力，例如：表权限，碎片文件压缩，DQC等功能。
+6. 对接superior-metastore 统一元数据中心, 引擎基于metastore 跨源计算: https://github.com/melin/superior-metastore
 
 ## 一、Build
 

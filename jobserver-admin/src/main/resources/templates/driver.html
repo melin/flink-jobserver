@@ -19,6 +19,14 @@
                         <option th:each="item : ${clusters}" th:value="${item.code}" th:text="${item.name}"></option>
                     </select>
                 </div>
+                <label class="layui-form-label">运行模式</label>
+                <div class="layui-input-inline">
+                    <select name="runtimeMode" class="layui-input" id="runtimeMode">
+                        <option value="">请选择...</option>
+                        <option value="BATCH">批</option>
+                        <option value="STREAMING">流</option>
+                    </select>
+                </div>
                 <label class="layui-form-label">ApplicationID</label>
                 <div class="layui-input-inline">
                     <input type="text" name="realName" placeholder="" class="layui-input">

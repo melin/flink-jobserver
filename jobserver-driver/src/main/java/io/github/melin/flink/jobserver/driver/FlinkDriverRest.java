@@ -90,7 +90,7 @@ public class FlinkDriverRest {
         LOG.info("spark dirver received job");
 
         LogUtils.info("当前 yarn queue: {}, ApplicationId: {}, shareDriver: {}",
-                instanceDto.getYarnQueue(), FlinkEnv.getApplicationId(), String.valueOf(instanceDto.isShareDriver()));
+                instanceDto.getYarnQueue(), FlinkDriverEnv.getApplicationId(), String.valueOf(instanceDto.isShareDriver()));
 
         LOG.info("Spark task: {} begined, submit from {}",
                 instanceDto.getInstanceCode(), instanceDto.getSparkJobServerUrl());

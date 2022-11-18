@@ -57,6 +57,12 @@ var Driver = function () {
                         width: 80
                     },
                     {
+                        title: '运行模式',
+                        field: 'runtimeMode',
+                        align: 'center',
+                        width: 80
+                    },
+                    {
                         title: '状态',
                         field: 'status',
                         align: 'left',

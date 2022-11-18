@@ -1,9 +1,9 @@
 package io.github.melin.flink.jobserver.monitor;
 
 import com.gitee.melin.bee.util.ThreadUtils;
-import io.github.melin.flink.jobserver.ConfigProperties;
 import io.github.melin.flink.jobserver.core.entity.Cluster;
 import io.github.melin.flink.jobserver.core.entity.FlinkDriver;
+import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
 import io.github.melin.flink.jobserver.core.service.ClusterService;
 import io.github.melin.flink.jobserver.core.service.FlinkDriverService;
 import io.github.melin.flink.jobserver.deployment.YarnFlinkDriverSubmit;
@@ -35,9 +35,6 @@ public class DriverPoolManager implements InitializingBean {
 
     @Autowired
     private RedisLeaderElection redisLeaderElection;
-
-    @Autowired
-    private ConfigProperties configProperties;
 
     @Autowired
     private FlinkDriverService driverService;
@@ -123,7 +120,7 @@ public class DriverPoolManager implements InitializingBean {
             int minDriverCount = clusterConfig.getInt(cluster.getCode(), JOBSERVER_DRIVER_MIN_COUNT);
             long driverCount = driverService.queryCount();
             while (minDriverCount > driverCount) {
-                yarnFlinkDriverSubmit.buildJobServer(cluster);
+                yarnFlinkDriverSubmit.buildJobServer(cluster, RuntimeMode.BATCH);
                 driverCount = driverService.queryCount();
             }
         } catch (Throwable e) {
