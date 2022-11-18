@@ -103,4 +103,7 @@ public class FlinkDriverEnv {
         FlinkDriverEnv.countDownLatch.await();
     }
 
+    public static StreamTableEnvironment getTableEnvironment() {
+        return tableEnvironment;
+    }
 }

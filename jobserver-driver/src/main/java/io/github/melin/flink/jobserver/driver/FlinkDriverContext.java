@@ -1,6 +1,7 @@
 package io.github.melin.flink.jobserver.driver;
 
 import com.gitee.melin.bee.util.NetUtils;
+import io.github.melin.flink.jobserver.core.dto.InstanceDto;
 import io.github.melin.flink.jobserver.core.entity.FlinkDriver;
 import io.github.melin.flink.jobserver.core.enums.DriverStatus;
 import io.github.melin.flink.jobserver.core.service.FlinkDriverService;
@@ -59,11 +60,11 @@ public class FlinkDriverContext {
         //logThread.startQueySparkStageLog();
     }
 
-    public void stopDriver(Long driverId) {
+    public void stopDriver(InstanceDto instanceDto) {
         LOGGER.info("stopQueySparkStageLog");
         //logThread.stopQueySparkStageLog();
 
-        FlinkDriver driver = driverService.getEntity(driverId);
+        FlinkDriver driver = driverService.getEntity(instanceDto.getDriverId());
         LOGGER.info("driver {} run task finished，update status idle", driver.getApplicationId());
 
         Instant nowDate = Instant.now();

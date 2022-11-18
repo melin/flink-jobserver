@@ -93,7 +93,7 @@ public class FlinkDriverRest {
                 instanceDto.getYarnQueue(), FlinkDriverEnv.getApplicationId(), String.valueOf(instanceDto.isShareDriver()));
 
         LOG.info("Spark task: {} begined, submit from {}",
-                instanceDto.getInstanceCode(), instanceDto.getSparkJobServerUrl());
+                instanceDto.getInstanceCode(), instanceDto.getSparkDriverUrl());
 
         JobType jobType = instanceDto.getJobType();
         if (JobType.FLINK_SQL == jobType) {
