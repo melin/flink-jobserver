@@ -2,7 +2,7 @@ package io.github.melin.flink.jobserver.driver;
 
 import com.gitee.melin.bee.core.support.Result;
 import io.github.melin.flink.jobserver.core.enums.DriverStatus;
-import io.github.melin.flink.jobserver.driver.task.FlinkJarTask;
+import io.github.melin.flink.jobserver.driver.task.FlinkAppTask;
 import io.github.melin.flink.jobserver.driver.task.FlinkSqlTask;
 import io.github.melin.flink.jobserver.core.dto.InstanceDto;
 import io.github.melin.flink.jobserver.core.enums.JobType;
@@ -41,7 +41,7 @@ public class FlinkDriverRest {
     private FlinkSqlTask flinkSqlTask;
 
     @Autowired
-    private FlinkJarTask flinkJarTask;
+    private FlinkAppTask flinkAppTask;
 
     @RequestMapping(value = "/ok", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
@@ -101,7 +101,7 @@ public class FlinkDriverRest {
             return flinkSqlTask.runTask(instanceDto);
         } else if (JobType.FLINK_APP == jobType) {
             flinkDriverContext.startDriver();
-            return flinkJarTask.runTask(instanceDto);
+            return flinkAppTask.runTask(instanceDto);
         } else {
             return Result.failureResult("不支持的 jobType: " + jobType);
         }
@@ -132,7 +132,7 @@ public class FlinkDriverRest {
             if (JobType.FLINK_SQL == jobType) {
                 flinkSqlTask.killJob(instanceCode);
             } else if (JobType.FLINK_APP == jobType) {
-                flinkJarTask.killJob(instanceCode);
+                flinkAppTask.killJob(instanceCode);
             }
 
             LOG.info("driver has been reset!");
