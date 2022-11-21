@@ -6,7 +6,7 @@ import io.github.melin.flink.jobserver.core.entity.FlinkDriver;
 import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
 import io.github.melin.flink.jobserver.core.service.ClusterService;
 import io.github.melin.flink.jobserver.core.service.FlinkDriverService;
-import io.github.melin.flink.jobserver.deployment.YarnFlinkDriverSubmit;
+import io.github.melin.flink.jobserver.deployment.YarnApplicationDriverDeployer;
 import io.github.melin.flink.jobserver.support.ClusterConfig;
 import io.github.melin.flink.jobserver.support.YarnClientService;
 import io.github.melin.flink.jobserver.support.leader.LeaderTypeEnum;
@@ -49,7 +49,7 @@ public class DriverPoolManager implements InitializingBean {
     private ClusterConfig clusterConfig;
 
     @Autowired
-    private YarnFlinkDriverSubmit yarnFlinkDriverSubmit;
+    private YarnApplicationDriverDeployer yarnApplicationDriverDeployer;
 
     private final ScheduledExecutorService scheduledExecutorService =
             ThreadUtils.newDaemonSingleThreadScheduledExecutor("check-yarn-app");
@@ -59,14 +59,18 @@ public class DriverPoolManager implements InitializingBean {
         redisLeaderElection.buildLeader(LeaderTypeEnum.DRIVER_POOL_MANAGER);
 
         scheduledExecutorService.scheduleAtFixedRate(() -> {
-            if (redisLeaderElection.checkLeader(LeaderTypeEnum.DRIVER_POOL_MANAGER)) {
-                List<Cluster> clusters = clusterService.findByNamedParam("status", 1);
-                for (Cluster cluster : clusters) {
-                    LOG.debug("monitor driver pool: {}", cluster.getCode());
+            try {
+                if (redisLeaderElection.checkLeader(LeaderTypeEnum.DRIVER_POOL_MANAGER)) {
+                    List<Cluster> clusters = clusterService.findByNamedParam("status", true);
+                    for (Cluster cluster : clusters) {
+                        LOG.debug("monitor driver pool: {}", cluster.getCode());
 
-                    stopMaxIdleJobserver(cluster);
-                    startMinJobServer(cluster);
+                        stopMaxIdleJobserver(cluster);
+                        startMinJobServer(cluster);
+                    }
                 }
+            } catch (Throwable e) {
+                LOG.error("start jobserver failed: " + e.getMessage(), e);
             }
         }, 10, 10, TimeUnit.SECONDS);
     }
@@ -120,7 +124,7 @@ public class DriverPoolManager implements InitializingBean {
             int minDriverCount = clusterConfig.getInt(cluster.getCode(), JOBSERVER_DRIVER_MIN_COUNT);
             long driverCount = driverService.queryCount();
             while (minDriverCount > driverCount) {
-                yarnFlinkDriverSubmit.buildJobServer(cluster, RuntimeMode.BATCH);
+                yarnApplicationDriverDeployer.buildJobServer(cluster, RuntimeMode.BATCH);
                 driverCount = driverService.queryCount();
             }
         } catch (Throwable e) {

@@ -30,7 +30,6 @@ public class FlinkDriverEnv {
     private static final CountDownLatch countDownLatch = new CountDownLatch(1);
 
     public static void init(Configuration flinkConf, Cluster cluster, DriverParam driverParam) throws Exception {
-
         if (tableEnvironment == null) {
             if (driverParam.isKerberosEnabled()) {
                 UserGroupInformation.getLoginUser().doAs((PrivilegedExceptionAction<Object>) () -> {
@@ -44,7 +43,6 @@ public class FlinkDriverEnv {
     }
 
     private static void initFlink(Configuration flinkConf, Cluster cluster, DriverParam driverParam) {
-
         StreamExecutionEnvironment env = new StreamExecutionEnvironment(flinkConf);
         env.setRuntimeMode(driverParam.getRuntimeMode());
         tableEnvironment = StreamTableEnvironment.create(env);

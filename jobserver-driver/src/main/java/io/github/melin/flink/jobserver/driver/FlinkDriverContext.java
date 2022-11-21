@@ -4,7 +4,10 @@ import com.gitee.melin.bee.util.NetUtils;
 import io.github.melin.flink.jobserver.core.dto.InstanceDto;
 import io.github.melin.flink.jobserver.core.entity.FlinkDriver;
 import io.github.melin.flink.jobserver.core.enums.DriverStatus;
+import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
 import io.github.melin.flink.jobserver.core.service.FlinkDriverService;
+import io.github.melin.flink.jobserver.driver.model.DriverParam;
+import org.apache.flink.api.common.RuntimeExecutionMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,14 +33,8 @@ public class FlinkDriverContext {
     @Autowired
     private FlinkDriverService driverService;
 
-    public void initFlinkDriver(Long driverId) {
-        updateJobServerIdle(driverId);
-    }
-
-    /**
-     * driver 启动成功，初始化状态为Idle
-     */
-    private void updateJobServerIdle(Long driverId) {
+    public void initFlinkDriver(DriverParam driverParam) {
+        Long driverId = driverParam.getDriverId();
         FlinkDriver driver = driverService.getEntity(driverId);
         if (driver == null) {
             throw new RuntimeException("No driver Id: " + driverId);
@@ -45,6 +42,11 @@ public class FlinkDriverContext {
         driver.setServerIp(NetUtils.getLocalHost());
         driver.setServerPort(serverPortService.getPort());
         driver.setStatus(DriverStatus.IDLE);
+        if (driverParam.getRuntimeMode() == RuntimeExecutionMode.BATCH) {
+            driver.setRuntimeMode(RuntimeMode.BATCH);
+        } else if (driverParam.getRuntimeMode() == RuntimeExecutionMode.STREAMING) {
+            driver.setRuntimeMode(RuntimeMode.STREAMING);
+        }
         driver.setCreater("admin");
 
         Instant nowDate = Instant.now();

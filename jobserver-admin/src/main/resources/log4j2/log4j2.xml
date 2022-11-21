@@ -67,6 +67,9 @@
             <appender-ref ref="RoutingAppender"/>
         </logger>
 
+        <logger name="org.apache.hadoop.hive" level="warn" />
+        <logger name="org.apache.hadoop.yarn.client" level="warn" />
+        <logger name="org.apache.hive" level="warn" />
         <logger name="org.apache.spark.launcher" level="warn" />
         <Logger name="org.hibernate.orm.deprecation" additivity="false" level="WARN">
             <RegexFilter regex=".*HHH90000022.*" onMatch="DENY" onMismatch="NEUTRAL"/>

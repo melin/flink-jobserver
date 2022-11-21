@@ -60,15 +60,8 @@ public class Cluster implements IEntity {
     @Column(name = "jobserver_config")
     private String jobserverConfig;
 
-    @Column(name = "flink_app_config")
-    private String flinkAppConfig;
-
-    @Column(name = "flink_session_enabled")
-    @Convert(converter = BooleanToIntConverter.class)
-    private boolean flinkSessionEnabled = false;
-
-    @Column(name = "flink_session_config")
-    private String flinkSessionConfig;
+    @Column(name = "flink_config")
+    private String flinkConfig;
 
     @Column(name = "core_config")
     private String coreConfig;

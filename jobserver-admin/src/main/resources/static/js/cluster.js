@@ -5,7 +5,7 @@ var Cluster = function () {
     let dropdown = layui.dropdown;
     const maxInstanceCount = $("#maxInstanceCount").val();
 
-    let jobserverEditor, flinkAppEditor, flinkSessionEditor, coreEditor, hdfsEditor, yarnEditor, hiveEditor;
+    let jobserverEditor, flinkEditor, coreEditor, hdfsEditor, yarnEditor, hiveEditor;
 
     return {
         init: function () {
@@ -34,19 +34,6 @@ var Cluster = function () {
                         field: 'schedulerType',
                         align: 'left',
                         width: 100,
-                    },
-                    {
-                        title: '启用Session模式',
-                        field: 'schedulerType',
-                        align: 'left',
-                        width: 120,
-                        templet: function(record) {
-                            if (record.flinkSessionEnabled) {
-                                return '<span style="font-weight:bold; color: #5FB878">启用</span>'
-                            } else {
-                                return '<span style="font-weight:bold;color: #FF5722">关闭</span>'
-                            }
-                        }
                     },
                     {
                         title: '开启kerberos',
@@ -144,8 +131,7 @@ var Cluster = function () {
             });
 
             jobserverEditor = Cluster.getEditor(jobserverEditor, "jobserverEditor", "ace/mode/properties");
-            flinkAppEditor = Cluster.getEditor(flinkAppEditor, "flinkAppEditor", "ace/mode/yaml");
-            flinkSessionEditor = Cluster.getEditor(flinkSessionEditor, "flinkSessionEditor", "ace/mode/yaml");
+            flinkEditor = Cluster.getEditor(flinkEditor, "flinkEditor", "ace/mode/yaml");
             coreEditor = Cluster.getEditor(coreEditor, "coreEditor", "ace/mode/xml");
             hdfsEditor = Cluster.getEditor(hdfsEditor, "hdfsEditor", "ace/mode/xml");
             yarnEditor = Cluster.getEditor(yarnEditor, "yarnEditor", "ace/mode/xml");
@@ -186,11 +172,6 @@ var Cluster = function () {
                             } else {
                                 data.kerberosEnabled = 0;
                             }
-                            if (data.flinkSessionEnabled) {
-                                data.flinkSessionEnabled = 1;
-                            } else {
-                                data.flinkSessionEnabled = 0;
-                            }
                             if (data.status) {
                                 data.status = 1;
                             } else {
@@ -198,8 +179,7 @@ var Cluster = function () {
                             }
                             form.val('newClusterForm', data);
                             Cluster.setEditorValue(jobserverEditor, data.jobserverConfig)
-                            Cluster.setEditorValue(flinkAppEditor, data.flinkAppConfig)
-                            Cluster.setEditorValue(flinkSessionEditor, data.flinkSessionConfig)
+                            Cluster.setEditorValue(flinkEditor, data.flinkConfig)
                             Cluster.setEditorValue(coreEditor, data.coreConfig)
                             Cluster.setEditorValue(hdfsEditor, data.hdfsConfig)
                             Cluster.setEditorValue(yarnEditor, data.yarnConfig)
@@ -210,8 +190,7 @@ var Cluster = function () {
             } else {
                 form.val('newClusterForm', {code: "", name: "", yarnQueueName: "default"});
                 Cluster.setEditorValue(jobserverEditor, $("#confDefaultValue").val())
-                Cluster.setEditorValue(flinkAppEditor, "")
-                Cluster.setEditorValue(flinkSessionEditor, "")
+                Cluster.setEditorValue(flinkEditor, "")
                 Cluster.setEditorValue(coreEditor, "")
                 Cluster.setEditorValue(hdfsEditor, "")
                 Cluster.setEditorValue(yarnEditor, "")
@@ -239,8 +218,7 @@ var Cluster = function () {
                     }
 
                     let jobserverConfig = $.trim(jobserverEditor.getValue());
-                    let flinkAppConfig = $.trim(flinkAppEditor.getValue());
-                    let flinkSessionConfig = $.trim(flinkSessionEditor.getValue());
+                    let flinkConfig = $.trim(flinkEditor.getValue());
                     let coreConfig = $.trim(coreEditor.getValue());
                     let hdfsConfig = $.trim(hdfsEditor.getValue());
                     let yarnConfig = $.trim(yarnEditor.getValue());
@@ -248,8 +226,7 @@ var Cluster = function () {
 
                     data.id = clusterId
                     data.jobserverConfig = jobserverConfig
-                    data.flinkAppConfig = flinkAppConfig
-                    data.flinkSessionConfig = flinkSessionConfig
+                    data.flinkConfig = flinkAppConfig
                     data.coreConfig = coreConfig
                     data.hdfsConfig = hdfsConfig
                     data.yarnConfig = yarnConfig

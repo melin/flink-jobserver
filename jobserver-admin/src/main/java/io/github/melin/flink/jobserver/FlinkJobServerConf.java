@@ -69,7 +69,7 @@ public class FlinkJobServerConf extends BeeConf {
                     .stringConf()
                     .createWithDefault("flink-jobserver-driver-0.1.0.jar");
 
-    public static final ConfigEntry<String> JOBSERVER_DRIVER_YAEN_QUEUE_NAME =
+    public static final ConfigEntry<String> JOBSERVER_DRIVER_YARN_QUEUE_NAME =
             buildConf("jobserver.driver.yarn.queue.name")
                     .doc("driver 运行yarn 队列名")
                     .version("1.0.0")

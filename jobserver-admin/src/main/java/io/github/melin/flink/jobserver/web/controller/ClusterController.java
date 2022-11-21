@@ -92,9 +92,7 @@ public class ClusterController {
                 old.setName(cluster.getName());
                 old.setSchedulerType(cluster.getSchedulerType());
                 old.setJobserverConfig(cluster.getJobserverConfig());
-                old.setFlinkAppConfig(cluster.getFlinkAppConfig());
-                old.setFlinkSessionEnabled(cluster.isFlinkSessionEnabled());
-                old.setFlinkSessionConfig(cluster.getFlinkSessionConfig());
+                old.setFlinkConfig(cluster.getFlinkConfig());
                 old.setCoreConfig(cluster.getCoreConfig());
                 old.setHdfsConfig(cluster.getHdfsConfig());
                 old.setYarnConfig(cluster.getYarnConfig());

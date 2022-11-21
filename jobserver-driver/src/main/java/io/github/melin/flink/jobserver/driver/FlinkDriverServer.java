@@ -40,7 +40,6 @@ public class FlinkDriverServer extends SpringBootServletInitializer {
         LOG.info("flink app args: {}", StringUtils.join(args, ","));
         JCommander.newBuilder().addObject(driverParam).build().parse(args);
 
-        Long driverId = driverParam.getDriverId();
         byte[] asBytes = Base64.getDecoder().decode(driverParam.getConfig());
         String configText = new String(asBytes, StandardCharsets.UTF_8);
 
@@ -53,7 +52,7 @@ public class FlinkDriverServer extends SpringBootServletInitializer {
         ConfigClient.init(configText, flinkConf);
         FlinkDriverEnv.init(flinkConf, cluster, driverParam);
 
-        flinkDriverContext.initFlinkDriver(driverId);
+        flinkDriverContext.initFlinkDriver(driverParam);
 
         FlinkDriverEnv.waitDriver();
         LOG.info("application finished");
