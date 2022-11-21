@@ -1,11 +1,10 @@
 ## REST job server for Apache Flink
 
 主要特点
-
 1. 通过Rest API 提交spark 作业运行，支持sql，java/scala 类型作业，解耦业务系统与Flink 集群。
-2. Flink Job 运行资源相互隔离，每一个job 独立运行在一个Spark driver中。
-3. 预启动 Flink Driver，提高Job 启动速度，Driver 共享运行多个Job(同时只有一个job运行)
-4. 支持多集群部署，Client 提交Job 到指定集群运行，不是模式只支持 flink yarn application
+2. Flink Job 运行资源相互隔离，每一个job 独立运行在一个FLink driver中。
+3. 预启动 Flink Driver，特别是在WebIDE 交互场景，有效提高Job 启动速度，Driver 共享运行多个Job(同时只有一个job运行，有点类似pre job模式)
+4. 支持多集群部署，Client 提交Job 到指定集群运行，考虑session 大规模生产环境不太可用，只支持 application 模式
 5. Driver 定制化，可以实现比较多能力，例如：表权限，碎片文件压缩，DQC等功能。
 6. 更加灵活的对调度任务并发和优先级控制，例如单个用户最大并发数量，不完全依赖底层yarn、k8s等资源管理能力。例如一些调度框架是把作业直接传给yarn 资源管理器，如果yarn资源不够，提交上去的任务全部在yarn 等待队列中。CDH 默认是公平调度，会导致任务无法按照优先级运行。
 7. 对接superior-metastore 统一元数据中心, 引擎基于metastore 跨源计算: https://github.com/melin/superior-metastore
