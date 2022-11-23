@@ -31,7 +31,7 @@ public class FlinkSqlTask extends AbstractFlinkTask {
         for (String row : sqls) {
             String sql = StringUtils.trim(row);
             if (StringUtils.isNotBlank(sql)) {
-
+                LogUtils.stdout("execute sql: " + sql);
                 if (StringUtils.startsWithIgnoreCase(sql, "select")) {
                     TableResultImpl tableResult = (TableResultImpl) FlinkDriverEnv.getTableEnvironment().executeSql(sql);
                     Iterator<RowData> it = tableResult.collectInternal();

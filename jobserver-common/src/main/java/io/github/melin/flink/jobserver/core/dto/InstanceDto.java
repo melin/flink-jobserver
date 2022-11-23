@@ -12,6 +12,8 @@ public class InstanceDto {
 
     private Long driverId;
 
+    private String applicationId;
+
     private String instanceCode;
 
     private String jobName;
@@ -22,7 +24,7 @@ public class InstanceDto {
 
     private String accessKey;
 
-    private String sparkDriverUrl;
+    private String flinkDriverUrl;
 
     private JobType jobType;
 

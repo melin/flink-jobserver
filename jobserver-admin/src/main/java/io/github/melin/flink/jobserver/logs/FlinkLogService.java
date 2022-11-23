@@ -87,7 +87,7 @@ public class FlinkLogService implements ApplicationContextAware, InitializingBea
                                 instanceInfo.setJobType(instance.getJobType());
                                 instanceInfo.setOwner(instance.getOwner());
 
-                                this.createSparkJobLog(instanceInfo, appId, shareDriver, flinkDriverUrl);
+                                this.createFlinkJobLog(instanceInfo, appId, shareDriver, flinkDriverUrl);
                                 this.startJobLogThread(instanceCode);
                             }
                         } else {
@@ -117,7 +117,7 @@ public class FlinkLogService implements ApplicationContextAware, InitializingBea
         driverService.clearCurrentLogServer();
     }
 
-    public void createSparkJobLog(JobInstanceInfo instanceInfo, String applicationId,
+    public void createFlinkJobLog(JobInstanceInfo instanceInfo, String applicationId,
                                   boolean shareDriver, String flinkDriverUrl) {
 
         String instanceCode = instanceInfo.getInstanceCode();

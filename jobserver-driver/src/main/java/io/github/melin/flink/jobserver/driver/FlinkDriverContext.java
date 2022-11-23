@@ -53,6 +53,7 @@ public class FlinkDriverContext {
         driver.setGmtCreated(nowDate);
         driver.setGmtModified(nowDate);
         driverService.updateEntity(driver);
+        LOGGER.info("driver status idle");
     }
 
     public void startDriver() {

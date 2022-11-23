@@ -79,21 +79,22 @@ public class FlinkDriverRest {
     /**
      * 提交spark任务的接口
      */
-    @PostMapping("/flinkDriver/runSparkJob")
-    public Result<String> runSparkJob(@RequestBody InstanceDto instanceDto) {
+    @PostMapping("/flinkDriver/runFlinkJob")
+    public Result<String> runFlinkJob(@RequestBody InstanceDto instanceDto) {
         LogUtils.clearLog(instanceDto.getInstanceCode());
 
         InstanceContext.setInstanceType(instanceDto.getInstanceType());
         InstanceContext.setAccessKey(instanceDto.getAccessKey());
         InstanceContext.setInstanceCode(instanceDto.getInstanceCode());
         InstanceContext.setAccessKey(instanceDto.getAccessKey());
-        LOG.info("spark dirver received job");
+        LOG.info("flink dirver received job");
+        FlinkDriverEnv.applicationId = instanceDto.getApplicationId();
 
         LogUtils.info("当前 yarn queue: {}, ApplicationId: {}, shareDriver: {}",
-                instanceDto.getYarnQueue(), FlinkDriverEnv.getApplicationId(), String.valueOf(instanceDto.isShareDriver()));
+                instanceDto.getYarnQueue(), FlinkDriverEnv.applicationId, String.valueOf(instanceDto.isShareDriver()));
 
-        LOG.info("Spark task: {} begined, submit from {}",
-                instanceDto.getInstanceCode(), instanceDto.getSparkDriverUrl());
+        LOG.info("Flink task: {} begined, submit from {}",
+                instanceDto.getInstanceCode(), instanceDto.getFlinkDriverUrl());
 
         JobType jobType = instanceDto.getJobType();
         if (JobType.FLINK_SQL == jobType) {

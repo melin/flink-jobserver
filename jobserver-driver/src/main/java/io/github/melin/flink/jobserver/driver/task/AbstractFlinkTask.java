@@ -16,6 +16,7 @@ import io.github.melin.flink.jobserver.driver.FlinkDriverContext;
 import io.github.melin.flink.jobserver.driver.FlinkDriverEnv;
 import io.github.melin.flink.jobserver.driver.ServerPortService;
 import io.github.melin.flink.jobserver.driver.util.LogUtils;
+import org.apache.calcite.rel.metadata.RelMetadataQueryBase;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -54,7 +55,7 @@ public abstract class AbstractFlinkTask {
 
     public Result<String> runTask(InstanceDto instanceDto) {
         new Task(instanceDto).start();
-        return Result.successMessageResult(FlinkDriverEnv.getApplicationId());
+        return Result.successResult();
     }
 
     /**
@@ -68,7 +69,7 @@ public abstract class AbstractFlinkTask {
             throw new FlinkJobException("作业实例不存在: " + instanceCode);
         }
 
-        String applicationId = FlinkDriverEnv.getApplicationId();
+        String applicationId = instanceDto.getApplicationId();
         instanceService.startJobInstance(instanceDto.getInstanceCode(), applicationId);
 
         startTime = System.currentTimeMillis();
@@ -83,7 +84,7 @@ public abstract class AbstractFlinkTask {
         driver.setInstanceCode(instanceCode);
         driverService.updateServerRunning(driver);
         LOG.info("Update Driver: {} Status running:", driver.getApplicationId());
-        startJobLogThread(instanceCode, instanceDto.getSparkDriverUrl());
+        startJobLogThread(instanceCode, instanceDto.getFlinkDriverUrl());
     }
 
     protected void endJob(String instanceCode, InstanceStatus status) {
@@ -98,7 +99,7 @@ public abstract class AbstractFlinkTask {
             instanceService.instanceRunEnd(instanceCode, status, errorMsg);
             LOG.info("作业: {} 运行完成，更新实例状态：{}", instanceCode, status.getValue());
 
-            driverService.updateServerFinished(FlinkDriverEnv.getApplicationId());
+            driverService.updateServerFinished(FlinkDriverEnv.applicationId);
 
             if (InstanceStatus.FAILED == status && errorMsg != null) {
                 instanceContentService.updateErrorMsg(instanceCode, errorMsg);
@@ -189,7 +190,9 @@ public abstract class AbstractFlinkTask {
         public void run() {
             String instanceCode = instanceDto.getInstanceCode();
             try {
-                LOG.info("Sql Job: {} begined, submit from {}", instanceCode, instanceDto.getSparkDriverUrl());
+                RelMetadataQueryBase.THREAD_PROVIDERS.set(FlinkDriverEnv.getMetadataProvider());
+
+                LOG.info("Sql Job: {} begined, submit from {}", instanceCode, instanceDto.getFlinkDriverUrl());
                 startJob(instanceDto);
                 setConf(instanceDto.getJobConfig());
 

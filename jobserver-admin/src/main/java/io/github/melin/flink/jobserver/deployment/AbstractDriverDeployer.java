@@ -3,13 +3,21 @@ package io.github.melin.flink.jobserver.deployment;
 import com.gitee.melin.bee.util.NetUtils;
 import com.google.common.collect.Lists;
 import io.github.melin.flink.jobserver.ConfigProperties;
+import io.github.melin.flink.jobserver.core.entity.FlinkDriver;
+import io.github.melin.flink.jobserver.core.enums.ComputeType;
+import io.github.melin.flink.jobserver.core.enums.DriverInstance;
+import io.github.melin.flink.jobserver.core.enums.DriverStatus;
 import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
+import io.github.melin.flink.jobserver.core.exception.FlinkJobException;
 import io.github.melin.flink.jobserver.core.exception.ResouceLimitException;
 import io.github.melin.flink.jobserver.core.service.FlinkDriverService;
 import io.github.melin.flink.jobserver.core.util.CommonUtils;
+import io.github.melin.flink.jobserver.deployment.dto.DriverInfo;
 import io.github.melin.flink.jobserver.deployment.dto.JobInstanceInfo;
+import io.github.melin.flink.jobserver.deployment.dto.SubmitYarnResult;
 import io.github.melin.flink.jobserver.support.ClusterConfig;
 import io.github.melin.flink.jobserver.support.ClusterManager;
+import io.github.melin.flink.jobserver.support.leader.RedisLeaderElection;
 import io.github.melin.flink.jobserver.util.FSUtils;
 import io.github.melin.flink.jobserver.util.JobServerUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -24,14 +32,13 @@ import oshi.hardware.HardwareAbstractionLayer;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import static io.github.melin.flink.jobserver.FlinkJobServerConf.*;
-import static io.github.melin.flink.jobserver.FlinkJobServerConf.JOBSERVER_DRIVER_HIVE_ENABLED;
+import static io.github.melin.flink.jobserver.core.enums.DriverInstance.NEW_INSTANCE;
 import static org.apache.flink.configuration.CoreOptions.FLINK_JM_JVM_OPTIONS;
 import static org.apache.flink.configuration.CoreOptions.FLINK_TM_JVM_OPTIONS;
 import static org.apache.flink.yarn.configuration.YarnConfigOptions.*;
@@ -51,6 +58,9 @@ abstract public class AbstractDriverDeployer {
 
     @Autowired
     protected FlinkDriverService driverService;
+
+    @Autowired
+    private RedisLeaderElection redisLeaderElection;
 
     @Value("${spring.profiles.active}")
     protected String profiles;
@@ -205,5 +215,123 @@ abstract public class AbstractDriverDeployer {
             String msg = "当前正在运行任务数量已达最大数量限制: " + driverMaxCount + "，请休息一会再重试！";
             throw new ResouceLimitException(msg);
         }
+    }
+
+    public DriverInfo allocateDriver(JobInstanceInfo job, ComputeType computeType, boolean shareDriver) {
+        String clusterCode = job.getClusterCode();
+        int maxInstanceCount = clusterConfig.getInt(clusterCode, JOBSERVER_DRIVER_RUN_MAX_INSTANCE_COUNT);
+        long minDriverId = clusterConfig.getLong(clusterCode, JOBSERVER_DRIVER_MIN_PRIMARY_ID);
+        List<FlinkDriver> drivers = driverService.queryAvailableApplication(maxInstanceCount, minDriverId);
+        if (drivers.size() > 0) {
+            for (FlinkDriver driver : drivers) {
+                int version = driver.getVersion();
+                int batch = driverService.updateServerLocked(driver.getApplicationId(), version);
+                if (batch <= 0) {
+                    continue;
+                }
+                String driverAddress = driver.getFlinkDriverUrl();
+                DriverInfo driverInfo = new DriverInfo(DriverInstance.SHARE_INSTANCE, driver.getApplicationId(), driver.getId());
+                driverInfo.setDriverAddress(driverAddress);
+                driverInfo.setYarnQueue(driver.getYarnQueue());
+                return driverInfo;
+            }
+        }
+
+        while (!redisLeaderElection.trylock()) {
+            try {
+                TimeUnit.MILLISECONDS.sleep(100);
+            } catch (Exception ignored) {}
+        }
+
+        try {
+            //未分配到server的请求重新申请server
+            checkLocalAvailableMemory();
+            checkMaxDriverCount(clusterCode);
+            clusterManager.checkYarnResourceLimit(job.getClusterCode());
+
+            Long driverId = initSparkDriver(job.getClusterCode(), shareDriver);
+            DriverInfo driverInfo = new DriverInfo(NEW_INSTANCE, driverId);
+
+            String yarnQueue = clusterConfig.getValue(clusterCode, JOBSERVER_DRIVER_YARN_QUEUE_NAME);
+            driverInfo.setYarnQueue(yarnQueue);
+            return driverInfo;
+        } finally {
+            redisLeaderElection.deletelock();
+        }
+    }
+
+    /**
+     * 初始化jobserver实例
+     */
+    protected Long initSparkDriver(String clusterCode, boolean shareDriver) {
+        Long driverId;
+        try {
+            FlinkDriver driver = FlinkDriver.buildFlinkDriver(clusterCode, shareDriver);
+            String yarnQueue = clusterConfig.getValue(clusterCode, JOBSERVER_DRIVER_YARN_QUEUE_NAME);
+            driver.setYarnQueue(yarnQueue);
+
+            while (!redisLeaderElection.trylock()) {
+                TimeUnit.MILLISECONDS.sleep(100);
+            }
+            LOG.info("Get redis lock");
+
+            long initDriverCount = driverService.queryCount("status", DriverStatus.INIT);
+            long maxConcurrentSubmitCount = clusterConfig.getInt(clusterCode, JOBSERVER_SUBMIT_DRIVER_MAX_CONCURRENT_COUNT);
+            if (initDriverCount > maxConcurrentSubmitCount) {
+                String msg = "当前正在提交jobserver数量: " + initDriverCount + ", 最大提交数量: " + maxConcurrentSubmitCount
+                        + ", 可调整参数: jobserver.concurrent.submit.max.num";
+                throw new ResouceLimitException(msg);
+            }
+            driverId = driverService.insertEntity(driver);
+        } catch (FlinkJobException jobException) {
+            throw jobException;
+        } catch (Exception e1) {
+            throw new RuntimeException(e1.getMessage());
+        } finally {
+            redisLeaderElection.deletelock();
+        }
+
+        if (driverId == null) {
+            throw new RuntimeException("Init Flink Driver Error");
+        }
+        return driverId;
+    }
+
+    /**
+     * 通过spark-submit提交任务到集群
+     */
+    public SubmitYarnResult submitToYarn(JobInstanceInfo job, Long driverId) throws Exception {
+        String jobInstanceCode = job.getInstanceCode();
+        String clusterCode = job.getClusterCode();
+        String yarnQueue = job.getYarnQueue();
+        LOG.info("jobserver yarn queue: {}", yarnQueue);
+
+        long getServerTime = System.currentTimeMillis();
+        String applicationId = startApplication(job, driverId, RuntimeMode.BATCH);
+
+        FlinkDriver driver = driverService.queryDriverByAppId(applicationId);
+        if (driver == null || driver.getServerPort() == -1) { // 默认值: -1
+            int tryNum = 50;
+            while (--tryNum > 0) {
+                if (driver != null && driver.getStatus() != DriverStatus.INIT) {
+                    break;
+                }
+                LOG.info("InstanceCode: " + jobInstanceCode + ", " + "waiting address for application: " + applicationId);
+
+                Thread.sleep(2000);
+                driver = driverService.queryDriverByAppId(applicationId);
+            }
+            if (driver == null) {
+                throw new RuntimeException("Can not get Address about: " + applicationId);
+            }
+        }
+
+        long execTime = (System.currentTimeMillis() - getServerTime) / 1000;
+        String msg =  "driver application " + applicationId + " 启动耗时：" + execTime + " s";
+        LOG.info("InstanceCode: " + jobInstanceCode + ", " + msg);
+
+        String sparkDriverUrl = driver.getFlinkDriverUrl();
+        LOG.info("InstanceCode {} Application {} stared at {}", jobInstanceCode, applicationId, sparkDriverUrl);
+        return new SubmitYarnResult(applicationId, sparkDriverUrl, yarnQueue);
     }
 }
