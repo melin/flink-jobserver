@@ -8,10 +8,7 @@ import io.github.melin.flink.jobserver.ConfigProperties;
 import io.github.melin.flink.jobserver.api.FlinkJobServerException;
 import io.github.melin.flink.jobserver.core.dto.InstanceDto;
 import io.github.melin.flink.jobserver.core.entity.JobInstance;
-import io.github.melin.flink.jobserver.core.enums.DriverInstance;
-import io.github.melin.flink.jobserver.core.enums.InstanceStatus;
-import io.github.melin.flink.jobserver.core.enums.InstanceType;
-import io.github.melin.flink.jobserver.core.enums.JobType;
+import io.github.melin.flink.jobserver.core.enums.*;
 import io.github.melin.flink.jobserver.core.exception.FlinkJobException;
 import io.github.melin.flink.jobserver.core.exception.HttpClientException;
 import io.github.melin.flink.jobserver.core.exception.ResouceLimitException;
@@ -45,7 +42,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static io.github.melin.flink.jobserver.core.enums.ComputeType.YARN_BATCH;
 import static io.github.melin.flink.jobserver.core.enums.DriverInstance.NEW_INSTANCE;
 
 @Service
@@ -271,15 +267,16 @@ public class FlinkJobSubmitService implements InitializingBean {
         boolean shareDriver = true;
         String instanceCode = jobInstanceInfo.getInstanceCode();
         try {
-            if (StringUtils.isNotBlank(jobInstanceInfo.getJobConfig())) {
-                boolean newDriver = checkStartNewDriver(jobInstanceInfo.getJobConfig());
-                if (newDriver) {
-                    Long driverId = driverDeployer.initSparkDriver(jobInstanceInfo.getClusterCode(), false);
-                    return new DriverInfo(NEW_INSTANCE, driverId);
-                }
+            boolean newDriver = checkStartNewDriver(jobInstanceInfo.getJobConfig());
+            if (jobInstanceInfo.getRuntimeMode() == RuntimeMode.STREAMING) { // 流任务每次启动一个新的 driver
+                newDriver = true;
+            }
+            if (newDriver) {
+                Long driverId = driverDeployer.initSparkDriver(jobInstanceInfo.getClusterCode(), false);
+                return new DriverInfo(NEW_INSTANCE, driverId);
             }
 
-            DriverInfo driverInfo = driverDeployer.allocateDriver(jobInstanceInfo, YARN_BATCH, shareDriver);
+            DriverInfo driverInfo = driverDeployer.allocateDriver(jobInstanceInfo, shareDriver);
             driverInfo.setShareDriver(shareDriver);
             return driverInfo;
         } catch (FlinkJobException e) {

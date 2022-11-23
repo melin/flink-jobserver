@@ -88,6 +88,7 @@ public class StartJobInstanceScheduler {
                 .setClusterCode(instance.getClusterCode())
                 .setJobType(instance.getJobType())
                 .setInstanceType(instance.getInstanceType())
+                .setRuntimeMode(instance.getRuntimeMode())
                 .setInstanceCode(instance.getCode())
                 .setJobName(instance.getName())
                 .setJobText(jobText)

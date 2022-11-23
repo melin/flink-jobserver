@@ -1,10 +1,10 @@
 package io.github.melin.flink.jobserver.core.entity;
 
-import io.github.melin.flink.jobserver.core.enums.ComputeType;
 import io.github.melin.flink.jobserver.core.enums.DriverStatus;
 import com.gitee.melin.bee.model.IEntity;
 import com.gitee.melin.bee.util.NetUtils;
 import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
+import io.github.melin.flink.jobserver.core.enums.SchedulerType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,8 +14,6 @@ import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.time.Instant;
-
-import static io.github.melin.flink.jobserver.core.enums.ComputeType.YARN_BATCH;
 
 @Getter
 @Setter
@@ -41,11 +39,11 @@ public class FlinkDriver implements IEntity {
     @Column(name = "server_port", nullable = false)
     private Integer serverPort;
 
-    @Column(name = "compute_type")
+    @Column(name = "scheduler_type")
     @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
             parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
-                    value = "io.github.melin.flink.jobserver.core.enums.ComputeType")})
-    private ComputeType computeType;
+                    value = "io.github.melin.flink.jobserver.core.enums.SchedulerType")})
+    private SchedulerType schedulerType; // 调度框架:YARN、K8S
 
     @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
             parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
@@ -113,7 +111,7 @@ public class FlinkDriver implements IEntity {
         jobServer.setVersion(0);
         jobServer.setServerIp("0.0.0.0");
         jobServer.setServerPort(-1);
-        jobServer.setComputeType(YARN_BATCH);
+        jobServer.setSchedulerType(SchedulerType.YARN);
         jobServer.setStatus(DriverStatus.INIT);
         jobServer.setApplicationId("");
         jobServer.setCreater("");

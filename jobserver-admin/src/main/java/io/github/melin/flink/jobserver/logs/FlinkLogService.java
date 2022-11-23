@@ -5,7 +5,7 @@ import com.google.common.collect.Maps;
 import io.github.melin.flink.jobserver.ConfigProperties;
 import io.github.melin.flink.jobserver.core.entity.FlinkDriver;
 import io.github.melin.flink.jobserver.core.entity.JobInstance;
-import io.github.melin.flink.jobserver.core.enums.ComputeType;
+import io.github.melin.flink.jobserver.core.enums.SchedulerType;
 import io.github.melin.flink.jobserver.core.service.FlinkDriverService;
 import io.github.melin.flink.jobserver.core.service.JobInstanceService;
 import io.github.melin.flink.jobserver.deployment.dto.JobInstanceInfo;
@@ -70,12 +70,12 @@ public class FlinkLogService implements ApplicationContextAware, InitializingBea
                 list.forEach(driver -> {
                     boolean flag = driverService.lockCurrentLogServer(driver.getApplicationId());
                     if (flag) {
-                        ComputeType computeType = driver.getComputeType();
+                        SchedulerType schedulerType = driver.getSchedulerType();
                         String appId = driver.getApplicationId();
                         String flinkDriverUrl = driver.getFlinkDriverUrl();
                         boolean shareDriver = driver.isShareDriver();
 
-                        if (ComputeType.YARN_BATCH == computeType) {
+                        if (SchedulerType.YARN == schedulerType) {
                             JobInstance instance = instanceService.queryInstanceByAppId(appId);
                             if (instance != null) {
                                 JobInstanceInfo instanceInfo = new JobInstanceInfo();

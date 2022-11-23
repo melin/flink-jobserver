@@ -59,7 +59,7 @@ CREATE TABLE `fjs_flink_driver` (
   `version` int DEFAULT '0' COMMENT '乐观锁，避免重复提交',
   `server_ip` varchar(100) DEFAULT NULL,
   `server_port` int NOT NULL,
-  `compute_type` varchar(45) DEFAULT NULL COMMENT 'thriftServer, driverServer',
+  `scheduler_type` varchar(45) DEFAULT 'YARN' COMMENT '调度框架:YARN、K8S',
   `status` varchar(45) NOT NULL COMMENT '状态',
   `application_id` varchar(64) NOT NULL,
   `log_server` varchar(64) DEFAULT NULL COMMENT 'spark 日志拉取server ip',

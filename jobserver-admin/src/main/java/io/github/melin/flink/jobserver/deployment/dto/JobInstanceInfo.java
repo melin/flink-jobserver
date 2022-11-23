@@ -2,6 +2,7 @@ package io.github.melin.flink.jobserver.deployment.dto;
 
 import io.github.melin.flink.jobserver.core.enums.InstanceType;
 import io.github.melin.flink.jobserver.core.enums.JobType;
+import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Tolerate;
@@ -23,6 +24,8 @@ public class JobInstanceInfo {
     private JobType jobType;
 
     private InstanceType instanceType;
+
+    private RuntimeMode runtimeMode;
 
     private String instanceCode;
 

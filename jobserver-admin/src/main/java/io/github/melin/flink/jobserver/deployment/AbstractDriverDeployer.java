@@ -4,7 +4,6 @@ import com.gitee.melin.bee.util.NetUtils;
 import com.google.common.collect.Lists;
 import io.github.melin.flink.jobserver.ConfigProperties;
 import io.github.melin.flink.jobserver.core.entity.FlinkDriver;
-import io.github.melin.flink.jobserver.core.enums.ComputeType;
 import io.github.melin.flink.jobserver.core.enums.DriverInstance;
 import io.github.melin.flink.jobserver.core.enums.DriverStatus;
 import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
@@ -217,7 +216,7 @@ abstract public class AbstractDriverDeployer {
         }
     }
 
-    public DriverInfo allocateDriver(JobInstanceInfo job, ComputeType computeType, boolean shareDriver) {
+    public DriverInfo allocateDriver(JobInstanceInfo job, boolean shareDriver) {
         String clusterCode = job.getClusterCode();
         int maxInstanceCount = clusterConfig.getInt(clusterCode, JOBSERVER_DRIVER_RUN_MAX_INSTANCE_COUNT);
         long minDriverId = clusterConfig.getLong(clusterCode, JOBSERVER_DRIVER_MIN_PRIMARY_ID);
