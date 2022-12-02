@@ -8,4 +8,9 @@ public class KerberosApplicationDriverDeployer extends AbstractDriverDeployer {
     protected String startApplication(JobInstanceInfo jobInstanceInfo, Long driverId, RuntimeMode runtimeMode) throws Exception {
         return null;
     }
+
+    @Override
+    protected void waitDriverStartup(String clusterCode, String applicationId) throws Exception {
+
+    }
 }

@@ -10,6 +10,7 @@ import io.github.melin.flink.jobserver.core.service.FlinkDriverService;
 import io.github.melin.flink.jobserver.deployment.dto.JobInstanceInfo;
 import io.github.melin.flink.jobserver.support.ClusterConfig;
 import io.github.melin.flink.jobserver.support.ClusterManager;
+import io.github.melin.flink.jobserver.support.YarnClientService;
 import io.github.melin.flink.jobserver.support.leader.RedisLeaderElection;
 import io.github.melin.flink.jobserver.core.entity.Cluster;
 import io.github.melin.flink.jobserver.web.controller.DriverController;
@@ -21,6 +22,8 @@ import org.apache.flink.client.deployment.application.ApplicationConfiguration;
 import org.apache.flink.client.deployment.application.cli.ApplicationClusterDeployer;
 import org.apache.flink.configuration.*;
 import org.apache.flink.yarn.configuration.YarnDeploymentTarget;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 
 import static io.github.melin.flink.jobserver.FlinkJobServerConf.*;
 import static org.apache.flink.yarn.configuration.YarnConfigOptions.*;
+import static org.apache.hadoop.yarn.api.records.YarnApplicationState.*;
 
 /**
  * 参考 Flink CliFrontend 启动提交FLink Driver
@@ -54,6 +58,9 @@ public class YarnApplicationDriverDeployer extends AbstractDriverDeployer {
 
     @Autowired
     private RedisLeaderElection redisLeaderElection;
+
+    @Autowired
+    private YarnClientService yarnClientService;
 
     public YarnApplicationDriverDeployer() {
         this.clusterClientServiceLoader = new DefaultClusterClientServiceLoader();
@@ -88,6 +95,8 @@ public class YarnApplicationDriverDeployer extends AbstractDriverDeployer {
                     driver.setApplicationId(applicationId);
                     driverService.updateEntity(driver);
                 }
+
+                waitDriverStartup(clusterCode, applicationId);
             }
 
             DriverController.flinkLauncherFailedMsg = "";
@@ -162,5 +171,38 @@ public class YarnApplicationDriverDeployer extends AbstractDriverDeployer {
             throw new RuntimeException("Init Flink Driver Error");
         }
         return driverId;
+    }
+
+    @Override
+    protected void waitDriverStartup(String clusterCode, String applicationId) throws Exception {
+        if (StringUtils.isBlank(applicationId)) {
+            throw new IllegalStateException("applicationId can not blank");
+        }
+
+        // 等待 yarn application 提交中
+        ApplicationReport report = yarnClientService.getYarnApplicationReport(clusterCode, applicationId);
+        YarnApplicationState state = report.getYarnApplicationState();
+        while (state == ACCEPTED || state == NEW || state == NEW_SAVING || state == SUBMITTED) {
+            TimeUnit.SECONDS.sleep(1);
+            report = yarnClientService.getYarnApplicationReport(clusterCode, applicationId);
+            state = report.getYarnApplicationState();
+        }
+
+        // 等待 flink driver 启动中
+        report = yarnClientService.getYarnApplicationReport(clusterCode, applicationId);
+        state = report.getYarnApplicationState();
+        FlinkDriver driver = driverService.queryDriverByAppId(applicationId);
+        while (state == RUNNING && driver.getStatus() == DriverStatus.INIT) {
+            TimeUnit.SECONDS.sleep(1);
+            report = yarnClientService.getYarnApplicationReport(clusterCode, applicationId);
+            state = report.getYarnApplicationState();
+            driver = driverService.queryDriverByAppId(applicationId);
+        }
+
+        if (state != RUNNING) {
+            LOG.error("startup driver failed, {} state: {}", applicationId, state.name());
+            String msg = "startup driver failed, " + applicationId + " state: " + state.name();
+            throw new FlinkJobException(msg);
+        }
     }
 }

@@ -301,12 +301,12 @@ abstract public class AbstractDriverDeployer {
      */
     public SubmitYarnResult submitToYarn(JobInstanceInfo job, Long driverId) throws Exception {
         String jobInstanceCode = job.getInstanceCode();
-        String clusterCode = job.getClusterCode();
         String yarnQueue = job.getYarnQueue();
         LOG.info("jobserver yarn queue: {}", yarnQueue);
 
         long getServerTime = System.currentTimeMillis();
         String applicationId = startApplication(job, driverId, RuntimeMode.BATCH);
+        waitDriverStartup(job.getClusterCode(), applicationId);
 
         FlinkDriver driver = driverService.queryDriverByAppId(applicationId);
         if (driver == null || driver.getServerPort() == -1) { // 默认值: -1
@@ -333,4 +333,6 @@ abstract public class AbstractDriverDeployer {
         LOG.info("InstanceCode {} Application {} stared at {}", jobInstanceCode, applicationId, sparkDriverUrl);
         return new SubmitYarnResult(applicationId, sparkDriverUrl, yarnQueue);
     }
+
+    abstract protected void waitDriverStartup(String clusterCode, String applicationId) throws Exception;
 }
