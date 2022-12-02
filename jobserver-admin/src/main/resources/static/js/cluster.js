@@ -226,7 +226,7 @@ var Cluster = function () {
 
                     data.id = clusterId
                     data.jobserverConfig = jobserverConfig
-                    data.flinkConfig = flinkAppConfig
+                    data.flinkConfig = flinkConfig
                     data.coreConfig = coreConfig
                     data.hdfsConfig = hdfsConfig
                     data.yarnConfig = yarnConfig

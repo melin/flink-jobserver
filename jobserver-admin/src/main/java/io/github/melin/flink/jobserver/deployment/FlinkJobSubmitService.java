@@ -131,7 +131,7 @@ public class FlinkJobSubmitService implements InitializingBean {
         LOG.error("task {} get server error: {}", instanceCode, errMsg);
         JobInstance instance = instanceService.updateJobStatusByCode(instanceCode, InstanceStatus.FAILED);
 
-        final String scheduleDate = DateUtils.formateDate(instance.getScheduleTime());
+        final String scheduleDate = DateUtils.formatDate(instance.getScheduleTime());
         String path = instanceLogPath + "/" + scheduleDate + "/" + instanceCode + ".log";
         MDC.put("logFileName", path);
         INST_LOG.error("Unable to Submit Job {}, error: {}", instanceCode, errMsg);
@@ -201,7 +201,7 @@ public class FlinkJobSubmitService implements InitializingBean {
                         } catch (Exception e) {
                             flinkLogService.removeLogThread(instanceCode);
 
-                            final String scheduleDate = DateUtils.formateDate(instanceInfo.getScheduleTime());
+                            final String scheduleDate = DateUtils.formatDate(instanceInfo.getScheduleTime());
                             String path = configProperties.getInstanceLogPath() + "/" + scheduleDate + "/" + instanceCode + ".log";
                             MDC.put("logFileName", path);
                             LOG.error("hostName:{}, job: {}, type:{} submit to yarn error:{}",

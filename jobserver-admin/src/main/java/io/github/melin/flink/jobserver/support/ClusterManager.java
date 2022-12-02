@@ -8,6 +8,7 @@ import io.github.melin.flink.jobserver.core.entity.Cluster;
 import io.github.melin.flink.jobserver.core.exception.ResouceLimitException;
 import io.github.melin.flink.jobserver.core.service.ClusterService;
 import io.github.melin.flink.jobserver.deployment.dto.YarnResource;
+import io.github.melin.flink.jobserver.util.DateUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -18,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -69,7 +71,9 @@ public class ClusterManager implements InitializingBean {
 
     private final Map<String, String> kerberosConfMap = Maps.newHashMap();
 
-    private final ConcurrentMap<String, String> yarnClientAddrMap = Maps.newConcurrentMap();
+    private final ConcurrentMap<String, String> yarnRMAddrMap = Maps.newConcurrentMap();
+
+    private final ConcurrentMap<String, String> yarnRMWebAppAddrMap = Maps.newConcurrentMap();
 
     private final ConcurrentMap<String, YarnResource> yarnResourceMap = Maps.newConcurrentMap();
 
@@ -87,7 +91,7 @@ public class ClusterManager implements InitializingBean {
         executorService = new ScheduledThreadPoolExecutor(5);
         executorService.scheduleWithFixedDelay(() -> {
             try {
-                for (String clusterCode : yarnClientAddrMap.keySet()) {
+                for (String clusterCode : yarnRMAddrMap.keySet()) {
                     YarnResource yarnResource = getResourceByCluster(clusterCode);
                     if (yarnResource != null) {
                         yarnResourceMap.put(clusterCode, yarnResource);
@@ -178,7 +182,7 @@ public class ClusterManager implements InitializingBean {
                     int port = Integer.parseInt(items[1]);
                     try {
                         new Socket(addr, port);
-                        yarnClientAddrMap.put(clusterCode, value);
+                        yarnRMAddrMap.put(clusterCode, value);
                         breakFind = true;
                     } catch (Exception e){
                         LOGGER.error("unactive resourcemanager webapp address:" + value + "  try next...");
@@ -196,28 +200,40 @@ public class ClusterManager implements InitializingBean {
         conf.addResource(new Path(confDir + "/hdfs-site.xml"));
         conf.addResource(new Path(confDir + "/yarn-site.xml"));
 
-        String rmAddr = null;
-        boolean breakFind = false;
         Iterator<Map.Entry<String, String>> iter = conf.iterator();
-        while (iter.hasNext() && !breakFind) {
+        String rmWebappAddress = null;
+        while (iter.hasNext()) {
+            Map.Entry<String, String> map = iter.next();
+            String name = map.getKey();
+            if (StringUtils.startsWith(name, "yarn.resourcemanager.webapp.address")) {
+                String value = map.getValue();
+                if (checkYarnResourceManagerAddress(value)) {
+                    yarnRMWebAppAddrMap.put(clusterCode, value);
+                    rmWebappAddress = value;
+                    break;
+                }
+            }
+        }
+
+        String rmAddr = null;
+        iter = conf.iterator();
+        while (iter.hasNext()) {
             Map.Entry<String, String> map = iter.next();
             String name = map.getKey();
             if (name.startsWith("yarn.resourcemanager.address")) {
                 String value = map.getValue();
                 if (value.split(":").length > 1) {
-                    String addr = value.split(":")[0];
-                    int port = Integer.parseInt(value.split(":")[1]);
-                    try {
-                        LOGGER.info("检测地址：{}:{}", addr, port);
-                        new Socket(addr, port);
+                    String hostName = value.split(":")[0];
+                    if (StringUtils.startsWith(rmWebappAddress, hostName)) {
                         rmAddr = value;
-                        breakFind = true;
-                    } catch (Exception e) {
-                        LOGGER.warn("unactive resourcemanager address: {} 失败原因: {}", value, e.getMessage());
+                        LOGGER.info("rm webapp adddress: {}, rm address: {}", rmWebappAddress, value);
+                    } else {
+                        LOGGER.warn("rm webapp adddress: {}, rm address: {}", rmWebappAddress, value);
                     }
                 }
             }
         }
+
         initYarnRMAddr(clusterCode, conf);
 
         if (StringUtils.isEmpty(rmAddr)) {
@@ -232,6 +248,35 @@ public class ClusterManager implements InitializingBean {
 
         LOGGER.info("init hadoop config finished: {}", clusterCode);
         return conf;
+    }
+
+    private boolean checkYarnResourceManagerAddress(String rmAddress) {
+        try {
+            String url = "http://" + rmAddress + "/ws/v1/cluster/info";
+            ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+            if (HttpStatus.OK == response.getStatusCode()) {
+                HashMap<String, Object> root = (HashMap<String, Object>) MapperUtils.toJavaMap(response.getBody());
+                HashMap<String, Object> clusterinfo = (LinkedHashMap<String, Object>) root.get("clusterInfo");
+
+                long startedOn = (long) clusterinfo.get("startedOn");
+                String time = DateUtils.formatTimestamp(startedOn);
+                String state = (String) clusterinfo.get("state");
+                String haState = (String) clusterinfo.get("haState");
+                String hadoopVersion = (String) clusterinfo.get("hadoopVersion");
+
+                LOGGER.info("check yarn resourcemanager status, hadoopVersion: {}, startedOn: {}, state: {}, haState: {}, rmAddress: {}",
+                        hadoopVersion, time, state, haState, rmAddress);
+
+                return "STARTED".equals(state) && "ACTIVE".equals(haState);
+            } else {
+                LOGGER.warn("check yarn resourcemanager status failed: {}, rmAddress: {}, msg: {}",
+                        response.getStatusCodeValue(), rmAddress, response.getBody());
+            }
+        } catch (Exception e) {
+            LOGGER.warn("check yarn resourcemanager failed: {}, rmAddress: {}", e.getMessage(), rmAddress);
+        }
+
+        return false;
     }
 
     private void downloadClusterConfig(Cluster cluster) throws IOException {
@@ -346,12 +391,12 @@ public class ClusterManager implements InitializingBean {
     }
 
     private YarnResource getResourceByCluster(String clusterCode) {
-        String addr = yarnClientAddrMap.get(clusterCode);
+        String addr = yarnRMAddrMap.get(clusterCode);
         YarnResource yarnResource = getResource(addr);
         if (yarnResource == null) {
             Configuration conf = hadoopConfList.get(clusterCode);
             initYarnRMAddr(clusterCode, conf);
-            addr = yarnClientAddrMap.get(clusterCode);
+            addr = yarnRMAddrMap.get(clusterCode);
             return getResource(addr);
         }
         return yarnResource;

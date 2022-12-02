@@ -66,7 +66,7 @@ public class FlinkTaskLogThread extends Thread {
         final String flinkDriverUrl = logTaskDto.getFlinkDriverUrl();
         final String clusterCode = logTaskDto.getClusterCode();
         final String applicationId = logTaskDto.getApplicationId();
-        final String scheduleDate = DateUtils.formateDate(logTaskDto.getScheduleTime());
+        final String scheduleDate = DateUtils.formatDate(logTaskDto.getScheduleTime());
 
         try {
             String path = instanceLogPath + "/" + scheduleDate + "/" + instanceCode + ".log";
