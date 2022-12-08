@@ -29,11 +29,11 @@ import java.util.stream.Collectors;
 public class DependencyUtils {
 
     public static void main(String[] args) throws Exception {
-        List<String> list = resolveMavenCoordinates(
+        List<String> list = resolveMavenDependencies(
+                false,
+                "",
                 "org.apache.flink:flink-core:1.16.0",
-                buildIvySettings(""),
-                true,
-                Lists.newArrayList(), false);
+                "http://maven.aliyun.com/nexus/content/groups/public/");
         System.out.print(list.size());
     }
 
@@ -41,7 +41,21 @@ public class DependencyUtils {
 
     private static DefaultModuleDescriptor getModuleDescriptor() {
         return DefaultModuleDescriptor.newDefaultInstance(
-                ModuleRevisionId.newInstance("org.apache.spark", "spark-submit-parent-" + UUID.randomUUID().toString(), "1.0"));
+                ModuleRevisionId.newInstance("com.datacyber.cybermeta", "flink-submit-parent-" + UUID.randomUUID().toString(), "1.0"));
+    }
+
+    public static List<String> resolveMavenDependencies(
+            boolean packagesTransitive,
+            String packagesExclusions,
+            String packages,
+            String repositories) throws Exception {
+        List<String> exclusions = Lists.newArrayList();
+        if (!StringUtils.isBlank(packagesExclusions)) {
+            exclusions = Arrays.asList(packagesExclusions.split(","));
+        }
+
+        IvySettings ivySettings = buildIvySettings(repositories);
+        return resolveMavenCoordinates(packages, ivySettings, packagesTransitive, exclusions, false);
     }
 
     /**
@@ -266,6 +280,19 @@ public class DependencyUtils {
                 throw new IllegalArgumentException("DependencyUtils.extractMavenCoordinates: " +
                         "Provided Maven Coordinates must be in the form 'groupId:artifactId:version'. " +
                         "The coordinate provided is: " + p);
+            }
+
+            if (StringUtils.isBlank(splits[0])) {
+                throw new IllegalArgumentException("The groupId cannot be null or " +
+                        "be whitespace. The groupId provided is: " + splits[0]);
+            }
+            if (StringUtils.isBlank(splits[1])) {
+                throw new IllegalArgumentException("The artifactId cannot be null or " +
+                        "be whitespace. The artifactId provided is: " + splits[1]);
+            }
+            if (StringUtils.isBlank(splits[2])) {
+                throw new IllegalArgumentException("The version cannot be null or " +
+                        "be whitespace. The version provided is: " + splits[2]);
             }
             return new MavenCoordinate(splits[0], splits[1], splits[2]);
         }).collect(Collectors.toList());
