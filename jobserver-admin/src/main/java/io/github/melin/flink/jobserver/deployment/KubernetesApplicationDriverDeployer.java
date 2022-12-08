@@ -2,17 +2,17 @@ package io.github.melin.flink.jobserver.deployment;
 
 import com.google.common.collect.Lists;
 import io.github.melin.flink.jobserver.core.entity.ApplicationDriver;
+import io.github.melin.flink.jobserver.core.entity.Cluster;
 import io.github.melin.flink.jobserver.core.enums.DriverStatus;
 import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
-import io.github.melin.flink.jobserver.core.exception.ResouceLimitException;
 import io.github.melin.flink.jobserver.core.exception.FlinkJobException;
+import io.github.melin.flink.jobserver.core.exception.ResouceLimitException;
 import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
 import io.github.melin.flink.jobserver.deployment.dto.DriverDeploymentInfo;
 import io.github.melin.flink.jobserver.support.ClusterConfig;
 import io.github.melin.flink.jobserver.support.ClusterManager;
 import io.github.melin.flink.jobserver.support.YarnClientService;
 import io.github.melin.flink.jobserver.support.leader.RedisLeaderElection;
-import io.github.melin.flink.jobserver.core.entity.Cluster;
 import io.github.melin.flink.jobserver.web.controller.ApplicationDriverController;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.client.cli.ApplicationDeployer;
@@ -20,7 +20,8 @@ import org.apache.flink.client.deployment.ClusterClientServiceLoader;
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader;
 import org.apache.flink.client.deployment.application.ApplicationConfiguration;
 import org.apache.flink.client.deployment.application.cli.ApplicationClusterDeployer;
-import org.apache.flink.configuration.*;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.DeploymentOptions;
 import org.apache.flink.yarn.configuration.YarnDeploymentTarget;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
@@ -30,20 +31,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Base64;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static io.github.melin.flink.jobserver.FlinkJobServerConf.*;
-import static org.apache.flink.yarn.configuration.YarnConfigOptions.*;
+import static org.apache.flink.yarn.configuration.YarnConfigOptions.APPLICATION_ID;
 import static org.apache.hadoop.yarn.api.records.YarnApplicationState.*;
 
 /**
  * 参考 Flink CliFrontend 启动提交FLink Driver
  */
 @Service
-public class YarnApplicationDriverDeployer extends AbstractDriverDeployer {
+public class KubernetesApplicationDriverDeployer extends AbstractDriverDeployer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(YarnApplicationDriverDeployer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(KubernetesApplicationDriverDeployer.class);
 
     private final ClusterClientServiceLoader clusterClientServiceLoader;
 
@@ -62,7 +64,7 @@ public class YarnApplicationDriverDeployer extends AbstractDriverDeployer {
     @Autowired
     private YarnClientService yarnClientService;
 
-    public YarnApplicationDriverDeployer() {
+    public KubernetesApplicationDriverDeployer() {
         this.clusterClientServiceLoader = new DefaultClusterClientServiceLoader();
     }
 

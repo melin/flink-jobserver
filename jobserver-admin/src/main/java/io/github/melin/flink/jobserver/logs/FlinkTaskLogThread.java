@@ -24,9 +24,6 @@ import java.util.concurrent.TimeUnit;
 import static io.github.melin.flink.jobserver.core.util.TaskStatusFlag.*;
 import static io.github.melin.flink.jobserver.core.enums.InstanceStatus.*;
 
-/**
- * Created by admin on 2017/7/1.
- */
 public class FlinkTaskLogThread extends Thread {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("jobinstancelogs");

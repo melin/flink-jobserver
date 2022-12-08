@@ -5,10 +5,13 @@ import com.gitee.melin.bee.util.MapperUtils;
 import com.gitee.melin.bee.util.RestTemplateUtils;
 import io.github.melin.flink.jobserver.ConfigProperties;
 import io.github.melin.flink.jobserver.api.FlinkJobServerException;
+import io.github.melin.flink.jobserver.core.entity.Cluster;
 import io.github.melin.flink.jobserver.core.entity.JobInstance;
 import io.github.melin.flink.jobserver.core.entity.JobInstanceContent;
+import io.github.melin.flink.jobserver.core.enums.DeployMode;
 import io.github.melin.flink.jobserver.core.enums.InstanceStatus;
-import io.github.melin.flink.jobserver.core.service.FlinkDriverService;
+import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
+import io.github.melin.flink.jobserver.core.service.ClusterService;
 import io.github.melin.flink.jobserver.core.service.JobInstanceContentService;
 import io.github.melin.flink.jobserver.core.service.JobInstanceService;
 import io.github.melin.flink.jobserver.util.DateUtils;
@@ -50,10 +53,13 @@ public class JobServerServiceImpl implements InitializingBean {
     private JobInstanceContentService instanceContentService;
 
     @Autowired
-    private FlinkDriverService driverService;
+    private ApplicationDriverService driverService;
 
     @Autowired
     private ConfigProperties configProperties;
+
+    @Autowired
+    private ClusterService clusterService;
 
     private RestTemplate restTemplate;
 
@@ -70,6 +76,17 @@ public class JobServerServiceImpl implements InitializingBean {
             throw new FlinkJobServerException("jobText can not blank");
         }
 
+        if (request.getDeployMode() == DeployMode.SESSION
+                && StringUtils.isBlank(request.getSessionName())) {
+            throw new IllegalArgumentException("session mode, session name can not blank");
+        }
+
+        String clusterCode = request.getClusterCode();
+        Cluster cluster = clusterService.getClusterByCode(clusterCode);
+        if (cluster != null) {
+            throw new IllegalArgumentException("cluster " + clusterCode + " not exists");
+        }
+
         String jobConfig = request.getJobConfig();
         JobServerUtils.validateJobConfig(jobConfig);
 
@@ -83,6 +100,9 @@ public class JobServerServiceImpl implements InitializingBean {
                 .setInstanceType(request.getInstanceType())
                 .setOwner(request.getOwner())
                 .setClusterCode(request.getClusterCode())
+                .setSchedulerType(cluster.getSchedulerType())
+                .setDeployMode(request.getDeployMode())
+                .setSessionName(request.getSessionName())
                 .setMaxRetryCount(request.getMaxRetryCount())
                 .setStatus(InstanceStatus.WAITING)
                 .setScheduleTime(Instant.ofEpochSecond(request.getScheduleTime()))

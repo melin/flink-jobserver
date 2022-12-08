@@ -6,28 +6,13 @@ import com.gitee.melin.bee.core.enums.BaseStringEnum;
 import com.gitee.melin.bee.core.enums.jackson.JacksonEnumStringSerializer;
 
 @JsonSerialize(using = JacksonEnumStringSerializer.class)
-public enum StorageType implements BaseStringEnum {
-    HDFS("hdfs"),
-    S3("S3");
-
-    private String name;
-
-    private StorageType(String name){
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
+public enum DeployMode implements BaseStringEnum {
+    SESSION,
+    APPLICATION;
 
     @JsonValue
     @Override
     public String getValue() {
-        return name;
-    }
-
-    @Override
-    public String toString() {
-        return name;
+        return this.name();
     }
 }

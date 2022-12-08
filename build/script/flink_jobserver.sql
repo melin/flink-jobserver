@@ -37,6 +37,8 @@ CREATE TABLE `fjs_cluster` (
   `hdfs_config` longtext COMMENT 'hdfs-site配置',
   `yarn_config` longtext COMMENT 'yarn-site配置',
   `hive_config` longtext COMMENT 'hive-site配置',
+  `kubernetes_config` longtext COMMENT 'kube 配置',
+  `kubernetes_namespace` varchar(128) DEFAULT NULL COMMENT 'kubernetes namespace',
   `storage_type` varchar(45) DEFAULT 'HDFS' COMMENT '存储类型:HDFS、OBS、OSS、S3等文件系统',
   `storage_config` longtext COMMENT '对象存储配置',
   `yarn_queue_name` varchar(255) DEFAULT NULL COMMENT '集群Yarn 默认队列',
@@ -50,10 +52,10 @@ CREATE TABLE `fjs_cluster` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='计算集群';
 
 -- ----------------------------
--- Table structure for fjs_flink_driver
+-- Table structure for fjs_application_driver
 -- ----------------------------
-DROP TABLE IF EXISTS `fjs_flink_driver`;
-CREATE TABLE `fjs_flink_driver` (
+DROP TABLE IF EXISTS `fjs_application_driver`;
+CREATE TABLE `fjs_application_driver` (
   `id` int NOT NULL AUTO_INCREMENT,
   `cluster_code` varchar(45) DEFAULT NULL COMMENT '集群Code',
   `version` int DEFAULT '0' COMMENT '乐观锁，避免重复提交',
@@ -75,8 +77,36 @@ CREATE TABLE `fjs_flink_driver` (
   `gmt_modified` datetime DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   KEY `idx_application_id` (`application_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Job driver注册信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='application driver注册信息';
 
+-- ----------------------------
+-- Table structure for fjs_application_driver
+-- ----------------------------
+DROP TABLE IF EXISTS `fjs_session_driver`;
+CREATE TABLE `fjs_session_driver` (
+    `id` int NOT NULL AUTO_INCREMENT,
+    `session_name` varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'session name',
+    `cluster_code` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '集群Code',
+    `version` int DEFAULT '0' COMMENT '乐观锁，避免重复提交',
+    `server_ip` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+    `server_port` int NOT NULL,
+    `scheduler_type` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '调度框架:YARN、K8S',
+    `status` varchar(45) COLLATE utf8mb4_general_ci NOT NULL COMMENT '状态',
+    `application_id` varchar(64) COLLATE utf8mb4_general_ci NOT NULL,
+    `log_server` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'spark 日志拉取server ip',
+    `instance_count` int DEFAULT '0' COMMENT '运行实例数量',
+    `server_cores` int NOT NULL COMMENT 'application占用core数',
+    `server_memory` int NOT NULL COMMENT 'Application占用内存大小',
+    `runtime_mode` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '运行模式: batch & stream',
+    `yarn_queue` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+    `creater` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
+    `modifier` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
+    `gmt_created` datetime NOT NULL,
+    `gmt_modified` datetime DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `index_session_name` (`session_name`),
+    KEY `idx_application_id` (`application_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='session driver注册信息';
 -- ----------------------------
 -- Table structure for fjs_job_instance
 -- ----------------------------
@@ -87,6 +117,8 @@ CREATE TABLE `fjs_job_instance` (
   `code` varchar(45) NOT NULL,
   `name` varchar(512) DEFAULT NULL,
   `cluster_code` varchar(64) DEFAULT 'default',
+  `deploy_mode` varchar(32) null comment '调度模式:session、application',
+  `scheduler_type` varchar(32) null comment '调度类型：Yarn、Kubernetes',
   `yarn_queue` varchar(128) DEFAULT NULL,
   `dependent_code` varchar(1024) DEFAULT 'START' COMMENT '依赖上一个实例code',
   `job_type` varchar(32) NOT NULL,
@@ -143,5 +175,26 @@ CREATE TABLE `fjs_job_instance_dependent` (
   KEY `idx_code` (`code`) USING BTREE,
   KEY `idx_dependent_code` (`parent_code`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='实例依赖表';
+
+-- ----------------------------
+-- Table structure for sjs_data_connector
+-- ----------------------------
+DROP TABLE IF EXISTS `sjs_data_connector`;
+CREATE TABLE `sjs_data_connector` (
+    `id` int NOT NULL AUTO_INCREMENT COMMENT 'id',
+    `code` varchar(64) DEFAULT NULL COMMENT 'Code，随机字符8位长',
+    `name` varchar(128) DEFAULT NULL COMMENT '数据源名称',
+    `db_type` varchar(45) DEFAULT NULL COMMENT 'mysql, db2, pg等',
+    `username` varchar(45) DEFAULT NULL COMMENT '数据库账号',
+    `password` varchar(45) DEFAULT NULL COMMENT '密码',
+    `db_url` varchar(256) DEFAULT NULL COMMENT '数据库连接地址',
+    `description` varchar(512) DEFAULT NULL COMMENT '数据源描述',
+    `creater` varchar(45) DEFAULT NULL COMMENT '创建人',
+    `modifier` varchar(45) DEFAULT NULL COMMENT '修改人',
+    `gmt_created` datetime DEFAULT NULL COMMENT '创建者',
+    `gmt_modified` datetime DEFAULT NULL COMMENT '修改时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE KEY `index_code` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='数据连接管理';
 
 SET FOREIGN_KEY_CHECKS = 1;

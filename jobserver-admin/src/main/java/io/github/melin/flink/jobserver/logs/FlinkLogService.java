@@ -3,10 +3,10 @@ package io.github.melin.flink.jobserver.logs;
 import com.gitee.melin.bee.util.ThreadUtils;
 import com.google.common.collect.Maps;
 import io.github.melin.flink.jobserver.ConfigProperties;
-import io.github.melin.flink.jobserver.core.entity.FlinkDriver;
+import io.github.melin.flink.jobserver.core.entity.ApplicationDriver;
 import io.github.melin.flink.jobserver.core.entity.JobInstance;
 import io.github.melin.flink.jobserver.core.enums.SchedulerType;
-import io.github.melin.flink.jobserver.core.service.FlinkDriverService;
+import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
 import io.github.melin.flink.jobserver.core.service.JobInstanceService;
 import io.github.melin.flink.jobserver.deployment.dto.JobInstanceInfo;
 import org.apache.hadoop.util.ShutdownHookManager;
@@ -25,16 +25,13 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Created by admin on 2019/10/29 11:43 上午
- */
 @Service
 public class FlinkLogService implements ApplicationContextAware, InitializingBean, DisposableBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FlinkLogService.class);
 
     @Autowired
-    private FlinkDriverService driverService;
+    private ApplicationDriverService driverService;
 
     @Autowired
     private JobInstanceService instanceService;
@@ -63,7 +60,7 @@ public class FlinkLogService implements ApplicationContextAware, InitializingBea
 
         scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
-                List<FlinkDriver> list = driverService.queryEmptyLogServers();
+                List<ApplicationDriver> list = driverService.queryEmptyLogServers();
                 if (list.size() > 0) {
                     LOGGER.info("query log server count: {}", list.size());
                 }

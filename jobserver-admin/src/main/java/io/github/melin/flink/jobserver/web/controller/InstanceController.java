@@ -4,14 +4,11 @@ import io.github.melin.flink.jobserver.ConfigProperties;
 import io.github.melin.flink.jobserver.core.entity.Cluster;
 import io.github.melin.flink.jobserver.core.entity.JobInstance;
 import io.github.melin.flink.jobserver.core.entity.JobInstanceContent;
-import io.github.melin.flink.jobserver.core.enums.InstanceStatus;
-import io.github.melin.flink.jobserver.core.enums.InstanceType;
-import io.github.melin.flink.jobserver.core.enums.JobType;
-import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
+import io.github.melin.flink.jobserver.core.enums.*;
 import io.github.melin.flink.jobserver.core.service.ClusterService;
 import io.github.melin.flink.jobserver.core.service.JobInstanceContentService;
 import io.github.melin.flink.jobserver.core.service.JobInstanceService;
-import io.github.melin.flink.jobserver.core.service.FlinkDriverService;
+import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
 import com.gitee.melin.bee.core.support.Pagination;
 import com.gitee.melin.bee.core.support.Result;
 import com.google.common.collect.Lists;
@@ -60,7 +57,7 @@ public class InstanceController {
     private ClusterService clusterService;
 
     @Autowired
-    private FlinkDriverService driverService;
+    private ApplicationDriverService driverService;
 
     @Autowired
     protected RestTemplate restTemplate;
@@ -83,12 +80,20 @@ public class InstanceController {
     @PostMapping("/instance/saveJobInstance")
     @ResponseBody
     @Transactional
-    public Result<Void> saveJobInstance(Long id, JobType jobType, RuntimeMode runtimeMode, String name, String jobText,
-                                        String clusterCode, String jobConfig, boolean isRun) {
+    public Result<Void> saveJobInstance(Long id, JobType jobType, RuntimeMode runtimeMode,
+                                        DeployMode deployMode, String sessionName, String name,
+                                        String jobText, String clusterCode, String jobConfig, boolean isRun) {
         if (id == null) {
             String instanceCode = RandomUniqueIdGenerator.getNewString(32);
+            Cluster cluster = clusterService.getClusterByCode(clusterCode);
+            if (cluster != null) {
+                throw new IllegalArgumentException("cluster " + clusterCode + " not exists");
+            }
             JobInstance.Builder builder = JobInstance.builder()
                     .setClusterCode(clusterCode)
+                    .setSchedulerType(cluster.getSchedulerType())
+                    .setDeployMode(deployMode)
+                    .setSessionName(sessionName)
                     .setCode(instanceCode)
                     .setName(name)
                     .setJobType(jobType)

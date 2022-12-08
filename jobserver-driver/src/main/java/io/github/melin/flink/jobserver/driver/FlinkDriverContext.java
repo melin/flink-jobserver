@@ -2,10 +2,10 @@ package io.github.melin.flink.jobserver.driver;
 
 import com.gitee.melin.bee.util.NetUtils;
 import io.github.melin.flink.jobserver.core.dto.InstanceDto;
-import io.github.melin.flink.jobserver.core.entity.FlinkDriver;
+import io.github.melin.flink.jobserver.core.entity.ApplicationDriver;
 import io.github.melin.flink.jobserver.core.enums.DriverStatus;
 import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
-import io.github.melin.flink.jobserver.core.service.FlinkDriverService;
+import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
 import io.github.melin.flink.jobserver.driver.model.DriverParam;
 import org.apache.flink.api.common.RuntimeExecutionMode;
 import org.slf4j.Logger;
@@ -31,11 +31,11 @@ public class FlinkDriverContext {
     private ServerPortService serverPortService;
 
     @Autowired
-    private FlinkDriverService driverService;
+    private ApplicationDriverService driverService;
 
     public void initFlinkDriver(DriverParam driverParam) {
         Long driverId = driverParam.getDriverId();
-        FlinkDriver driver = driverService.getEntity(driverId);
+        ApplicationDriver driver = driverService.getEntity(driverId);
         if (driver == null) {
             throw new RuntimeException("No driver Id: " + driverId);
         }
@@ -67,7 +67,7 @@ public class FlinkDriverContext {
         LOGGER.info("stopQueySparkStageLog");
         //logThread.stopQueySparkStageLog();
 
-        FlinkDriver driver = driverService.getEntity(instanceDto.getDriverId());
+        ApplicationDriver driver = driverService.getEntity(instanceDto.getDriverId());
         LOGGER.info("driver {} run task finished，update status idle", driver.getApplicationId());
 
         Instant nowDate = Instant.now();

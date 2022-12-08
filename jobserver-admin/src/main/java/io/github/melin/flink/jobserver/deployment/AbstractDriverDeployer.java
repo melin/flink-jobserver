@@ -3,14 +3,14 @@ package io.github.melin.flink.jobserver.deployment;
 import com.gitee.melin.bee.util.NetUtils;
 import com.google.common.collect.Lists;
 import io.github.melin.flink.jobserver.ConfigProperties;
-import io.github.melin.flink.jobserver.core.entity.FlinkDriver;
+import io.github.melin.flink.jobserver.core.entity.ApplicationDriver;
 import io.github.melin.flink.jobserver.core.enums.DriverInstance;
 import io.github.melin.flink.jobserver.core.enums.DriverStatus;
-import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
 import io.github.melin.flink.jobserver.core.exception.FlinkJobException;
 import io.github.melin.flink.jobserver.core.exception.ResouceLimitException;
-import io.github.melin.flink.jobserver.core.service.FlinkDriverService;
+import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
 import io.github.melin.flink.jobserver.core.util.CommonUtils;
+import io.github.melin.flink.jobserver.deployment.dto.DriverDeploymentInfo;
 import io.github.melin.flink.jobserver.deployment.dto.DriverInfo;
 import io.github.melin.flink.jobserver.deployment.dto.JobInstanceInfo;
 import io.github.melin.flink.jobserver.deployment.dto.SubmitYarnResult;
@@ -56,7 +56,7 @@ abstract public class AbstractDriverDeployer {
     private ClusterConfig clusterConfig;
 
     @Autowired
-    protected FlinkDriverService driverService;
+    protected ApplicationDriverService driverService;
 
     @Autowired
     private RedisLeaderElection redisLeaderElection;
@@ -73,10 +73,10 @@ abstract public class AbstractDriverDeployer {
     @Value("${spring.datasource.password}")
     private String datasourcePassword;
 
-    abstract protected String startApplication(JobInstanceInfo jobInstanceInfo, Long driverId, RuntimeMode runtimeMode) throws Exception;
+    abstract protected String startDriver(DriverDeploymentInfo deploymentInfo, Long driverId) throws Exception;
 
-    protected Configuration buildFlinkConfig(JobInstanceInfo jobInstanceInfo) throws Exception {
-        String clusterCode = jobInstanceInfo.getClusterCode();
+    protected Configuration buildFlinkConfig(DriverDeploymentInfo deploymentInfo, Long driverId) throws Exception {
+        final String clusterCode = deploymentInfo.getClusterCode();
         final String confDir = clusterManager.loadYarnConfig(clusterCode);
         org.apache.hadoop.conf.Configuration hadoopConf = clusterManager.getHadoopConf(clusterCode);
         String defaultFS = hadoopConf.get("fs.defaultFS", "hdfs://dzcluster");
@@ -93,12 +93,12 @@ abstract public class AbstractDriverDeployer {
             flinkConfig.setString("flink." + entry.getKey(), entry.getValue());
         }
 
-        Properties params = addJobConfig(flinkConfig, jobInstanceInfo);
+        Properties params = addJobConfig(flinkConfig, deploymentInfo.getJobConfig());
         // jm 和 tm jvm 参数
         jvmConfig(clusterCode, flinkConfig, params, driverHome);
 
         //设置队列
-        String yarnQueue = jobInstanceInfo.getYarnQueue();
+        String yarnQueue = deploymentInfo.getYarnQueue();
         if (StringUtils.isNotBlank(yarnQueue)) {
             flinkConfig.setString(APPLICATION_QUEUE, yarnQueue);
         } else {
@@ -126,9 +126,8 @@ abstract public class AbstractDriverDeployer {
         return flinkConfig;
     }
 
-    private Properties addJobConfig(Configuration flinkConfig, JobInstanceInfo jobInstanceInfo) throws IOException {
+    private Properties addJobConfig(Configuration flinkConfig, String jobConfig) throws IOException {
         Properties properties = new Properties();
-        String jobConfig = jobInstanceInfo.getJobConfig();
         if (StringUtils.isNotBlank(jobConfig)) {
             properties.load(new StringReader(jobConfig));
 
@@ -216,13 +215,12 @@ abstract public class AbstractDriverDeployer {
         }
     }
 
-    public DriverInfo allocateDriver(JobInstanceInfo job, boolean shareDriver) {
-        String clusterCode = job.getClusterCode();
+    public DriverInfo allocateDriver(String clusterCode, boolean shareDriver) {
         int maxInstanceCount = clusterConfig.getInt(clusterCode, JOBSERVER_DRIVER_RUN_MAX_INSTANCE_COUNT);
         long minDriverId = clusterConfig.getLong(clusterCode, JOBSERVER_DRIVER_MIN_PRIMARY_ID);
-        List<FlinkDriver> drivers = driverService.queryAvailableApplication(maxInstanceCount, minDriverId);
+        List<ApplicationDriver> drivers = driverService.queryAvailableApplication(maxInstanceCount, minDriverId);
         if (drivers.size() > 0) {
-            for (FlinkDriver driver : drivers) {
+            for (ApplicationDriver driver : drivers) {
                 int version = driver.getVersion();
                 int batch = driverService.updateServerLocked(driver.getApplicationId(), version);
                 if (batch <= 0) {
@@ -246,9 +244,9 @@ abstract public class AbstractDriverDeployer {
             //未分配到server的请求重新申请server
             checkLocalAvailableMemory();
             checkMaxDriverCount(clusterCode);
-            clusterManager.checkYarnResourceLimit(job.getClusterCode());
+            clusterManager.checkYarnResourceLimit(clusterCode);
 
-            Long driverId = initSparkDriver(job.getClusterCode(), shareDriver);
+            Long driverId = initSparkDriver(clusterCode, shareDriver);
             DriverInfo driverInfo = new DriverInfo(NEW_INSTANCE, driverId);
 
             String yarnQueue = clusterConfig.getValue(clusterCode, JOBSERVER_DRIVER_YARN_QUEUE_NAME);
@@ -265,7 +263,7 @@ abstract public class AbstractDriverDeployer {
     protected Long initSparkDriver(String clusterCode, boolean shareDriver) {
         Long driverId;
         try {
-            FlinkDriver driver = FlinkDriver.buildFlinkDriver(clusterCode, shareDriver);
+            ApplicationDriver driver = ApplicationDriver.buildApplicationDriver(clusterCode, shareDriver);
             String yarnQueue = clusterConfig.getValue(clusterCode, JOBSERVER_DRIVER_YARN_QUEUE_NAME);
             driver.setYarnQueue(yarnQueue);
 
@@ -305,10 +303,10 @@ abstract public class AbstractDriverDeployer {
         LOG.info("jobserver yarn queue: {}", yarnQueue);
 
         long getServerTime = System.currentTimeMillis();
-        String applicationId = startApplication(job, driverId, RuntimeMode.BATCH);
+        String applicationId = startDriver(job.buildDriverDeploymentInfo(), driverId);
         waitDriverStartup(job.getClusterCode(), applicationId);
 
-        FlinkDriver driver = driverService.queryDriverByAppId(applicationId);
+        ApplicationDriver driver = driverService.queryDriverByAppId(applicationId);
         if (driver == null || driver.getServerPort() == -1) { // 默认值: -1
             int tryNum = 50;
             while (--tryNum > 0) {

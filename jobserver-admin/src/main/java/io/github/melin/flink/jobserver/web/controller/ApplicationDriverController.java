@@ -2,7 +2,7 @@ package io.github.melin.flink.jobserver.web.controller;
 
 import io.github.melin.flink.jobserver.ConfigProperties;
 import io.github.melin.flink.jobserver.FlinkJobServerConf;
-import io.github.melin.flink.jobserver.core.entity.FlinkDriver;
+import io.github.melin.flink.jobserver.core.entity.ApplicationDriver;
 import io.github.melin.flink.jobserver.logs.FlinkLogService;
 import io.github.melin.flink.jobserver.support.ClusterConfig;
 import io.github.melin.flink.jobserver.support.YarnClientService;
@@ -10,7 +10,7 @@ import io.github.melin.flink.jobserver.core.entity.Cluster;
 import io.github.melin.flink.jobserver.core.enums.DriverStatus;
 import io.github.melin.flink.jobserver.core.service.ClusterService;
 import io.github.melin.flink.jobserver.core.service.JobInstanceService;
-import io.github.melin.flink.jobserver.core.service.FlinkDriverService;
+import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
 import com.gitee.melin.bee.core.support.Pagination;
 import com.gitee.melin.bee.core.support.Result;
 import com.google.common.collect.Lists;
@@ -40,18 +40,15 @@ import java.net.URLConnection;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- * Created by admin on 2017/7/1.
- */
 @Controller
-public class DriverController implements InitializingBean {
+public class ApplicationDriverController implements InitializingBean {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DriverController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ApplicationDriverController.class);
 
     private static final String TMP_DIR = FileUtils.getUserDirectory() + "/tmp/";
 
     @Autowired
-    private FlinkDriverService driverService;
+    private ApplicationDriverService driverService;
 
     @Autowired
     protected JobInstanceService jobInstanceService;
@@ -95,7 +92,7 @@ public class DriverController implements InitializingBean {
 
     @RequestMapping("/driver/queryDrivers")
     @ResponseBody
-    public Pagination<FlinkDriver> queryDrivers(String applicationId, int page, int limit, HttpServletRequest request) {
+    public Pagination<ApplicationDriver> queryDrivers(String applicationId, int page, int limit, HttpServletRequest request) {
         String sort = request.getParameter("sort");
         String order = request.getParameter("order");
 
@@ -114,7 +111,7 @@ public class DriverController implements InitializingBean {
             params.add("applicationId");
             values.add(applicationId);
         }
-        Pagination<FlinkDriver> pagination = driverService.findPageByNamedParamAndOrder(params, values,
+        Pagination<ApplicationDriver> pagination = driverService.findPageByNamedParamAndOrder(params, values,
                 Lists.newArrayList(order1), page, limit);
 
         pagination.getResult().forEach(driver -> {
@@ -143,7 +140,7 @@ public class DriverController implements InitializingBean {
     @PostMapping("/driver/killDriver")
     @ResponseBody
     public Result<String> killDriver(Long driverId) {
-        FlinkDriver driver = driverService.getEntity(driverId);
+        ApplicationDriver driver = driverService.getEntity(driverId);
         if (driver == null) {
             return Result.failureResult("停止失败, Drover 不存在" + driverId);
         }
@@ -169,7 +166,7 @@ public class DriverController implements InitializingBean {
 
     @RequestMapping("/driver/downloadYarnLog")
     public void downloadYarnLog(String applicationId, HttpServletResponse response) throws Exception {
-        FlinkDriver driver = driverService.queryDriverByAppId(applicationId);
+        ApplicationDriver driver = driverService.queryDriverByAppId(applicationId);
         if (driver != null) {
             String urlStr = driver.getFlinkDriverUrl() + "/flinkDriver/downloadYarnLog";
             LOG.info("下载yarn log: {}", urlStr);

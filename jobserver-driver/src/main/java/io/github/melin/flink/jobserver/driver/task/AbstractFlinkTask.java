@@ -5,10 +5,10 @@ import com.gitee.melin.bee.util.NetUtils;
 import com.gitee.melin.bee.util.RestTemplateUtils;
 import io.github.melin.flink.jobserver.api.FlinkJobServerException;
 import io.github.melin.flink.jobserver.core.dto.InstanceDto;
-import io.github.melin.flink.jobserver.core.entity.FlinkDriver;
+import io.github.melin.flink.jobserver.core.entity.ApplicationDriver;
 import io.github.melin.flink.jobserver.core.enums.InstanceStatus;
 import io.github.melin.flink.jobserver.core.exception.FlinkJobException;
-import io.github.melin.flink.jobserver.core.service.FlinkDriverService;
+import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
 import io.github.melin.flink.jobserver.core.service.JobInstanceContentService;
 import io.github.melin.flink.jobserver.core.service.JobInstanceService;
 import io.github.melin.flink.jobserver.core.util.CommonUtils;
@@ -43,7 +43,7 @@ public abstract class AbstractFlinkTask {
     protected FlinkDriverContext sparkDriverContext;
 
     @Autowired
-    private FlinkDriverService driverService;
+    private ApplicationDriverService driverService;
 
     @Autowired
     private ServerPortService serverPortService;
@@ -74,7 +74,7 @@ public abstract class AbstractFlinkTask {
 
         startTime = System.currentTimeMillis();
 
-        FlinkDriver driver = driverService.queryDriverByAppId(applicationId);
+        ApplicationDriver driver = driverService.queryDriverByAppId(applicationId);
         if (driver == null) {
             String msg = "driver 不存在, yarn applicationId: " + applicationId;
             exitFailure(instanceCode, msg);

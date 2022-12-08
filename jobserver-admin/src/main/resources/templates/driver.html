@@ -3,7 +3,7 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="utf-8">
-    <title>Driver管理</title>
+    <title>Driver Admin</title>
     <link rel="stylesheet" href="/component/pear/css/pear.css" />
     <link rel="stylesheet" href="/component/toast/toast.min.css" />
 </head>
@@ -77,7 +77,8 @@
 </div>
 
 <script type="text/html" id="driver-bar">
-    <button class="pear-btn pear-btn-sm" id="opt_{{d.id}}"><i class="layui-icon layui-icon-triangle-d"></i></button>
+    <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="download"><i class="layui-icon layui-icon-download-circle"></i></button>
+    <button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove"><i class="layui-icon layui-icon-delete"></i></button>
 </script>
 
 <script type="text/javascript" src="/component/jquery.min.js"></script>

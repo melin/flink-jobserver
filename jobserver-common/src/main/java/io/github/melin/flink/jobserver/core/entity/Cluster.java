@@ -33,7 +33,7 @@ public class Cluster implements IEntity {
     @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
             parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
                     value = "io.github.melin.flink.jobserver.core.enums.StorageType")})
-    private StorageType storageType = StorageType.HDFS; //存储类型:HDFS、OBS、OSS、S3等文件系统
+    private StorageType storageType = StorageType.HDFS; //存储类型:HDFS、S3等文件系统
 
     @Column(name = "scheduler_type")
     @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
@@ -74,6 +74,12 @@ public class Cluster implements IEntity {
 
     @Column(name = "hive_config")
     private String hiveConfig;
+
+    @Column(name = "Kubernetes_config")
+    private String kubernetesConfig;
+
+    @Column(name = "kubernetes_namespace")
+    private String kubernetesNamespace;
 
     @Column(name = "storage_config")
     private String storageConfig;

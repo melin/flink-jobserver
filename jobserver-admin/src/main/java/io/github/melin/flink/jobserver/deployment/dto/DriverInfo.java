@@ -2,9 +2,6 @@ package io.github.melin.flink.jobserver.deployment.dto;
 
 import io.github.melin.flink.jobserver.core.enums.DriverInstance;
 
-/**
- * Created by admin on 2017/7/1.
- */
 public class DriverInfo {
     private final DriverInstance driverInstance;
 

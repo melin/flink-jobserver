@@ -138,7 +138,7 @@ var Driver = function () {
                         toolbar: '#driver-bar',
                         align: 'right',
                         fixed: 'right',
-                        width: 50
+                        width: 100
                     }
                 ]
             ]
@@ -156,27 +156,15 @@ var Driver = function () {
                         "data": res.rows
                     };
                 },
-                defaultToolbar: [],
-                done: function(res, curr, count) {
-                    for (var i = 0; i < res.data.length; i++) {
-                        const row = res.data[i];
-                        const menus = []
-                        menus.push({title: '下载日志', id: "downloadYarnLog", driverId: row.id, applicationId: row.applicationId});
-                        menus.push({title: '关闭', id: "closeDriver", driverId: row.id, applicationId: row.applicationId});
+                defaultToolbar: []
+            });
 
-                        dropdown.render({
-                            elem: '#opt_' + row.id,
-                            data: menus,
-                            id: "#opt_" + row.id,
-                            click: function(obj) {
-                                if (obj.id === "downloadYarnLog") {
-                                    Driver.downloadYarnLog(obj.driverId, obj.applicationId)
-                                } else if (obj.id === "closeDriver") {
-                                    Driver.closeDriver(obj.driverId, obj.applicationId)
-                                }
-                            }
-                        });
-                    }
+            table.on('tool(driver-table)', function(obj) {
+                let data = obj.data;
+                if (obj.event === 'download') {
+                    Driver.downloadYarnLog(data.id, data.applicationId)
+                } else if (obj.event === 'remove') {
+                    Driver.closeDriver(data.id, data.applicationId)
                 }
             });
 

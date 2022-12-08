@@ -1,27 +1,29 @@
 package io.github.melin.flink.jobserver.deployment;
 
-import com.google.common.collect.Lists;
-import io.github.melin.flink.jobserver.core.entity.ApplicationDriver;
+import io.github.melin.flink.jobserver.core.entity.Cluster;
+import io.github.melin.flink.jobserver.core.entity.SessionDriver;
 import io.github.melin.flink.jobserver.core.enums.DriverStatus;
 import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
-import io.github.melin.flink.jobserver.core.exception.ResouceLimitException;
 import io.github.melin.flink.jobserver.core.exception.FlinkJobException;
-import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
+import io.github.melin.flink.jobserver.core.exception.ResouceLimitException;
+import io.github.melin.flink.jobserver.core.service.SessionDriverService;
 import io.github.melin.flink.jobserver.deployment.dto.DriverDeploymentInfo;
 import io.github.melin.flink.jobserver.support.ClusterConfig;
-import io.github.melin.flink.jobserver.support.ClusterManager;
 import io.github.melin.flink.jobserver.support.YarnClientService;
 import io.github.melin.flink.jobserver.support.leader.RedisLeaderElection;
-import io.github.melin.flink.jobserver.core.entity.Cluster;
 import io.github.melin.flink.jobserver.web.controller.ApplicationDriverController;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.client.cli.ApplicationDeployer;
+import org.apache.flink.client.deployment.ClusterClientFactory;
 import org.apache.flink.client.deployment.ClusterClientServiceLoader;
+import org.apache.flink.client.deployment.ClusterSpecification;
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader;
-import org.apache.flink.client.deployment.application.ApplicationConfiguration;
-import org.apache.flink.client.deployment.application.cli.ApplicationClusterDeployer;
-import org.apache.flink.configuration.*;
+import org.apache.flink.client.program.ClusterClient;
+import org.apache.flink.client.program.ClusterClientProvider;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.DeploymentOptions;
+import org.apache.flink.yarn.YarnClusterDescriptor;
 import org.apache.flink.yarn.configuration.YarnDeploymentTarget;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.slf4j.Logger;
@@ -29,32 +31,24 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
-import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import static io.github.melin.flink.jobserver.FlinkJobServerConf.*;
-import static org.apache.flink.yarn.configuration.YarnConfigOptions.*;
+import static io.github.melin.flink.jobserver.FlinkJobServerConf.JOBSERVER_DRIVER_YARN_QUEUE_NAME;
+import static io.github.melin.flink.jobserver.FlinkJobServerConf.JOBSERVER_SUBMIT_DRIVER_MAX_CONCURRENT_COUNT;
 import static org.apache.hadoop.yarn.api.records.YarnApplicationState.*;
 
 /**
- * 参考 Flink CliFrontend 启动提交FLink Driver
+ * 参考 Flink FlinkYarnSessionCli 启动提交FLink Driver
  */
 @Service
-public class YarnApplicationDriverDeployer extends AbstractDriverDeployer {
+public class KubenetesSessionDriverDeployer extends AbstractDriverDeployer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(YarnApplicationDriverDeployer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(KubenetesSessionDriverDeployer.class);
 
     private final ClusterClientServiceLoader clusterClientServiceLoader;
 
     @Autowired
-    protected ClusterManager clusterManager;
-
-    @Autowired
     private ClusterConfig clusterConfig;
-
-    @Autowired
-    protected ApplicationDriverService driverService;
 
     @Autowired
     private RedisLeaderElection redisLeaderElection;
@@ -62,18 +56,19 @@ public class YarnApplicationDriverDeployer extends AbstractDriverDeployer {
     @Autowired
     private YarnClientService yarnClientService;
 
-    public YarnApplicationDriverDeployer() {
+    @Autowired
+    protected SessionDriverService driverService;
+
+    public KubenetesSessionDriverDeployer() {
         this.clusterClientServiceLoader = new DefaultClusterClientServiceLoader();
     }
 
-    public void buildJobServer(Cluster cluster, RuntimeMode runtimeMode) {
+    public void buildJobServer(Cluster cluster, RuntimeMode runtimeMode, String sessionName) {
         Long driverId = null;
         String clusterCode = cluster.getCode();
         try {
-            //未分配到server的请求重新申请server
-            checkLocalAvailableMemory();
-            checkMaxDriverCount(clusterCode);
-            clusterManager.checkYarnResourceLimit(clusterCode);
+            driverId = initFlinkDriver(clusterCode, sessionName);
+            LOG.info("预启动 driver Id: {}", driverId);
 
             String yarnQueue = clusterConfig.getValue(clusterCode, JOBSERVER_DRIVER_YARN_QUEUE_NAME);
             DriverDeploymentInfo deploymentInfo = DriverDeploymentInfo.builder()
@@ -82,9 +77,6 @@ public class YarnApplicationDriverDeployer extends AbstractDriverDeployer {
                     .setRuntimeMode(runtimeMode)
                     .build();
 
-            driverId = initFlinkDriver(clusterCode, true);
-            LOG.info("预启动 driver Id: {}", driverId);
-
             long appSubmitTime = System.currentTimeMillis();
             String applicationId = startDriver(deploymentInfo, driverId);
 
@@ -92,7 +84,7 @@ public class YarnApplicationDriverDeployer extends AbstractDriverDeployer {
             LOG.info("start share jobserver: {}, times: {}s", applicationId, times);
 
             if (StringUtils.isNotBlank(applicationId)) {
-                ApplicationDriver driver = driverService.getEntity(driverId);
+                SessionDriver driver = driverService.getEntity(driverId);
                 if (driver != null) {
                     driver.setApplicationId(applicationId);
                     driverService.updateEntity(driver);
@@ -119,32 +111,42 @@ public class YarnApplicationDriverDeployer extends AbstractDriverDeployer {
 
     @Override
     protected String startDriver(DriverDeploymentInfo deploymentInfo, Long driverId) throws Exception {
-        Configuration flinkConfig = buildFlinkConfig(deploymentInfo, driverId);
-        flinkConfig.setString(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName());
+        Configuration effectiveConfiguration = buildFlinkConfig(deploymentInfo, driverId);
+        final ClusterClientFactory<ApplicationId> yarnClusterClientFactory =
+                clusterClientServiceLoader.getClusterClientFactory(effectiveConfiguration);
+        effectiveConfiguration.set(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName());
 
-        final String conf = Base64.getEncoder().encodeToString("{}".getBytes(StandardCharsets.UTF_8));
-        final String clusterCode = deploymentInfo.getClusterCode();
-        List<String> programArgs = Lists.newArrayList("-j", String.valueOf(driverId), "-conf", conf,
-                "-c", clusterCode, "-mode", deploymentInfo.getRuntimeMode().getValue());
-        boolean hiveEnabled = clusterConfig.getBoolean(clusterCode, JOBSERVER_DRIVER_HIVE_ENABLED);
-        if (hiveEnabled) {
-            programArgs.add("-hive");
+        final YarnClusterDescriptor yarnClusterDescriptor = (YarnClusterDescriptor)
+                yarnClusterClientFactory.createClusterDescriptor(effectiveConfiguration);
+
+        try {
+            final ClusterSpecification clusterSpecification =
+                    yarnClusterClientFactory.getClusterSpecification(effectiveConfiguration);
+
+            final ClusterClientProvider<ApplicationId> clusterClientProvider =
+                    yarnClusterDescriptor.deploySessionCluster(clusterSpecification);
+            ClusterClient<ApplicationId> clusterClient = clusterClientProvider.getClusterClient();
+
+            // ------------------ ClusterClient deployed, handle connection details
+            final ApplicationId yarnApplicationId = clusterClient.getClusterId();
+            YarnClusterDescriptor.logDetachedClusterInformation(yarnApplicationId, LOG);
+            return yarnApplicationId.toString();
+        } finally {
+            try {
+                yarnClusterDescriptor.close();
+            } catch (Exception e) {
+                LOG.info("Could not properly close the yarn cluster descriptor.", e);
+            }
         }
-
-        final ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration(
-                programArgs.toArray(new String[0]), "io.github.melin.flink.jobserver.driver.FlinkDriverServer");
-        final ApplicationDeployer deployer = new ApplicationClusterDeployer(clusterClientServiceLoader);
-        deployer.run(flinkConfig, applicationConfiguration);
-        return flinkConfig.get(APPLICATION_ID);
     }
 
     /**
      * 初始化jobserver实例
      */
-    protected Long initFlinkDriver(String clusterCode, boolean shareDriver) {
+    protected Long initFlinkDriver(String clusterCode, String sessionName) {
         Long driverId;
         try {
-            ApplicationDriver driver = ApplicationDriver.buildApplicationDriver(clusterCode, shareDriver);
+            SessionDriver driver = SessionDriver.buildSessionDriver(clusterCode, sessionName);
             String yarnQueue = clusterConfig.getValue(clusterCode, JOBSERVER_DRIVER_YARN_QUEUE_NAME);
             driver.setYarnQueue(yarnQueue);
 
@@ -193,7 +195,7 @@ public class YarnApplicationDriverDeployer extends AbstractDriverDeployer {
         // 等待 flink driver 启动中
         report = yarnClientService.getYarnApplicationReport(clusterCode, applicationId);
         state = report.getYarnApplicationState();
-        ApplicationDriver driver = driverService.queryDriverByAppId(applicationId);
+        SessionDriver driver = driverService.queryDriverByAppId(applicationId);
         while (state == RUNNING && driver.getStatus() == DriverStatus.INIT) {
             TimeUnit.SECONDS.sleep(1);
             report = yarnClientService.getYarnApplicationReport(clusterCode, applicationId);

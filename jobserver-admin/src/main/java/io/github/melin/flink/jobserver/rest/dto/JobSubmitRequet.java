@@ -1,5 +1,6 @@
 package io.github.melin.flink.jobserver.rest.dto;
 
+import io.github.melin.flink.jobserver.core.enums.DeployMode;
 import io.github.melin.flink.jobserver.core.enums.InstanceType;
 import io.github.melin.flink.jobserver.core.enums.JobType;
 import lombok.Getter;
@@ -7,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import javax.persistence.Column;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -41,6 +43,10 @@ public class JobSubmitRequet {
     private String owner;
 
     private String clusterCode = "default";
+
+    private DeployMode deployMode = DeployMode.APPLICATION;
+
+    private String sessionName;
 
     private Integer maxRetryCount = 1;
 

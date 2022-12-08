@@ -20,8 +20,8 @@ import java.time.Instant;
 @ToString
 @NoArgsConstructor
 @Entity
-@Table(name = "fjs_flink_driver")
-public class FlinkDriver implements IEntity {
+@Table(name = "fjs_application_driver")
+public class ApplicationDriver implements IEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -105,8 +105,8 @@ public class FlinkDriver implements IEntity {
 
     private static final String hostName = NetUtils.getLocalHost();
 
-    public static FlinkDriver buildFlinkDriver(String clusterCode, Boolean shareDriver) {
-        FlinkDriver jobServer = new FlinkDriver();
+    public static ApplicationDriver buildApplicationDriver(String clusterCode, Boolean shareDriver) {
+        ApplicationDriver jobServer = new ApplicationDriver();
         jobServer.setClusterCode(clusterCode);
         jobServer.setVersion(0);
         jobServer.setServerIp("0.0.0.0");

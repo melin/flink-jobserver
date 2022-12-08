@@ -73,7 +73,7 @@ var Cluster = function () {
                         title: '操作',
                         toolbar: '#cluster-bar',
                         align: 'right',
-                        width: 50,
+                        width: 100,
                         fixed: "right"
                     }
                 ]
@@ -94,26 +94,14 @@ var Cluster = function () {
                 },
                 toolbar: '#toolbarDemo',
                 defaultToolbar: [],
-                done: function(res, curr, count) {
-                    for (var i = 0; i < res.data.length; i++) {
-                        const row = res.data[i];
-                        const menus = []
-                        menus.push({title: '编辑集群', id: "editorCluster", clusterId: row.id, clusterCode: row.code});
-                        menus.push({title: '关闭集群', id: "closeCluster", clusterId: row.id, clusterCode: row.code});
+            });
 
-                        dropdown.render({
-                            elem: '#opt_' + row.id,
-                            data: menus,
-                            id: "#opt_" + row.id,
-                            click: function(obj) {
-                                if (obj.id === "editorCluster") {
-                                    Cluster.newClusterWin(obj.clusterId)
-                                } else if (obj.id === "closeCluster") {
-                                    Cluster.closeCluster(obj.clusterId, obj.clusterCode)
-                                }
-                            }
-                        });
-                    }
+            table.on('tool(cluster-table)', function(obj) {
+                let data = obj.data;
+                if (obj.event === 'remove') {
+                    Cluster.closeCluster(data.id, data.code)
+                } else if (obj.event === 'edit') {
+                    Cluster.newClusterWin(data.id)
                 }
             });
 

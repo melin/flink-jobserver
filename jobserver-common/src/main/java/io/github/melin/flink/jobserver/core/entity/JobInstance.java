@@ -33,6 +33,21 @@ public class JobInstance implements IEntity {
     @Column(name = "cluster_code", length = 64)
     private String clusterCode;
 
+    @Column(name = "deploy_mode", length = 32)
+    @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
+            parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
+                    value = "io.github.melin.flink.jobserver.core.enums.DeployMode")})
+    private DeployMode deployMode = DeployMode.APPLICATION;
+
+    @Column(name = "session_name", length = 128)
+    private String sessionName;
+
+    @Column(name = "scheduler_type", length = 32)
+    @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
+            parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
+                    value = "io.github.melin.flink.jobserver.core.enums.SchedulerType")})
+    private SchedulerType schedulerType; // 调度框架:YARN、K8S
+
     @Column(name = "yarn_queue", length = 128)
     private String yarnQueue;
 

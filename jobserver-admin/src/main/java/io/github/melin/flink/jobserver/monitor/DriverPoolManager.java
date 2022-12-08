@@ -2,10 +2,10 @@ package io.github.melin.flink.jobserver.monitor;
 
 import com.gitee.melin.bee.util.ThreadUtils;
 import io.github.melin.flink.jobserver.core.entity.Cluster;
-import io.github.melin.flink.jobserver.core.entity.FlinkDriver;
+import io.github.melin.flink.jobserver.core.entity.ApplicationDriver;
 import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
 import io.github.melin.flink.jobserver.core.service.ClusterService;
-import io.github.melin.flink.jobserver.core.service.FlinkDriverService;
+import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
 import io.github.melin.flink.jobserver.deployment.YarnApplicationDriverDeployer;
 import io.github.melin.flink.jobserver.support.ClusterConfig;
 import io.github.melin.flink.jobserver.support.YarnClientService;
@@ -37,7 +37,7 @@ public class DriverPoolManager implements InitializingBean {
     private RedisLeaderElection redisLeaderElection;
 
     @Autowired
-    private FlinkDriverService driverService;
+    private ApplicationDriverService driverService;
 
     @Autowired
     private YarnClientService yarnClientService;
@@ -82,7 +82,7 @@ public class DriverPoolManager implements InitializingBean {
     private void stopMaxIdleJobserver(Cluster cluster) {
         try {
             String clusterCode = cluster.getCode();
-            List<FlinkDriver> allIdleDrivers = driverService.queryAllIdleDrivers(clusterCode);
+            List<ApplicationDriver> allIdleDrivers = driverService.queryAllIdleDrivers(clusterCode);
             int driverMinCount = clusterConfig.getInt(clusterCode, JOBSERVER_DRIVER_MIN_COUNT);
             int driverMaxCount = clusterConfig.getInt(clusterCode, JOBSERVER_DRIVER_MAX_COUNT);
             int removed = allIdleDrivers.size() - driverMaxCount;
@@ -90,7 +90,7 @@ public class DriverPoolManager implements InitializingBean {
 
             // 删除超过空闲时间的driver
             for (int i = 0; i < removed; i++) {
-                FlinkDriver driver = allIdleDrivers.get(i);
+                ApplicationDriver driver = allIdleDrivers.get(i);
                 Instant gmtModified = driver.getGmtModified();
                 long idleSeconds = current.getEpochSecond() - gmtModified.getEpochSecond();
                 int maxIdleTimeSeconds = clusterConfig.getInt(clusterCode, JOBSERVER_DRIVER_MAX_IDLE_TIME_SECONDS);
@@ -103,7 +103,7 @@ public class DriverPoolManager implements InitializingBean {
 
             // 删除超过运行次数的driver
             int maxInstanceCount = clusterConfig.getInt(clusterCode, JOBSERVER_DRIVER_RUN_MAX_INSTANCE_COUNT);
-            for (FlinkDriver driver : allIdleDrivers) {
+            for (ApplicationDriver driver : allIdleDrivers) {
                 if (driver.getInstanceCount() >= maxInstanceCount) {
                     String appId = driver.getApplicationId();
                     driverService.deleteJobServerByAppId(appId);

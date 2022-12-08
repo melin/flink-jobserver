@@ -1,8 +1,5 @@
 package io.github.melin.flink.jobserver.core.util;
 
-/**
- * Created by admin on 2017/6/29.
- */
 public class Constants {
 
     public static final String TASK_LOG_ENDFLAG = "Task_End_Flag";

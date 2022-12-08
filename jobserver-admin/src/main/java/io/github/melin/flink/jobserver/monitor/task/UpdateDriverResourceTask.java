@@ -1,7 +1,7 @@
 package io.github.melin.flink.jobserver.monitor.task;
 
-import io.github.melin.flink.jobserver.core.entity.FlinkDriver;
-import io.github.melin.flink.jobserver.core.service.FlinkDriverService;
+import io.github.melin.flink.jobserver.core.entity.ApplicationDriver;
+import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
 import io.github.melin.flink.jobserver.support.YarnClientService;
 import io.github.melin.flink.jobserver.support.leader.LeaderTypeEnum;
 import io.github.melin.flink.jobserver.support.leader.RedisLeaderElection;
@@ -27,7 +27,7 @@ public class UpdateDriverResourceTask implements Runnable {
     private RedisLeaderElection redisLeaderElection;
 
     @Autowired
-    private FlinkDriverService driverService;
+    private ApplicationDriverService driverService;
 
     @Autowired
     private YarnClientService yarnClientService;
@@ -38,7 +38,7 @@ public class UpdateDriverResourceTask implements Runnable {
             return;
         }
 
-        List<FlinkDriver> drivers = driverService.findAllEntity();
+        List<ApplicationDriver> drivers = driverService.findAllEntity();
         drivers.forEach(driver -> {
             try {
                 String applicationId = driver.getApplicationId();

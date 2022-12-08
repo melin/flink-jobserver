@@ -26,7 +26,6 @@ import static io.github.melin.flink.jobserver.util.Constant.ROOT_SCHEDULE_NODE;
 
 /**
  * 每隔一分钟，检测待运行的作业实例是否要运行；
- * Created by admin on 2020/5/15.
  */
 @Service
 public class StartJobInstanceScheduler {

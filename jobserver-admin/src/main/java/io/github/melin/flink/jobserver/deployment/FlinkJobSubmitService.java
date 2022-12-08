@@ -13,7 +13,7 @@ import io.github.melin.flink.jobserver.core.exception.FlinkJobException;
 import io.github.melin.flink.jobserver.core.exception.HttpClientException;
 import io.github.melin.flink.jobserver.core.exception.ResouceLimitException;
 import io.github.melin.flink.jobserver.core.exception.SwitchYarnQueueException;
-import io.github.melin.flink.jobserver.core.service.FlinkDriverService;
+import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
 import io.github.melin.flink.jobserver.core.service.JobInstanceService;
 import io.github.melin.flink.jobserver.deployment.dto.DriverInfo;
 import io.github.melin.flink.jobserver.deployment.dto.JobInstanceInfo;
@@ -58,7 +58,7 @@ public class FlinkJobSubmitService implements InitializingBean {
     private YarnClientService yarnClientService;
 
     @Autowired
-    private FlinkDriverService flinkDriverService;
+    private ApplicationDriverService applicationDriverService;
 
     @Autowired
     private YarnApplicationDriverDeployer driverDeployer;
@@ -166,11 +166,11 @@ public class FlinkJobSubmitService implements InitializingBean {
                 SubmitYarnResult result = new SubmitYarnResult(applicationId, driverAddress, yarnQueue);
                 postTaskToServer(instanceInfo, result, driverInfo);
             } catch (SwitchYarnQueueException e) {
-                flinkDriverService.updateDriverStatusIdle(applicationId);
+                applicationDriverService.updateDriverStatusIdle(applicationId);
                 flinkLogService.removeLogThread(instanceCode);
                 throw e;
             } catch (Exception e) {
-                flinkDriverService.updateDriverStatusIdle(applicationId);
+                applicationDriverService.updateDriverStatusIdle(applicationId);
                 flinkLogService.removeLogThread(instanceCode);
                 LOG.error("post task to server error: " + ExceptionUtils.getStackTrace(e));
                 if (ExceptionUtils.indexOfThrowable(e, SocketTimeoutException.class) > 0
@@ -246,7 +246,7 @@ public class FlinkJobSubmitService implements InitializingBean {
         JobInstance instance = instanceService.queryJobInstanceByCode(instanceInfo.getInstanceCode());
 
         LOG.info("delete driver: {}", driverId);
-        flinkDriverService.deleteEntity(driverId);
+        applicationDriverService.deleteEntity(driverId);
         int retryCount = instance.getRetryCount();
         if (InstanceType.DEV != instanceType && retryCount < 2) {
             instance.setRetryCount(instance.getRetryCount() + 1);
@@ -263,20 +263,21 @@ public class FlinkJobSubmitService implements InitializingBean {
     /**
      * 为Instance 分配可用的server
      */
-    private DriverInfo allocateDriver(JobInstanceInfo jobInstanceInfo, Boolean isDevTask) {
+    private DriverInfo allocateDriver(JobInstanceInfo instanceInfo, Boolean isDevTask) {
         boolean shareDriver = true;
-        String instanceCode = jobInstanceInfo.getInstanceCode();
+        String instanceCode = instanceInfo.getInstanceCode();
+        String clusterCode = instanceInfo.getClusterCode();
         try {
-            boolean newDriver = checkStartNewDriver(jobInstanceInfo.getJobConfig());
-            if (jobInstanceInfo.getRuntimeMode() == RuntimeMode.STREAMING) { // 流任务每次启动一个新的 driver
+            boolean newDriver = checkStartNewDriver(instanceInfo.getJobConfig());
+            if (instanceInfo.getRuntimeMode() == RuntimeMode.STREAMING) { // 流任务每次启动一个新的 driver
                 newDriver = true;
             }
             if (newDriver) {
-                Long driverId = driverDeployer.initSparkDriver(jobInstanceInfo.getClusterCode(), false);
+                Long driverId = driverDeployer.initSparkDriver(clusterCode, false);
                 return new DriverInfo(NEW_INSTANCE, driverId);
             }
 
-            DriverInfo driverInfo = driverDeployer.allocateDriver(jobInstanceInfo, shareDriver);
+            DriverInfo driverInfo = driverDeployer.allocateDriver(clusterCode, shareDriver);
             driverInfo.setShareDriver(shareDriver);
             return driverInfo;
         } catch (FlinkJobException e) {

@@ -1,7 +1,7 @@
 package io.github.melin.flink.jobserver.support;
 
-import io.github.melin.flink.jobserver.core.entity.FlinkDriver;
-import io.github.melin.flink.jobserver.core.service.FlinkDriverService;
+import io.github.melin.flink.jobserver.core.entity.ApplicationDriver;
+import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
 import io.github.melin.flink.jobserver.core.util.LogRecord;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.slf4j.Logger;
@@ -24,7 +24,7 @@ public class DriverClientService {
     private static final Logger LOG = LoggerFactory.getLogger(DriverClientService.class);
 
     @Autowired
-    private FlinkDriverService driverService;
+    private ApplicationDriverService driverService;
 
     @Autowired
     private YarnClientService yarnClientService;
@@ -56,7 +56,7 @@ public class DriverClientService {
         try {
             return restTemplate.postForObject(url, null, Boolean.class);
         } catch (Exception e) {
-            FlinkDriver driver = driverService.queryDriverByAppId(applicationId);
+            ApplicationDriver driver = driverService.queryDriverByAppId(applicationId);
             if (driver != null) {
                 YarnApplicationState state = yarnClientService.getApplicationStatus(driver.getClusterCode(), applicationId);
 

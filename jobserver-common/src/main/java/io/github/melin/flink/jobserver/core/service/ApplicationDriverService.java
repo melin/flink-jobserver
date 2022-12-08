@@ -1,7 +1,7 @@
 package io.github.melin.flink.jobserver.core.service;
 
-import io.github.melin.flink.jobserver.core.dao.FlinkDriverDao;
-import io.github.melin.flink.jobserver.core.entity.FlinkDriver;
+import io.github.melin.flink.jobserver.core.dao.ApplicationDriverDao;
+import io.github.melin.flink.jobserver.core.entity.ApplicationDriver;
 import io.github.melin.flink.jobserver.core.enums.DriverStatus;
 import com.gitee.melin.bee.core.hibernate5.HibernateBaseDao;
 import com.gitee.melin.bee.core.service.BaseServiceImpl;
@@ -18,37 +18,34 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.List;
 
-/**
- * Created by admin on 2017/6/29.
- */
 @Service
 @Transactional
-public class FlinkDriverService extends BaseServiceImpl<FlinkDriver, Long> {
+public class ApplicationDriverService extends BaseServiceImpl<ApplicationDriver, Long> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(FlinkDriverService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ApplicationDriverService.class);
 
     @Autowired
-    private FlinkDriverDao flinkDriverDao;
+    private ApplicationDriverDao applicationDriverDao;
 
     private String hostName = "";
 
-    public FlinkDriverService() {
+    public ApplicationDriverService() {
         hostName = NetUtils.getLocalHost();
     }
 
     @Override
-    public HibernateBaseDao<FlinkDriver, Long> getHibernateBaseDao() {
-        return flinkDriverDao;
+    public HibernateBaseDao<ApplicationDriver, Long> getHibernateBaseDao() {
+        return applicationDriverDao;
     }
 
     @Transactional(readOnly = true)
-    public FlinkDriver queryDriverByAppId(String applicationId) {
+    public ApplicationDriver queryDriverByAppId(String applicationId) {
         return this.queryByNamedParam("applicationId", applicationId);
     }
 
     @Transactional(readOnly = true)
     public String queryDriverAddressByAppId(String applicationId) {
-        FlinkDriver driver = this.queryDriverByAppId(applicationId);
+        ApplicationDriver driver = this.queryDriverByAppId(applicationId);
         if (driver != null) {
             return driver.getFlinkDriverUrl();
         } else {
@@ -57,7 +54,7 @@ public class FlinkDriverService extends BaseServiceImpl<FlinkDriver, Long> {
     }
 
     @Transactional
-    public void updateServerRunning(FlinkDriver driver) {
+    public void updateServerRunning(ApplicationDriver driver) {
         driver.setStatus(DriverStatus.RUNNING);
         driver.setGmtModified(Instant.now());
         driver.setInstanceCount(driver.getInstanceCount() + 1);
@@ -82,7 +79,7 @@ public class FlinkDriverService extends BaseServiceImpl<FlinkDriver, Long> {
     }
 
     @Transactional(readOnly = true)
-    public List<FlinkDriver> queryAllIdleDrivers(String clusterCode) {
+    public List<ApplicationDriver> queryAllIdleDrivers(String clusterCode) {
         return findByNamedParamAndOrder(new String[] {"status", "clusterCode"},
                 new Object[]{DriverStatus.IDLE, clusterCode},
                 Order.asc("gmtModified"));
@@ -90,7 +87,7 @@ public class FlinkDriverService extends BaseServiceImpl<FlinkDriver, Long> {
 
     @Transactional
     public void updateYarnQueue(String appId, String yarnQueue) {
-        FlinkDriver driver = queryDriverByAppId(appId);
+        ApplicationDriver driver = queryDriverByAppId(appId);
         if (driver != null) {
             driver.setYarnQueue(yarnQueue);
             this.updateEntity(driver);
@@ -99,7 +96,7 @@ public class FlinkDriverService extends BaseServiceImpl<FlinkDriver, Long> {
 
     @Transactional
     public void updateDriverStatusIdle(String appId) {
-        FlinkDriver driver = queryDriverByAppId(appId);
+        ApplicationDriver driver = queryDriverByAppId(appId);
         if (driver != null) {
             driver.setStatus(DriverStatus.IDLE);
             driver.setGmtModified(Instant.now());
@@ -110,7 +107,7 @@ public class FlinkDriverService extends BaseServiceImpl<FlinkDriver, Long> {
 
     @Transactional
     public void deleteJobServerByAppId(String appId) {
-        FlinkDriver driver = queryDriverByAppId(appId);
+        ApplicationDriver driver = queryDriverByAppId(appId);
         if (driver != null) {
             LOG.info("delete driver: {}, appId: {}", driver.getId(), driver.getApplicationId());
             this.deleteEntity(driver);
@@ -123,7 +120,7 @@ public class FlinkDriverService extends BaseServiceImpl<FlinkDriver, Long> {
     @Transactional
     public void clearCurrentLogServer() {
         try {
-            String hql = "update FlinkDriver set logServer = null where logServer = :logServer";
+            String hql = "update ApplicationDriver set logServer = null where logServer = :logServer";
             int count = this.deleteOrUpdateByHQL(hql, "logServer", hostName);
             LOG.info("清空log server count: {}", count);
         } catch (Exception e) {
@@ -134,7 +131,7 @@ public class FlinkDriverService extends BaseServiceImpl<FlinkDriver, Long> {
     @Transactional
     public boolean lockCurrentLogServer(String appId) {
         try {
-            String hql = "update FlinkDriver set logServer=:logServer where logServer is null and applicationId=:appId";
+            String hql = "update ApplicationDriver set logServer=:logServer where logServer is null and applicationId=:appId";
             int count = this.deleteOrUpdateByHQL(hql, new String[]{"logServer", "appId"},
                     new Object[]{hostName, appId});
             if (count > 0) {
@@ -149,14 +146,14 @@ public class FlinkDriverService extends BaseServiceImpl<FlinkDriver, Long> {
     }
 
     @Transactional
-    public List<FlinkDriver> queryEmptyLogServers() {
+    public List<ApplicationDriver> queryEmptyLogServers() {
         Criterion logServerCtr = Restrictions.isNull("logServer");
         return findByCriterions(logServerCtr);
     }
 
     @Transactional
     public int updateServerLocked(String applicationId, int version) {
-        String hql = "update FlinkDriver set status=:afterStatus, gmtModified=:gmtModified, version=:afterVersion " +
+        String hql = "update ApplicationDriver set status=:afterStatus, gmtModified=:gmtModified, version=:afterVersion " +
                 "where status=:beforeStatus and applicationId=:applicationId and version =:beforeVersion";
 
         int batch = this.deleteOrUpdateByHQL(hql, new String[]{"afterStatus", "gmtModified", "afterVersion",
@@ -169,7 +166,7 @@ public class FlinkDriverService extends BaseServiceImpl<FlinkDriver, Long> {
     }
 
     @Transactional(readOnly = true)
-    public List<FlinkDriver> queryAvailableApplication(int maxInstanceCount, Long minJobserverId) {
+    public List<ApplicationDriver> queryAvailableApplication(int maxInstanceCount, Long minJobserverId) {
         Criterion statusCrt = Restrictions.eq("status", DriverStatus.IDLE);
         Criterion shareDriverCrt = Restrictions.eq("shareDriver", true);
         Criterion instanceCountCrt = Restrictions.lt("instanceCount", maxInstanceCount);

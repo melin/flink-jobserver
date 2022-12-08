@@ -1,10 +1,11 @@
 package io.github.melin.flink.jobserver.support;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.github.melin.flink.jobserver.FlinkJobServerConf;
-import io.github.melin.flink.jobserver.core.entity.FlinkDriver;
+import io.github.melin.flink.jobserver.core.entity.ApplicationDriver;
 import io.github.melin.flink.jobserver.core.exception.SwitchYarnQueueException;
-import io.github.melin.flink.jobserver.core.service.FlinkDriverService;
+import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -16,25 +17,24 @@ import org.apache.hadoop.yarn.exceptions.ApplicationNotFoundException;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentMap;
 
-/**
- * Created by admin on 2018/12/24.
- */
 @Service
 @DependsOn("clusterManager")
-public class YarnClientService {
+public class YarnClientService implements DisposableBean {
     private static final Logger LOG = LoggerFactory.getLogger(YarnClientService.class);
 
     private static final Logger SERVER_LOGGER = LoggerFactory.getLogger("serverMetricsMsg");
 
     @Autowired
-    private FlinkDriverService driverService;
+    private ApplicationDriverService driverService;
 
     @Autowired
     private ClusterManager clusterManager;
@@ -42,12 +42,28 @@ public class YarnClientService {
     @Autowired
     private ClusterConfig clusterConfig;
 
-    public YarnClient createYarnClient(String clusterCode) {
-        Configuration configuration = clusterManager.getHadoopConf(clusterCode);
-        YarnClient innerClient = YarnClient.createYarnClient();
-        innerClient.init(configuration);
-        innerClient.start();
-        return innerClient;
+    private final ConcurrentMap<String, YarnClient> yarnClientCache = Maps.newConcurrentMap();
+
+    @Override
+    public void destroy() throws Exception {
+        yarnClientCache.forEach((clusterCode, yarnClient) -> {
+            try {
+                yarnClient.stop();
+                LOG.info("stop {} yarn client", clusterCode);
+            } catch (Exception e) {
+                LOG.error("stop {} yarn client failed: {}", clusterCode, e.getMessage());
+            }
+        });
+    }
+
+    public YarnClient getYarnClient(String clusterCode) {
+        return yarnClientCache.computeIfAbsent(clusterCode, (key) -> {
+            Configuration configuration = clusterManager.getHadoopConf(clusterCode);
+            YarnClient innerClient = YarnClient.createYarnClient();
+            innerClient.init(configuration);
+            innerClient.start();
+            return innerClient;
+        });
     }
 
     @Transactional
@@ -84,7 +100,7 @@ public class YarnClientService {
         LOG.warn("close jobserver: {}, shareDriver: {}", appId, shareDriver);
         driverService.updateDriverStatusIdle(appId);
         if (shareDriver) {
-            FlinkDriver driver = driverService.queryDriverByAppId(appId);
+            ApplicationDriver driver = driverService.queryDriverByAppId(appId);
             if (driver != null) {
                 int runCount = driver.getInstanceCount();
                 int maxInstanceCount = clusterConfig.getInt(clusterCode, FlinkJobServerConf.JOBSERVER_DRIVER_RUN_MAX_INSTANCE_COUNT);
@@ -122,7 +138,7 @@ public class YarnClientService {
 
     public ApplicationReport getYarnApplicationReport(String clusterCode, String appId) throws Exception {
         return clusterManager.runSecured(clusterCode, () -> {
-            YarnClient yarnClient = createYarnClient(clusterCode);
+            YarnClient yarnClient = getYarnClient(clusterCode);
             ApplicationId applicationId = ConverterUtils.toApplicationId(appId);
             return yarnClient.getApplicationReport(applicationId);
         });
@@ -133,7 +149,7 @@ public class YarnClientService {
             ApplicationId applicationId = ConverterUtils.toApplicationId(appId);
 
             List<String> queues = Lists.newArrayList();
-            YarnClient yarnClient = createYarnClient(clusterCode);
+            YarnClient yarnClient = getYarnClient(clusterCode);
             for (QueueInfo queueInfo : yarnClient.getAllQueues()) {
                 queues.add(queueInfo.getQueueName());
             }
@@ -159,7 +175,7 @@ public class YarnClientService {
         ApplicationId applicationId = ConverterUtils.toApplicationId(appId);
 
         clusterManager.runSecured(clusterCode, () -> {
-            YarnClient yarnClient = createYarnClient(clusterCode);
+            YarnClient yarnClient = getYarnClient(clusterCode);
             ApplicationReport applicationReport = yarnClient.getApplicationReport(applicationId);
             YarnApplicationState state = applicationReport.getYarnApplicationState();
             if (state == YarnApplicationState.RUNNING || state == YarnApplicationState.ACCEPTED) {

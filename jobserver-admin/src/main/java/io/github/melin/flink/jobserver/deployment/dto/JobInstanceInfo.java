@@ -49,4 +49,13 @@ public class JobInstanceInfo {
     @Tolerate
     public JobInstanceInfo() {
     }
+
+    public DriverDeploymentInfo buildDriverDeploymentInfo() {
+        return DriverDeploymentInfo.builder()
+                .setClusterCode(this.clusterCode)
+                .setRuntimeMode(this.runtimeMode)
+                .setJobConfig(this.jobConfig)
+                .setYarnQueue(this.yarnQueue)
+                .build();
+    }
 }
