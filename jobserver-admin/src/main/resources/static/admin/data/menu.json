@@ -23,6 +23,14 @@
 		"href": "/cluster"
 	},
 	{
+		"id": "session",
+		"title": "Session Admin",
+		"icon": "layui-icon layui-icon-component",
+		"type": 1,
+		"openType": "_iframe",
+		"href": "/session"
+	},
+	{
 		"id": "connector",
 		"title": "Connector Admin",
 		"icon": "layui-icon layui-icon-component",

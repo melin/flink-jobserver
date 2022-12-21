@@ -5,9 +5,9 @@ import com.google.common.collect.Lists;
 import io.github.melin.flink.jobserver.ConfigProperties;
 import io.github.melin.flink.jobserver.FlinkJobServerConf;
 import io.github.melin.flink.jobserver.core.entity.Cluster;
-import io.github.melin.flink.jobserver.core.entity.SessionDriver;
+import io.github.melin.flink.jobserver.core.entity.SessionCluster;
 import io.github.melin.flink.jobserver.core.service.ClusterService;
-import io.github.melin.flink.jobserver.core.service.SessionDriverService;
+import io.github.melin.flink.jobserver.core.service.SessionClusterService;
 import io.github.melin.flink.jobserver.support.ClusterConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.Order;
@@ -23,12 +23,12 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @Controller
-public class SessionDriverController {
+public class SessionClusterController {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SessionDriverController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SessionClusterController.class);
 
     @Autowired
-    private SessionDriverService driverService;
+    private SessionClusterService driverService;
 
     @Autowired
     private ConfigProperties configProperties;
@@ -39,16 +39,16 @@ public class SessionDriverController {
     @Autowired
     private ClusterConfig clusterConfig;
 
-    @RequestMapping("/sessionDriver")
+    @RequestMapping("/session")
     public String home(ModelMap model) {
         List<Cluster> clusters = clusterService.queryValidClusters();
         model.addAttribute("clusters", clusters);
-        return "sessionDriver";
+        return "session";
     }
 
-    @RequestMapping("/sessionDriver/queryDrivers")
+    @RequestMapping("/session/queryClusters")
     @ResponseBody
-    public Pagination<SessionDriver> queryDrivers(String applicationId, int page, int limit, HttpServletRequest request) {
+    public Pagination<SessionCluster> queryClusters(String applicationId, int page, int limit, HttpServletRequest request) {
         String sort = request.getParameter("sort");
         String order = request.getParameter("order");
 
@@ -67,7 +67,7 @@ public class SessionDriverController {
             params.add("applicationId");
             values.add(applicationId);
         }
-        Pagination<SessionDriver> pagination = driverService.findPageByNamedParamAndOrder(params, values,
+        Pagination<SessionCluster> pagination = driverService.findPageByNamedParamAndOrder(params, values,
                 Lists.newArrayList(order1), page, limit);
 
         pagination.getResult().forEach(driver -> {

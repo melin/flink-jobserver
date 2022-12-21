@@ -5,6 +5,7 @@ import com.gitee.melin.bee.util.NetUtils;
 import io.github.melin.flink.jobserver.core.enums.DriverStatus;
 import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
 import io.github.melin.flink.jobserver.core.enums.SchedulerType;
+import io.github.melin.flink.jobserver.core.enums.SessionClusterStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,7 +22,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @Entity
 @Table(name = "fjs_session_driver")
-public class SessionDriver implements IEntity {
+public class SessionCluster implements IEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -50,9 +51,9 @@ public class SessionDriver implements IEntity {
 
     @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
             parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
-                    value = "io.github.melin.flink.jobserver.core.enums.DriverStatus")})
+                    value = "io.github.melin.flink.jobserver.core.enums.SessionClusterStatus")})
     @Column(name = "status", nullable = false, length = 45)
-    private DriverStatus status;
+    private SessionClusterStatus status;
 
     @Column(name = "application_id", nullable = false, length = 64)
     private String applicationId;
@@ -68,12 +69,6 @@ public class SessionDriver implements IEntity {
 
     @Column(name = "server_memory", nullable = false)
     private Long serverMemory;
-
-    @Column(name = "runtime_mode", length = 32)
-    @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
-            parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
-                    value = "io.github.melin.flink.jobserver.core.enums.RuntimeMode")})
-    private RuntimeMode runtimeMode;
 
     @Column(name = "yarn_queue")
     private String yarnQueue;
@@ -105,15 +100,15 @@ public class SessionDriver implements IEntity {
 
     private static final String hostName = NetUtils.getLocalHost();
 
-    public static SessionDriver buildSessionDriver(String clusterCode, String sessionName) {
-        SessionDriver jobServer = new SessionDriver();
+    public static SessionCluster buildSessionDriver(String clusterCode, String sessionName) {
+        SessionCluster jobServer = new SessionCluster();
         jobServer.setSessionName(sessionName);
         jobServer.setClusterCode(clusterCode);
         jobServer.setVersion(0);
         jobServer.setServerIp("0.0.0.0");
         jobServer.setServerPort(-1);
         jobServer.setSchedulerType(SchedulerType.YARN);
-        jobServer.setStatus(DriverStatus.INIT);
+        jobServer.setStatus(SessionClusterStatus.INIT);
         jobServer.setApplicationId("");
         jobServer.setCreater("");
         jobServer.setGmtCreated(Instant.now());

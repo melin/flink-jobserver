@@ -1,12 +1,13 @@
 package io.github.melin.flink.jobserver.deployment;
 
 import io.github.melin.flink.jobserver.core.entity.Cluster;
-import io.github.melin.flink.jobserver.core.entity.SessionDriver;
+import io.github.melin.flink.jobserver.core.entity.SessionCluster;
 import io.github.melin.flink.jobserver.core.enums.DriverStatus;
 import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
+import io.github.melin.flink.jobserver.core.enums.SessionClusterStatus;
 import io.github.melin.flink.jobserver.core.exception.FlinkJobException;
 import io.github.melin.flink.jobserver.core.exception.ResouceLimitException;
-import io.github.melin.flink.jobserver.core.service.SessionDriverService;
+import io.github.melin.flink.jobserver.core.service.SessionClusterService;
 import io.github.melin.flink.jobserver.deployment.dto.DriverDeploymentInfo;
 import io.github.melin.flink.jobserver.support.ClusterConfig;
 import io.github.melin.flink.jobserver.support.YarnClientService;
@@ -57,7 +58,7 @@ public class KubenetesSessionDriverDeployer extends AbstractDriverDeployer {
     private YarnClientService yarnClientService;
 
     @Autowired
-    protected SessionDriverService driverService;
+    protected SessionClusterService driverService;
 
     public KubenetesSessionDriverDeployer() {
         this.clusterClientServiceLoader = new DefaultClusterClientServiceLoader();
@@ -84,7 +85,7 @@ public class KubenetesSessionDriverDeployer extends AbstractDriverDeployer {
             LOG.info("start share jobserver: {}, times: {}s", applicationId, times);
 
             if (StringUtils.isNotBlank(applicationId)) {
-                SessionDriver driver = driverService.getEntity(driverId);
+                SessionCluster driver = driverService.getEntity(driverId);
                 if (driver != null) {
                     driver.setApplicationId(applicationId);
                     driverService.updateEntity(driver);
@@ -146,7 +147,7 @@ public class KubenetesSessionDriverDeployer extends AbstractDriverDeployer {
     protected Long initFlinkDriver(String clusterCode, String sessionName) {
         Long driverId;
         try {
-            SessionDriver driver = SessionDriver.buildSessionDriver(clusterCode, sessionName);
+            SessionCluster driver = SessionCluster.buildSessionDriver(clusterCode, sessionName);
             String yarnQueue = clusterConfig.getValue(clusterCode, JOBSERVER_DRIVER_YARN_QUEUE_NAME);
             driver.setYarnQueue(yarnQueue);
 
@@ -195,8 +196,8 @@ public class KubenetesSessionDriverDeployer extends AbstractDriverDeployer {
         // 等待 flink driver 启动中
         report = yarnClientService.getYarnApplicationReport(clusterCode, applicationId);
         state = report.getYarnApplicationState();
-        SessionDriver driver = driverService.queryDriverByAppId(applicationId);
-        while (state == RUNNING && driver.getStatus() == DriverStatus.INIT) {
+        SessionCluster driver = driverService.queryDriverByAppId(applicationId);
+        while (state == RUNNING && driver.getStatus() == SessionClusterStatus.INIT) {
             TimeUnit.SECONDS.sleep(1);
             report = yarnClientService.getYarnApplicationReport(clusterCode, applicationId);
             state = report.getYarnApplicationState();

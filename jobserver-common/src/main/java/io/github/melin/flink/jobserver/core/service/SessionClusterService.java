@@ -2,8 +2,8 @@ package io.github.melin.flink.jobserver.core.service;
 
 import com.gitee.melin.bee.core.hibernate5.HibernateBaseDao;
 import com.gitee.melin.bee.core.service.BaseServiceImpl;
-import io.github.melin.flink.jobserver.core.dao.SessionDriverDao;
-import io.github.melin.flink.jobserver.core.entity.SessionDriver;
+import io.github.melin.flink.jobserver.core.dao.SessionClusterDao;
+import io.github.melin.flink.jobserver.core.entity.SessionCluster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,20 +12,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
-public class SessionDriverService extends BaseServiceImpl<SessionDriver, Long> {
+public class SessionClusterService extends BaseServiceImpl<SessionCluster, Long> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SessionDriverService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SessionClusterService.class);
 
     @Autowired
-    private SessionDriverDao sessionDriverDao;
+    private SessionClusterDao sessionClusterDao;
 
     @Override
-    public HibernateBaseDao<SessionDriver, Long> getHibernateBaseDao() {
-        return this.sessionDriverDao;
+    public HibernateBaseDao<SessionCluster, Long> getHibernateBaseDao() {
+        return this.sessionClusterDao;
     }
 
     @Transactional(readOnly = true)
-    public SessionDriver queryDriverByAppId(String applicationId) {
+    public SessionCluster queryDriverByAppId(String applicationId) {
         return this.queryByNamedParam("applicationId", applicationId);
     }
 }

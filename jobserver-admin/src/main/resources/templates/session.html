@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="utf-8">
+    <title>Session Admin</title>
+    <link rel="stylesheet" href="/component/pear/css/pear.css" />
+    <link rel="stylesheet" href="/component/toast/toast.min.css" />
+    <style>
+        .layui-tab {
+            margin: 10px 10px;
+        }
+
+        .layui-tab-title {
+            height: 30px;
+        }
+        .layui-tab-title li {
+            line-height: 30px;
+        }
+        .layui-tab-title .layui-this:after {
+            height: 31px;
+        }
+
+        .layui-tab-content {
+            padding: 5px 0;
+        }
+    </style>
+</head>
+<body class="pear-container">
+<script type="text/html" id="toolbarDemo">
+    <div class="layui-btn-container">
+        <button class="pear-btn pear-btn-primary pear-btn-md" onclick="Session.newClusterWin()">
+            <i class="layui-icon layui-icon-add-1"></i>
+            新建集群
+        </button>
+    </div>
+</script>
+
+<input type="hidden" id="confDefaultValue" th:value="${confDefaultValue}">
+<div class="layui-card">
+    <div class="layui-card-body">
+        <form class="layui-form" action="">
+            <div class="layui-form-item">
+                <div class="layui-col-md1">
+                    <label class="layui-form-label">集群Code</label>
+                </div>
+                <div class="layui-col-md2">
+                    <input type="text" name="code" placeholder="" class="layui-input">
+                </div>
+                <div class="layui-col-md2" style="padding-left: 10px">
+                    <button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="user-query">
+                        <i class="layui-icon layui-icon-search"></i>
+                        查询
+                    </button>
+                    <button type="reset" class="pear-btn pear-btn-md">
+                        <i class="layui-icon layui-icon-refresh"></i>
+                        重置
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table id="session-table" lay-filter="session-table"></table>
+    </div>
+</div>
+
+<!--日志显示窗口-->
+<div id="newClusterDiv" title="新建集群" style="display: none;">
+    <form class="layui-form" action="javascript:void(0);" style="margin: 10px" lay-filter="newClusterForm">
+        <div class="layui-card-body layui-row layui-col-space10">
+            <div class="layui-col-md3">
+                <label class="layui-form-label form-label">Code</label>
+            </div>
+            <div class="layui-col-md3">
+                <input type="text" name="code" hover placeholder="只能字母、数字和下划线组成" autocomplete="off" id="cluster_code" class="layui-input">
+            </div>
+            <div class="layui-col-md3">
+                <label class="layui-form-label form-label">名称</label>
+            </div>
+            <div class="layui-col-md3">
+                <input type="text" name="name" hover placeholder="集群名称" autocomplete="off" id="cluster_name" class="layui-input">
+            </div>
+            <div class="layui-col-md3">
+                <label class="layui-form-label form-label">Flink 集群</label>
+            </div>
+            <div class="layui-col-md3">
+                <select name="clusterName" class="layui-input">
+                    <option value="yarn">Yarn</option>
+                    <option value="k8s">Kubernetes</option>
+                </select>
+            </div>
+            <div class="layui-col-md3">
+                <label class="layui-form-label form-label">Task Managers 数量</label>
+            </div>
+            <div class="layui-col-md3">
+                <input type="text" name="numberOfTaskManagers" value="2" autocomplete="off" class="layui-input">
+            </div>
+            <div class="layui-col-md3">
+                <label class="layui-form-label form-label">JobManager CPU Cores</label>
+            </div>
+            <div class="layui-col-md3">
+                <input type="text" name="jobmanagerCpu" value="1" autocomplete="off" class="layui-input">
+            </div>
+            <div class="layui-col-md3">
+                <label class="layui-form-label form-label">JobManager Memory</label>
+            </div>
+            <div class="layui-col-md3">
+                <input type="text" name="jobmanagerMemory" value="2" autocomplete="off" class="layui-input">
+            </div>
+            <div class="layui-col-md3">
+                <label class="layui-form-label form-label">TaskManager CPU Cores</label>
+            </div>
+            <div class="layui-col-md3">
+                <input type="text" name="taskmanagerCpu" value="2" autocomplete="off" class="layui-input">
+            </div>
+            <div class="layui-col-md3">
+                <label class="layui-form-label form-label">JobManager Memory</label>
+            </div>
+            <div class="layui-col-md3">
+                <input type="text" name="taskmanagerMemory" value="4" autocomplete="off" class="layui-input">
+            </div>
+            <div class="layui-col-md3">
+                <label class="layui-form-label form-label">其他配置</label>
+            </div>
+            <div class="layui-col-md9">
+                <div id="otherConfigEditor" style="width: 100%;" class="editor"></div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script type="text/html" id="cluster-bar">
+    <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i></button>
+    <button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove"><i class="layui-icon layui-icon-delete"></i></button>
+</script>
+
+<script type="text/javascript" src="/component/jquery.min.js"></script>
+<script type="text/javascript" src="/component/layui/layui.js"></script>
+<script type="text/javascript" src="/component/pear/pear.js"></script>
+<script src="/component/toast/toast.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="/common/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="/common/ace/mode-yaml.js" type="text/javascript" charset="utf-8"></script>
+<script src="/common/ace/mode-properties.js" type="text/javascript" charset="utf-8"></script>
+<script src="/js/session.js" type="text/javascript" charset="utf-8"></script>
+</body>
+</html>

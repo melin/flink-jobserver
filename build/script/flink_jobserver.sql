@@ -80,10 +80,10 @@ CREATE TABLE `fjs_application_driver` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='application driver注册信息';
 
 -- ----------------------------
--- Table structure for fjs_application_driver
+-- Table structure for fjs_session_cluster
 -- ----------------------------
-DROP TABLE IF EXISTS `fjs_session_driver`;
-CREATE TABLE `fjs_session_driver` (
+DROP TABLE IF EXISTS `fjs_session_cluster`;
+CREATE TABLE `fjs_session_cluster` (
     `id` int NOT NULL AUTO_INCREMENT,
     `session_name` varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'session name',
     `cluster_code` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '集群Code',
