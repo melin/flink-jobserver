@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.persistence.Column;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -17,9 +16,6 @@ import javax.validation.constraints.NotNull;
 @ToString
 @NoArgsConstructor
 public class JobSubmitRequet {
-
-    @NotEmpty
-    private String accessKey;
 
     // 用户可以指定实例code，如果不设置系统生成32位随机数
     private String instanceCode;

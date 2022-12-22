@@ -13,15 +13,15 @@ import io.github.melin.flink.jobserver.support.ClusterManager;
 import io.github.melin.flink.jobserver.support.YarnClientService;
 import io.github.melin.flink.jobserver.support.leader.RedisLeaderElection;
 import io.github.melin.flink.jobserver.core.entity.Cluster;
+import io.github.melin.flink.jobserver.util.IOUtils;
 import io.github.melin.flink.jobserver.web.controller.ApplicationDriverController;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.client.cli.ApplicationDeployer;
-import org.apache.flink.client.deployment.ClusterClientServiceLoader;
-import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader;
+import org.apache.flink.client.deployment.*;
 import org.apache.flink.client.deployment.application.ApplicationConfiguration;
-import org.apache.flink.client.deployment.application.cli.ApplicationClusterDeployer;
+import org.apache.flink.client.program.ClusterClient;
 import org.apache.flink.configuration.*;
 import org.apache.flink.yarn.configuration.YarnDeploymentTarget;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.slf4j.Logger;
@@ -34,7 +34,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static io.github.melin.flink.jobserver.FlinkJobServerConf.*;
-import static org.apache.flink.yarn.configuration.YarnConfigOptions.*;
 import static org.apache.hadoop.yarn.api.records.YarnApplicationState.*;
 
 /**
@@ -119,7 +118,7 @@ public class YarnApplicationDriverDeployer extends AbstractDriverDeployer {
 
     @Override
     protected String startDriver(DriverDeploymentInfo deploymentInfo, Long driverId) throws Exception {
-        Configuration flinkConfig = buildFlinkConfig(deploymentInfo, driverId);
+        final Configuration flinkConfig = buildFlinkConfig(deploymentInfo, driverId);
         flinkConfig.setString(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName());
 
         final String conf = Base64.getEncoder().encodeToString("{}".getBytes(StandardCharsets.UTF_8));
@@ -131,11 +130,30 @@ public class YarnApplicationDriverDeployer extends AbstractDriverDeployer {
             programArgs.add("-hive");
         }
 
-        final ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration(
-                programArgs.toArray(new String[0]), "io.github.melin.flink.jobserver.driver.FlinkDriverServer");
-        final ApplicationDeployer deployer = new ApplicationClusterDeployer(clusterClientServiceLoader);
-        deployer.run(flinkConfig, applicationConfiguration);
-        return flinkConfig.get(APPLICATION_ID);
+        DefaultClusterClientServiceLoader clusterClientServiceLoader = new DefaultClusterClientServiceLoader();
+        ClusterClientFactory<ApplicationId> clientFactory = clusterClientServiceLoader.getClusterClientFactory(flinkConfig);
+        ClusterDescriptor<ApplicationId> clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig);
+        ClusterClient<ApplicationId> clusterClient = null;
+        try {
+            ClusterSpecification clusterSpecification = clientFactory.getClusterSpecification(flinkConfig);
+            LOG.info("------------------------<<specification>>-------------------------");
+            LOG.info(clusterSpecification.toString());
+            LOG.info("------------------------------------------------------------------");
+
+            final ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration(
+                    programArgs.toArray(new String[0]), "io.github.melin.flink.jobserver.driver.FlinkDriverServer");
+
+            clusterClient = clusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient();
+            ApplicationId applicationId = clusterClient.getClusterId();
+            String jobManagerUrl = clusterClient.getWebInterfaceURL();
+            LOG.info("-------------------------<<applicationId>>------------------------");
+            LOG.info("Flink Job Started: applicationId: " + applicationId + " JobManager Web Interface: " + jobManagerUrl);
+            LOG.info("------------------------------------------------------------------");
+
+            return applicationId.toString();
+        } finally {
+            IOUtils.closeQuietly(clusterDescriptor, clusterClient);
+        }
     }
 
     /**

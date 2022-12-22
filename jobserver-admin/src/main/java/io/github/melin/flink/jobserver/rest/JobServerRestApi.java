@@ -4,16 +4,22 @@ import com.gitee.melin.bee.core.support.Result;
 import io.github.melin.flink.jobserver.rest.dto.InstanceInfo;
 import io.github.melin.flink.jobserver.rest.dto.JobSubmitRequet;
 import io.github.melin.flink.jobserver.service.JobServerServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
 
 @Controller
+@Tag(name = "JobServer 接口")
 public class JobServerRestApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(JobServerRestApi.class);
@@ -21,7 +27,9 @@ public class JobServerRestApi {
     @Autowired
     private JobServerServiceImpl jobServerService;
 
-    @RequestMapping("v1/jobserver/submitJobInstance")
+    @PostMapping("v1/jobserver/submitJobInstance")
+    @Operation(summary = "提交作业实例")
+    @Parameter()
     @ResponseBody
     public Result<String> submitJobInstance(String accessKey, String accessSecret, JobSubmitRequet requet) {
         try {
@@ -33,7 +41,8 @@ public class JobServerRestApi {
         }
     }
 
-    @RequestMapping("v1/jobserver/queryInstanceStatus")
+    @GetMapping("v1/jobserver/queryInstanceStatus")
+    @Operation(summary = "查询作业实例状态")
     @ResponseBody
     public Result<InstanceInfo> queryInstanceStatus(String accessKey, String accessSecret, String instanceCode) {
         try {
@@ -45,7 +54,8 @@ public class JobServerRestApi {
         }
     }
 
-    @RequestMapping("v1/jobserver/batchQueryInstanceStatus")
+    @GetMapping("v1/jobserver/batchQueryInstanceStatus")
+    @Operation(summary = "批量查询作业实例状态")
     @ResponseBody
     public Result<List<InstanceInfo>> batchQueryInstanceStatus(String accessKey, String accessSecret, String[] instanceCode) {
         try {
@@ -57,7 +67,8 @@ public class JobServerRestApi {
         }
     }
 
-    @RequestMapping("v1/jobserver/queryInstanceLog")
+    @GetMapping("v1/jobserver/queryInstanceLog")
+    @Operation(summary = "查询作业实例运行日志")
     @ResponseBody
     public Result<String> queryInstanceLog(String accessKey, String accessSecret, String instanceCode) {
         try {
@@ -69,7 +80,8 @@ public class JobServerRestApi {
         }
     }
 
-    @RequestMapping("v1/jobserver/stopInstance")
+    @PostMapping("v1/jobserver/stopInstance")
+    @Operation(summary = "停止作业运行")
     @ResponseBody
     public Result<String> stopInstance(String accessKey, String accessSecret, String instanceCode) {
         try {

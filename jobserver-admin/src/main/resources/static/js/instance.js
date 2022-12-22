@@ -97,22 +97,26 @@ var Instance = function () {
                     {
                         title: '调度时间',
                         field: 'scheduleTime',
-                        align: 'right'
+                        align: 'right',
+                        width: 140,
                     },
                     {
                         title: '开始时间',
                         field: 'startTime',
-                        align: 'right'
+                        align: 'right',
+                        width: 140,
                     },
                     {
                         title: '结束时间',
                         field: 'endTime',
-                        align: 'right'
+                        align: 'right',
+                        width: 140,
                     },
                     {
                         title: '状态',
                         field: 'status',
                         align: 'center',
+                        fixed: 'right',
                         width: 80,
                         templet: function(record) {
                             const status = record.status;
