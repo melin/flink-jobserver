@@ -129,7 +129,7 @@ var Cluster = function () {
 
         getEditor: function(editor, editorId, mode) {
             editor = ace.edit(editorId);
-            editor.setTheme("ace/theme/cobalt");
+            `editor.setTheme("ace/theme/cobalt");`
             editor.getSession().setMode(mode);
             $('#' + editorId).height((winHeight - 285) + "px");
             editor.resize();
