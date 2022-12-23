@@ -5,11 +5,6 @@ import lombok.Data;
 import org.apache.flink.configuration.*;
 import org.apache.flink.configuration.description.BlockElement;
 import org.apache.flink.configuration.description.TextElement;
-import org.apache.flink.contrib.streaming.state.RocksDBNativeMetricOptions;
-import org.apache.flink.contrib.streaming.state.RocksDBOptions;
-import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions;
-import org.apache.flink.streaming.api.environment.ExecutionCheckpointingOptions;
-import org.apache.flink.yarn.configuration.YarnConfigOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,8 +18,11 @@ public class FlinkUtils {
     private static LinkedList<Config> configs = new LinkedList<>();
 
     public static void main(String[] args) throws Exception {
-        parseConfig(JobManagerOptions.class, 1000);
+        /*parseConfig(JobManagerOptions.class, 1000);
         parseConfig(TaskManagerOptions.class, 950);
+        parseConfig(CoreOptions.class, 940);
+        parseConfig(ExecutionConfigOptions.class, 930);
+        parseConfig(TableConfigOptions.class, 920);
         parseConfig(CoreOptions.class, 900);
         parseConfig(RestOptions.class, 850);
         parseConfig(YarnConfigOptions.class, 800);
@@ -42,7 +40,7 @@ public class FlinkUtils {
         parseConfig(MetricOptions.class, 400);
 
         parseConfig(AkkaOptions.class, 350);
-        parseConfig(SecurityOptions.class, 300);
+        parseConfig(SecurityOptions.class, 300);*/
         System.out.println(MapperUtils.toJSONString(configs, true));
     }
 
