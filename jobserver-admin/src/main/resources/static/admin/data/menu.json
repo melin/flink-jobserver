@@ -15,20 +15,20 @@
 		"href": "/driver"
 	},
 	{
-		"id": "cluster",
-		"title": "Cluster Admin",
-		"icon": "layui-icon layui-icon-component",
-		"type": 1,
-		"openType": "_iframe",
-		"href": "/cluster"
-	},
-	{
 		"id": "session",
 		"title": "Session Admin",
 		"icon": "layui-icon layui-icon-component",
 		"type": 1,
 		"openType": "_iframe",
 		"href": "/session"
+	},
+	{
+		"id": "cluster",
+		"title": "Cluster Admin",
+		"icon": "layui-icon layui-icon-component",
+		"type": 1,
+		"openType": "_iframe",
+		"href": "/cluster"
 	},
 	{
 		"id": "connector",
@@ -39,7 +39,7 @@
 		"href": "/connector"
 	},
 	{
-		"id": "connector",
+		"id": "uploadJar",
 		"title": "Upload Jar",
 		"icon": "layui-icon layui-icon-upload",
 		"type": 1,
@@ -47,7 +47,7 @@
 		"href": "/upload"
 	},
 	{
-		"id": "connector",
+		"id": "document",
 		"title": "Document",
 		"icon": "layui-icon layui-icon-template-1",
 		"type": 1,
