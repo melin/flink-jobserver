@@ -2,6 +2,7 @@ package io.github.melin.flink.jobserver.web.controller;
 
 import io.github.melin.flink.jobserver.FlinkJobServerConf;
 import io.github.melin.flink.jobserver.core.entity.Cluster;
+import io.github.melin.flink.jobserver.core.enums.SchedulerType;
 import io.github.melin.flink.jobserver.core.service.ClusterService;
 import com.gitee.melin.bee.core.support.Pagination;
 import com.gitee.melin.bee.core.support.Result;
@@ -79,12 +80,15 @@ public class ClusterController {
     @RequestMapping("/cluster/saveCluster")
     @ResponseBody
     public Result<Void> saveCluster(Cluster cluster) {
-        if (!StringUtils.contains(cluster.getYarnConfig(), "yarn.resourcemanager.webapp.address")
-                || !StringUtils.contains(cluster.getYarnConfig(), "yarn.resourcemanager.address")) {
+        if (SchedulerType.YARN == cluster.getSchedulerType()) {
+            if (!StringUtils.contains(cluster.getYarnConfig(), "yarn.resourcemanager.webapp.address")
+                    || !StringUtils.contains(cluster.getYarnConfig(), "yarn.resourcemanager.address")) {
 
-            String msg = "yarn-site.xml 缺少 yarn.resourcemanager.webapp.address & yarn.resourcemanager.address 参数配置";
-            return Result.failureResult(msg);
+                String msg = "yarn-site.xml 缺少 yarn.resourcemanager.webapp.address & yarn.resourcemanager.address 参数配置";
+                return Result.failureResult(msg);
+            }
         }
+
         try {
             cluster.setGmtCreated(Instant.now());
             cluster.setGmtModified(Instant.now());
@@ -105,7 +109,7 @@ public class ClusterController {
                 old.setHiveConfig(cluster.getHiveConfig());
                 old.setKerberosConfig(cluster.getKerberosConfig());
                 old.setKerberosEnabled(cluster.isKerberosEnabled());
-                old.setYarnQueueName(cluster.getYarnQueueName());
+                old.setKubernetesConfig(cluster.getKubernetesConfig());
                 clusterService.updateEntity(old);
             }
             return Result.successResult();

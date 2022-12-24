@@ -78,14 +78,8 @@ public class Cluster implements IEntity {
     @Column(name = "Kubernetes_config")
     private String kubernetesConfig;
 
-    @Column(name = "kubernetes_namespace")
-    private String kubernetesNamespace;
-
     @Column(name = "storage_config")
     private String storageConfig;
-
-    @Column(name = "yarn_queue_name")
-    private String yarnQueueName;
 
     @Convert(converter = BooleanToIntConverter.class)
     private boolean status = true;

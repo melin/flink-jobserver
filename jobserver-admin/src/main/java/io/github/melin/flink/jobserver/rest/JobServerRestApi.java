@@ -29,7 +29,6 @@ public class JobServerRestApi {
 
     @PostMapping("v1/jobserver/submitJobInstance")
     @Operation(summary = "提交作业实例")
-    @Parameter()
     @ResponseBody
     public Result<String> submitJobInstance(String accessKey, String accessSecret, JobSubmitRequet requet) {
         try {

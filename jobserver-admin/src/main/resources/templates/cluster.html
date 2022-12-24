@@ -97,21 +97,6 @@
                 <input type="text" name="name" hover placeholder="集群名称" autocomplete="off" id="cluster_name" class="layui-input">
             </div>
             <div class="layui-col-md1">
-                <label class="layui-form-label form-label">调度类型</label>
-            </div>
-            <div class="layui-col-md3">
-                <select name="schedulerType" class="layui-input">
-                    <option value="yarn">Yarn</option>
-                    <option value="k8s">Kubernetes</option>
-                </select>
-            </div>
-            <div class="layui-col-md1">
-                <label class="layui-form-label form-label">Yarn队列</label>
-            </div>
-            <div class="layui-col-md3">
-                <input type="text" name="yarnQueueName" hover placeholder="集群默认使用队列" autocomplete="off" value="default" class="layui-input">
-            </div>
-            <div class="layui-col-md1">
                 <label class="layui-form-label form-label">启用集群</label>
             </div>
             <div class="layui-col-md3">
@@ -121,7 +106,7 @@
                 </select>
             </div>
             <div class="layui-col-md1">
-                <label class="layui-form-label form-label">Kerberos认证</label>
+                <label class="layui-form-label form-label">Kerberos</label>
             </div>
             <div class="layui-col-md3">
                 <select name="kerberosEnabled" class="layui-input">
@@ -129,16 +114,24 @@
                     <!--<option value="1">启用</option>-->
                 </select>
             </div>
+            <div class="layui-col-md1">
+                <label class="layui-form-label form-label">调度类型</label>
+            </div>
+            <div class="layui-col-md3">
+                <select name="schedulerType" lay-filter="schedulerType" id="schedulerType" class="layui-input">
+                    <option value="yarn">Yarn</option>
+                    <option value="kubernetes">Kubernetes</option>
+                </select>
+            </div>
         </div>
     </form>
 
-    <div class="layui-tab">
+    <div class="layui-tab" lay-filter="config_tabs">
         <ul class="layui-tab-title">
             <li class="layui-this">jobserver.properties</li>
             <li>flink-conf.yaml</li>
             <li>core-site.xml</li>
             <li>hdfs-site.xml</li>
-            <li>yarn-site.xml</li>
             <li>hive-site.xml</li>
         </ul>
         <div class="layui-tab-content">
@@ -153,9 +146,6 @@
             </div>
             <div class="layui-tab-item">
                 <div id="hdfsEditor" style="width: 100%;" class="editor"></div>
-            </div>
-            <div class="layui-tab-item">
-                <div id="yarnEditor" style="width: 100%;" class="editor"></div>
             </div>
             <div class="layui-tab-item">
                 <div id="hiveEditor" style="width: 100%;" class="editor"></div>

@@ -2,6 +2,7 @@ var Cluster = function () {
     let winWidth, winHeight;
     let table = layui.table;
     let form = layui.form;
+    let element = layui.element;
     let dropdown = layui.dropdown;
     const maxInstanceCount = $("#maxInstanceCount").val();
 
@@ -18,7 +19,7 @@ var Cluster = function () {
     let langTools = ace.require("ace/ext/language_tools");
     langTools.setCompleters([sparkCompleter]);
 
-    let jobserverEditor, flinkEditor, coreEditor, hdfsEditor, yarnEditor, hiveEditor;
+    let jobserverEditor, flinkEditor, coreEditor, hdfsEditor, hiveEditor, yarnEditor, kubenetesEditor;
 
     return {
         init: function () {
@@ -47,6 +48,14 @@ var Cluster = function () {
                         field: 'schedulerType',
                         align: 'left',
                         width: 100,
+                        templet: function(record) {
+                            const schedulerType = record.schedulerType;
+                            if (schedulerType === 'yarn') {
+                                return 'Yarn'
+                            } else {
+                                return 'Kubernetes'
+                            }
+                        }
                     },
                     {
                         title: '开启kerberos',
@@ -135,16 +144,35 @@ var Cluster = function () {
             flinkEditor = Cluster.getEditor(flinkEditor, "flinkEditor", "ace/mode/yaml");
             coreEditor = Cluster.getEditor(coreEditor, "coreEditor", "ace/mode/xml");
             hdfsEditor = Cluster.getEditor(hdfsEditor, "hdfsEditor", "ace/mode/xml");
-            yarnEditor = Cluster.getEditor(yarnEditor, "yarnEditor", "ace/mode/xml");
             hiveEditor = Cluster.getEditor(hiveEditor, "hiveEditor", "ace/mode/xml");
             //let kerberosEditor = Cluster.getEditor(kerberosEditor, "kerberosEditor", "ace/mode/properties");
+
+            form.on('select(schedulerType)', function (data) {
+                Cluster.changeConfigTab(data.value)
+            });
+        },
+
+        changeConfigTab : function (schedulerType) {
+            if (schedulerType === "kubernetes") {
+                element.tabDelete('config_tabs', 'yarn_tab')
+                element.tabDelete('config_tabs', 'kubernetes_tab')
+                element.tabAdd('config_tabs', {id: 'kubernetes_tab', title: 'Kubernetes Config',
+                    content: '<div id="kubenetesEditor" style="width: 100%;" class="editor"></div>'});
+                kubenetesEditor = Cluster.getEditor(kubenetesEditor, "kubenetesEditor", "ace/mode/yaml");
+            } else {
+                element.tabDelete('config_tabs', 'yarn_tab')
+                element.tabDelete('config_tabs', 'kubernetes_tab')
+                element.tabAdd('config_tabs', {id: 'yarn_tab', title: 'yarn-site.xml',
+                    content: '<div id="yarnEditor" style="width: 100%;" class="editor"></div>'});
+                yarnEditor = Cluster.getEditor(yarnEditor, "yarnEditor", "ace/mode/xml");
+            }
         },
 
         getEditor: function(editor, editorId, mode) {
             editor = ace.edit(editorId);
             if ("flinkEditor" === editorId) {
                 editor.commands.on("afterExec", function (e) {
-                    if (e.command.name == "insertstring" && /^[\w.]$/.test(e.args)) {
+                    if (e.command.name === "insertstring" && /^[\w.]$/.test(e.args)) {
                         editor.execCommand("startAutocomplete");
                     }
                 });
@@ -199,19 +227,33 @@ var Cluster = function () {
                             Cluster.setEditorValue(flinkEditor, data.flinkConfig)
                             Cluster.setEditorValue(coreEditor, data.coreConfig)
                             Cluster.setEditorValue(hdfsEditor, data.hdfsConfig)
-                            Cluster.setEditorValue(yarnEditor, data.yarnConfig)
                             Cluster.setEditorValue(hiveEditor, data.hiveConfig)
+
+                            Cluster.changeConfigTab(data.schedulerType)
+                            if (data.schedulerType === "yarn") {
+                                Cluster.setEditorValue(yarnEditor, data.yarnConfig)
+                            } else {
+                                Cluster.setEditorValue(kubenetesEditor, data.kubernetesConfig)
+                            }
                         }
                     }
                 })
+
+                $("#schedulerType").attr("disabled","disabled");
+                form.render('select');
             } else {
-                form.val('newClusterForm', {code: "", name: "", yarnQueueName: "default"});
+                form.val('newClusterForm', {code: "", name: ""});
                 Cluster.setEditorValue(jobserverEditor, $("#confDefaultValue").val())
                 Cluster.setEditorValue(flinkEditor, "")
                 Cluster.setEditorValue(coreEditor, "")
                 Cluster.setEditorValue(hdfsEditor, "")
-                Cluster.setEditorValue(yarnEditor, "")
                 Cluster.setEditorValue(hiveEditor, "")
+
+                Cluster.changeConfigTab("yarn")
+                Cluster.setEditorValue(yarnEditor, "")
+
+                $("#schedulerType").removeAttr("disabled");
+                form.render('select');
             }
 
             var index = layer.open({
@@ -222,7 +264,7 @@ var Cluster = function () {
                 resize: false,
                 btnAlign: 'c',
                 content: $("#newClusterDiv"),
-                btn: ['保存'],
+                btn: ['保存', '取消'],
                 zIndex: 1111,
                 btn1: function(index, layero) {
                     let data = form.val('newClusterForm');
@@ -239,16 +281,24 @@ var Cluster = function () {
                     let flinkConfig = $.trim(flinkEditor.getValue());
                     let coreConfig = $.trim(coreEditor.getValue());
                     let hdfsConfig = $.trim(hdfsEditor.getValue());
-                    let yarnConfig = $.trim(yarnEditor.getValue());
                     let hiveConfig = $.trim(hiveEditor.getValue());
+
+                    let yarnConfig = "";
+                    let kerberosConfig = "";
+                    if (data.schedulerType === "yarn") {
+                        yarnConfig = $.trim(yarnEditor.getValue());
+                    } else {
+                        kerberosConfig = $.trim(kubenetesEditor.getValue());
+                    }
 
                     data.id = clusterId
                     data.jobserverConfig = jobserverConfig
                     data.flinkConfig = flinkConfig
                     data.coreConfig = coreConfig
                     data.hdfsConfig = hdfsConfig
-                    data.yarnConfig = yarnConfig
                     data.hiveConfig = hiveConfig
+                    data.yarnConfig = yarnConfig
+                    data.kerberosConfig = kerberosConfig
                     $.ajax({
                         async: true,
                         type: "POST",
