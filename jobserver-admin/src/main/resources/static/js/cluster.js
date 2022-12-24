@@ -23,9 +23,6 @@ var Cluster = function () {
 
     return {
         init: function () {
-            winWidth = $(window).width() * 0.95;
-            winHeight = $(window).height() * 0.95;
-
             let cols = [
                 [{
                     title: '序号',
@@ -203,6 +200,9 @@ var Cluster = function () {
         },
 
         newClusterWin : function(clusterId) {
+            winWidth = $(window).width() * 0.95;
+            winHeight = $(window).height() * 0.95;
+
             if (clusterId) {
                 $.ajax({
                     async: true,
