@@ -40,8 +40,8 @@ public class UpdateDriverResourceTask implements Runnable {
 
         List<ApplicationDriver> drivers = driverService.findAllEntity();
         drivers.forEach(driver -> {
+            String applicationId = driver.getApplicationId();
             try {
-                String applicationId = driver.getApplicationId();
                 String clusterCode = driver.getClusterCode();
                 if (StringUtils.isNotBlank(applicationId)) {
                     ApplicationReport report = yarnClientService.getYarnApplicationReport(clusterCode, applicationId);
@@ -54,7 +54,12 @@ public class UpdateDriverResourceTask implements Runnable {
                     }
                 }
             } catch (Throwable e) {
-                LOG.error("update driver {} resource failure: {}", driver.getApplicationId(), e.getMessage());
+                boolean remoteException = yarnClientService.handleApplicationNotFoundException(e, applicationId);
+                if (remoteException) {
+                    LOG.error("update driver resource failure, yarn app {} not exists", applicationId);
+                } else {
+                    LOG.error("update driver resource failure: {}, yarn app {}", e.getMessage(), applicationId);
+                }
             }
         });
     }

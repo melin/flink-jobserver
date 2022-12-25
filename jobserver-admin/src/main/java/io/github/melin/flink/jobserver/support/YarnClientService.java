@@ -7,7 +7,9 @@ import io.github.melin.flink.jobserver.core.entity.ApplicationDriver;
 import io.github.melin.flink.jobserver.core.exception.SwitchYarnQueueException;
 import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.ipc.RemoteException;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.QueueInfo;
@@ -93,6 +95,23 @@ public class YarnClientService implements DisposableBean {
         } finally {
             driverService.deleteJobServerByAppId(applicationId);
         }
+    }
+
+    @Transactional
+    public boolean handleApplicationNotFoundException(Throwable e, String applicationId) {
+        Throwable rootCause = ExceptionUtils.getRootCause(e);
+        if (rootCause instanceof RemoteException) {
+            RemoteException remoteException = (RemoteException) rootCause;
+            if (ApplicationNotFoundException.class.getName().equals(remoteException.getClassName())) {
+                driverService.deleteJobServerByAppId(applicationId);
+                LOG.warn("yarn application not exists: {}", applicationId);
+                return true;
+            } else {
+                LOG.warn("{} ignored", remoteException.getClassName());
+            }
+        }
+
+        return false;
     }
 
     @Transactional

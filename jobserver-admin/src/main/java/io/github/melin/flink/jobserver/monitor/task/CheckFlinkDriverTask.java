@@ -103,8 +103,6 @@ public class CheckFlinkDriverTask implements Runnable {
                             });
                         } catch (Exception e) {
                             LOG.error(e.getMessage(), e);
-                        } finally {
-                            yarnClient.stop();
                         }
                     }
 
