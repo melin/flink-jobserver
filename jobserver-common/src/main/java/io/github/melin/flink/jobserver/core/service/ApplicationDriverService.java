@@ -44,6 +44,11 @@ public class ApplicationDriverService extends BaseServiceImpl<ApplicationDriver,
     }
 
     @Transactional(readOnly = true)
+    public long queryDriverCount(String clusterCode) {
+        return this.queryCount("clusterCode", clusterCode);
+    }
+
+    @Transactional(readOnly = true)
     public String queryDriverAddressByAppId(String applicationId) {
         ApplicationDriver driver = this.queryDriverByAppId(applicationId);
         if (driver != null) {

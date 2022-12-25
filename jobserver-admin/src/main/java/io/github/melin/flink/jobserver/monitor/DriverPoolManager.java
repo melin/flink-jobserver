@@ -4,8 +4,10 @@ import com.gitee.melin.bee.util.ThreadUtils;
 import io.github.melin.flink.jobserver.core.entity.Cluster;
 import io.github.melin.flink.jobserver.core.entity.ApplicationDriver;
 import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
+import io.github.melin.flink.jobserver.core.enums.SchedulerType;
 import io.github.melin.flink.jobserver.core.service.ClusterService;
 import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
+import io.github.melin.flink.jobserver.submit.deployer.KubernetesApplicationDriverDeployer;
 import io.github.melin.flink.jobserver.submit.deployer.YarnApplicationDriverDeployer;
 import io.github.melin.flink.jobserver.support.ClusterConfig;
 import io.github.melin.flink.jobserver.support.YarnClientService;
@@ -50,6 +52,9 @@ public class DriverPoolManager implements InitializingBean {
 
     @Autowired
     private YarnApplicationDriverDeployer yarnApplicationDriverDeployer;
+
+    @Autowired
+    private KubernetesApplicationDriverDeployer kubernetesApplicationDriverDeployer;
 
     private final ScheduledExecutorService scheduledExecutorService =
             ThreadUtils.newDaemonSingleThreadScheduledExecutor("check-yarn-app");
@@ -122,10 +127,15 @@ public class DriverPoolManager implements InitializingBean {
     private void startMinJobServer(Cluster cluster) {
         try {
             int minDriverCount = clusterConfig.getInt(cluster.getCode(), JOBSERVER_DRIVER_MIN_COUNT);
-            long driverCount = driverService.queryCount();
+            long driverCount = driverService.queryDriverCount(cluster.getCode());
             while (minDriverCount > driverCount) {
-                yarnApplicationDriverDeployer.buildJobServer(cluster, RuntimeMode.BATCH);
-                driverCount = driverService.queryCount();
+                if (SchedulerType.YARN == cluster.getSchedulerType()) {
+                    yarnApplicationDriverDeployer.buildJobServer(cluster, RuntimeMode.BATCH);
+                    driverCount = driverService.queryDriverCount(cluster.getCode());
+                } else {
+                    kubernetesApplicationDriverDeployer.buildJobServer(cluster, RuntimeMode.BATCH);
+                    driverCount = driverService.queryDriverCount(cluster.getCode());
+                }
             }
         } catch (Throwable e) {
             LOG.error(e.getMessage());
