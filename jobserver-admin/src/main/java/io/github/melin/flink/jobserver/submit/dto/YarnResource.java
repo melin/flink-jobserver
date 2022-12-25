@@ -1,4 +1,4 @@
-package io.github.melin.flink.jobserver.deployment.dto;
+package io.github.melin.flink.jobserver.submit.dto;
 
 /**
  * @author melin 2021/7/20 1:11 下午

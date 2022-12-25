@@ -1,4 +1,4 @@
-package io.github.melin.flink.jobserver.deployment.dto;
+package io.github.melin.flink.jobserver.submit.dto;
 
 import io.github.melin.flink.jobserver.core.enums.DriverInstance;
 import lombok.Data;

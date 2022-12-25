@@ -7,7 +7,7 @@ import io.github.melin.flink.jobserver.api.FlinkJobServerException;
 import io.github.melin.flink.jobserver.core.entity.Cluster;
 import io.github.melin.flink.jobserver.core.exception.ResouceLimitException;
 import io.github.melin.flink.jobserver.core.service.ClusterService;
-import io.github.melin.flink.jobserver.deployment.dto.YarnResource;
+import io.github.melin.flink.jobserver.submit.dto.YarnResource;
 import io.github.melin.flink.jobserver.util.DateUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;

@@ -1,4 +1,4 @@
-package io.github.melin.flink.jobserver.deployment;
+package io.github.melin.flink.jobserver.submit.deployer;
 
 import io.github.melin.flink.jobserver.core.entity.Cluster;
 import io.github.melin.flink.jobserver.core.entity.SessionCluster;
@@ -8,7 +8,7 @@ import io.github.melin.flink.jobserver.core.enums.SessionClusterStatus;
 import io.github.melin.flink.jobserver.core.exception.FlinkJobException;
 import io.github.melin.flink.jobserver.core.exception.ResouceLimitException;
 import io.github.melin.flink.jobserver.core.service.SessionClusterService;
-import io.github.melin.flink.jobserver.deployment.dto.DriverDeploymentInfo;
+import io.github.melin.flink.jobserver.submit.dto.DriverDeploymentInfo;
 import io.github.melin.flink.jobserver.support.ClusterConfig;
 import io.github.melin.flink.jobserver.support.YarnClientService;
 import io.github.melin.flink.jobserver.support.leader.RedisLeaderElection;
@@ -111,7 +111,7 @@ public class YarnSessionDriverDeployer extends AbstractDriverDeployer {
 
     @Override
     protected String startDriver(DriverDeploymentInfo deploymentInfo, Long driverId) throws Exception {
-        Configuration effectiveConfiguration = buildFlinkConfig(deploymentInfo, driverId);
+        Configuration effectiveConfiguration = buildFlinkConfig(deploymentInfo);
         final ClusterClientFactory<ApplicationId> yarnClusterClientFactory =
                 clusterClientServiceLoader.getClusterClientFactory(effectiveConfiguration);
         effectiveConfiguration.set(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName());

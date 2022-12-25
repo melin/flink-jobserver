@@ -26,6 +26,12 @@ var Cluster = function () {
             winWidth = $(window).width() * 0.95;
             winHeight = $(window).height() * 0.95;
 
+            $('#schedulerTypeTip').on('click', function() {
+                layer.tips('<li>Yarn: 需要填写core-site.xml, hdfs-sitexml, yarn-site.xml配置，hive-site.xml是可选的</li>'
+                    + '<li>Kubenetes: core-site.xml, hdfs-sitexml, yarn-site.xml, hive-site.xml, Kubernetes Config 用于访问k8s 集群配置，必填写</li>',
+                    '#schedulerTypeTip', {time: 2000});
+            });
+
             let cols = [
                 [{
                     title: '序号',

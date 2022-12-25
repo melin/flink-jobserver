@@ -1,4 +1,4 @@
-package io.github.melin.flink.jobserver.deployment;
+package io.github.melin.flink.jobserver.submit.deployer;
 
 import com.google.common.collect.Lists;
 import io.github.melin.flink.jobserver.core.entity.ApplicationDriver;
@@ -7,7 +7,7 @@ import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
 import io.github.melin.flink.jobserver.core.exception.ResouceLimitException;
 import io.github.melin.flink.jobserver.core.exception.FlinkJobException;
 import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
-import io.github.melin.flink.jobserver.deployment.dto.DriverDeploymentInfo;
+import io.github.melin.flink.jobserver.submit.dto.DriverDeploymentInfo;
 import io.github.melin.flink.jobserver.support.ClusterConfig;
 import io.github.melin.flink.jobserver.support.ClusterManager;
 import io.github.melin.flink.jobserver.support.YarnClientService;
@@ -118,7 +118,7 @@ public class YarnApplicationDriverDeployer extends AbstractDriverDeployer {
 
     @Override
     protected String startDriver(DriverDeploymentInfo deploymentInfo, Long driverId) throws Exception {
-        final Configuration flinkConfig = buildFlinkConfig(deploymentInfo, driverId);
+        final Configuration flinkConfig = buildFlinkConfig(deploymentInfo);
         flinkConfig.setString(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName());
 
         final String conf = Base64.getEncoder().encodeToString("{}".getBytes(StandardCharsets.UTF_8));

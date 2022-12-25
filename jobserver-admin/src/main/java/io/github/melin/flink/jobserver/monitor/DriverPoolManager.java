@@ -6,7 +6,7 @@ import io.github.melin.flink.jobserver.core.entity.ApplicationDriver;
 import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
 import io.github.melin.flink.jobserver.core.service.ClusterService;
 import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
-import io.github.melin.flink.jobserver.deployment.YarnApplicationDriverDeployer;
+import io.github.melin.flink.jobserver.submit.deployer.YarnApplicationDriverDeployer;
 import io.github.melin.flink.jobserver.support.ClusterConfig;
 import io.github.melin.flink.jobserver.support.YarnClientService;
 import io.github.melin.flink.jobserver.support.leader.LeaderTypeEnum;

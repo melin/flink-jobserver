@@ -1,4 +1,4 @@
-package io.github.melin.flink.jobserver.deployment;
+package io.github.melin.flink.jobserver.submit.deployer;
 
 import com.gitee.melin.bee.util.NetUtils;
 import com.google.common.collect.Lists;
@@ -10,10 +10,10 @@ import io.github.melin.flink.jobserver.core.exception.FlinkJobException;
 import io.github.melin.flink.jobserver.core.exception.ResouceLimitException;
 import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
 import io.github.melin.flink.jobserver.core.util.CommonUtils;
-import io.github.melin.flink.jobserver.deployment.dto.DriverDeploymentInfo;
-import io.github.melin.flink.jobserver.deployment.dto.DriverInfo;
-import io.github.melin.flink.jobserver.deployment.dto.JobInstanceInfo;
-import io.github.melin.flink.jobserver.deployment.dto.SubmitYarnResult;
+import io.github.melin.flink.jobserver.submit.dto.DriverDeploymentInfo;
+import io.github.melin.flink.jobserver.submit.dto.DriverInfo;
+import io.github.melin.flink.jobserver.submit.dto.JobInstanceInfo;
+import io.github.melin.flink.jobserver.submit.dto.SubmitYarnResult;
 import io.github.melin.flink.jobserver.support.ClusterConfig;
 import io.github.melin.flink.jobserver.support.ClusterManager;
 import io.github.melin.flink.jobserver.support.leader.RedisLeaderElection;
@@ -75,7 +75,7 @@ abstract public class AbstractDriverDeployer {
 
     abstract protected String startDriver(DriverDeploymentInfo deploymentInfo, Long driverId) throws Exception;
 
-    protected Configuration buildFlinkConfig(DriverDeploymentInfo deploymentInfo, Long driverId) throws Exception {
+    protected Configuration buildFlinkConfig(DriverDeploymentInfo deploymentInfo) throws Exception {
         final String clusterCode = deploymentInfo.getClusterCode();
         final String confDir = clusterManager.loadYarnConfig(clusterCode);
         org.apache.hadoop.conf.Configuration hadoopConf = clusterManager.getHadoopConf(clusterCode);
@@ -260,7 +260,7 @@ abstract public class AbstractDriverDeployer {
     /**
      * 初始化jobserver实例
      */
-    protected Long initSparkDriver(String clusterCode, boolean shareDriver) {
+    public Long initSparkDriver(String clusterCode, boolean shareDriver) {
         Long driverId;
         try {
             ApplicationDriver driver = ApplicationDriver.buildApplicationDriver(clusterCode, shareDriver);

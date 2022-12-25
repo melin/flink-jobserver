@@ -8,7 +8,7 @@ import io.github.melin.flink.jobserver.core.entity.JobInstance;
 import io.github.melin.flink.jobserver.core.enums.SchedulerType;
 import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
 import io.github.melin.flink.jobserver.core.service.JobInstanceService;
-import io.github.melin.flink.jobserver.deployment.dto.JobInstanceInfo;
+import io.github.melin.flink.jobserver.submit.dto.JobInstanceInfo;
 import org.apache.hadoop.util.ShutdownHookManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
