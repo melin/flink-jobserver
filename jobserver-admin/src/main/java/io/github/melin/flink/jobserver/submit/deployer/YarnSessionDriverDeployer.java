@@ -9,9 +9,7 @@ import io.github.melin.flink.jobserver.core.exception.FlinkJobException;
 import io.github.melin.flink.jobserver.core.exception.ResouceLimitException;
 import io.github.melin.flink.jobserver.core.service.SessionClusterService;
 import io.github.melin.flink.jobserver.submit.dto.DriverDeploymentInfo;
-import io.github.melin.flink.jobserver.support.ClusterConfig;
 import io.github.melin.flink.jobserver.support.YarnClientService;
-import io.github.melin.flink.jobserver.support.leader.RedisLeaderElection;
 import io.github.melin.flink.jobserver.web.controller.ApplicationDriverController;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.client.deployment.ClusterClientFactory;
@@ -46,12 +44,6 @@ public class YarnSessionDriverDeployer extends AbstractDriverDeployer {
     private static final Logger LOG = LoggerFactory.getLogger(YarnSessionDriverDeployer.class);
 
     private final ClusterClientServiceLoader clusterClientServiceLoader;
-
-    @Autowired
-    private ClusterConfig clusterConfig;
-
-    @Autowired
-    private RedisLeaderElection redisLeaderElection;
 
     @Autowired
     private YarnClientService yarnClientService;

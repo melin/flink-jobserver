@@ -9,7 +9,6 @@ import io.github.melin.flink.jobserver.core.exception.FlinkJobException;
 import io.github.melin.flink.jobserver.core.exception.ResouceLimitException;
 import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
 import io.github.melin.flink.jobserver.submit.dto.DriverDeploymentInfo;
-import io.github.melin.flink.jobserver.support.ClusterConfig;
 import io.github.melin.flink.jobserver.support.ClusterManager;
 import io.github.melin.flink.jobserver.support.YarnClientService;
 import io.github.melin.flink.jobserver.support.leader.RedisLeaderElection;
@@ -43,7 +42,7 @@ import static org.apache.hadoop.yarn.api.records.YarnApplicationState.*;
  * 参考 Flink CliFrontend 启动提交FLink Driver
  */
 @Service
-public class KubernetesApplicationDriverDeployer extends AbstractDriverDeployer {
+public class KubernetesApplicationDriverDeployer extends AbstractKubernetesDeployer {
 
     private static final Logger LOG = LoggerFactory.getLogger(KubernetesApplicationDriverDeployer.class);
 
@@ -51,9 +50,6 @@ public class KubernetesApplicationDriverDeployer extends AbstractDriverDeployer 
 
     @Autowired
     protected ClusterManager clusterManager;
-
-    @Autowired
-    private ClusterConfig clusterConfig;
 
     @Autowired
     protected ApplicationDriverService driverService;

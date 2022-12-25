@@ -53,13 +53,13 @@ abstract public class AbstractDriverDeployer {
     protected ClusterManager clusterManager;
 
     @Autowired
-    private ClusterConfig clusterConfig;
+    protected ClusterConfig clusterConfig;
 
     @Autowired
     protected ApplicationDriverService driverService;
 
     @Autowired
-    private RedisLeaderElection redisLeaderElection;
+    protected RedisLeaderElection redisLeaderElection;
 
     @Value("${spring.profiles.active}")
     protected String profiles;

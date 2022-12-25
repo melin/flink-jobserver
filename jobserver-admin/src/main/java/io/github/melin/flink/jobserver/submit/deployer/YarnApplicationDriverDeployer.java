@@ -8,10 +8,8 @@ import io.github.melin.flink.jobserver.core.exception.ResouceLimitException;
 import io.github.melin.flink.jobserver.core.exception.FlinkJobException;
 import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
 import io.github.melin.flink.jobserver.submit.dto.DriverDeploymentInfo;
-import io.github.melin.flink.jobserver.support.ClusterConfig;
 import io.github.melin.flink.jobserver.support.ClusterManager;
 import io.github.melin.flink.jobserver.support.YarnClientService;
-import io.github.melin.flink.jobserver.support.leader.RedisLeaderElection;
 import io.github.melin.flink.jobserver.core.entity.Cluster;
 import io.github.melin.flink.jobserver.util.IOUtils;
 import io.github.melin.flink.jobserver.web.controller.ApplicationDriverController;
@@ -50,13 +48,7 @@ public class YarnApplicationDriverDeployer extends AbstractDriverDeployer {
     protected ClusterManager clusterManager;
 
     @Autowired
-    private ClusterConfig clusterConfig;
-
-    @Autowired
     protected ApplicationDriverService driverService;
-
-    @Autowired
-    private RedisLeaderElection redisLeaderElection;
 
     @Autowired
     private YarnClientService yarnClientService;
