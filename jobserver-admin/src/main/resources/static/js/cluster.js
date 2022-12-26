@@ -19,7 +19,8 @@ var Cluster = function () {
     let langTools = ace.require("ace/ext/language_tools");
     langTools.setCompleters([sparkCompleter]);
 
-    let jobserverEditor, flinkEditor, coreEditor, hdfsEditor, hiveEditor, yarnEditor, kubenetesEditor;
+    let jobserverEditor, flinkEditor, coreEditor, hdfsEditor, hiveEditor, yarnEditor,
+        kubernetesEditor, jmPodTemplateEditor, tmPodTemplateEditor;
 
     return {
         init: function () {
@@ -180,12 +181,26 @@ var Cluster = function () {
             if (schedulerType === "kubernetes") {
                 element.tabDelete('config_tabs', 'yarn_tab')
                 element.tabDelete('config_tabs', 'kubernetes_tab')
+                element.tabDelete('config_tabs', 'jmPodTemplate_tab')
+                element.tabDelete('config_tabs', 'tmPodTemplate_tab')
+
                 element.tabAdd('config_tabs', {id: 'kubernetes_tab', title: 'Kubernetes Config',
-                    content: '<div id="kubenetesEditor" style="width: 100%;" class="editor"></div>'});
-                kubenetesEditor = Cluster.getEditor(kubenetesEditor, "kubenetesEditor", "ace/mode/yaml");
+                    content: '<div id="kubernetesEditor" style="width: 100%;" class="editor"></div>'});
+                kubernetesEditor = Cluster.getEditor(kubernetesEditor, "kubernetesEditor", "ace/mode/yaml");
+
+                element.tabAdd('config_tabs', {id: 'jmPodTemplate_tab', title: 'JM Pod Template',
+                    content: '<div id="jmPodTemplateEditor" style="width: 100%;" class="editor"></div>'});
+                jmPodTemplateEditor = Cluster.getEditor(jmPodTemplateEditor, "jmPodTemplateEditor", "ace/mode/yaml");
+
+                element.tabAdd('config_tabs', {id: 'tmPodTemplate_tab', title: 'TM Pod Template',
+                    content: '<div id="tmPodTemplateEditor" style="width: 100%;" class="editor"></div>'});
+                tmPodTemplateEditor = Cluster.getEditor(tmPodTemplateEditor, "tmPodTemplateEditor", "ace/mode/yaml");
             } else {
                 element.tabDelete('config_tabs', 'yarn_tab')
                 element.tabDelete('config_tabs', 'kubernetes_tab')
+                element.tabDelete('config_tabs', 'jmPodTemplate_tab')
+                element.tabDelete('config_tabs', 'tmPodTemplate_tab')
+
                 element.tabAdd('config_tabs', {id: 'yarn_tab', title: 'yarn-site.xml',
                     content: '<div id="yarnEditor" style="width: 100%;" class="editor"></div>'});
                 yarnEditor = Cluster.getEditor(yarnEditor, "yarnEditor", "ace/mode/xml");
@@ -252,7 +267,9 @@ var Cluster = function () {
                             if (data.schedulerType === "yarn") {
                                 Cluster.setEditorValue(yarnEditor, data.yarnConfig)
                             } else {
-                                Cluster.setEditorValue(kubenetesEditor, data.kubernetesConfig)
+                                Cluster.setEditorValue(kubernetesEditor, data.kubernetesConfig)
+                                Cluster.setEditorValue(jmPodTemplateEditor, data.jmPodTemplate)
+                                Cluster.setEditorValue(tmPodTemplateEditor, data.tmPodTemplate)
                             }
                         }
                     }
@@ -303,11 +320,15 @@ var Cluster = function () {
                     let hiveConfig = $.trim(hiveEditor.getValue());
 
                     let yarnConfig = "";
-                    let kerberosConfig = "";
+                    let kubernetesConfig = "";
+                    let jmPodTemplate = "";
+                    let tmPodTemplate = "";
                     if (data.schedulerType === "yarn") {
                         yarnConfig = $.trim(yarnEditor.getValue());
                     } else {
-                        kerberosConfig = $.trim(kubenetesEditor.getValue());
+                        kubernetesConfig = $.trim(kubernetesEditor.getValue());
+                        jmPodTemplate = $.trim(jmPodTemplateEditor.getValue());
+                        tmPodTemplate = $.trim(tmPodTemplateEditor.getValue());
                     }
 
                     data.id = clusterId
@@ -317,7 +338,9 @@ var Cluster = function () {
                     data.hdfsConfig = hdfsConfig
                     data.hiveConfig = hiveConfig
                     data.yarnConfig = yarnConfig
-                    data.kerberosConfig = kerberosConfig
+                    data.kubernetesConfig = kubernetesConfig
+                    data.jmPodTemplate = jmPodTemplate
+                    data.tmPodTemplate = tmPodTemplate
                     $.ajax({
                         async: true,
                         type: "POST",

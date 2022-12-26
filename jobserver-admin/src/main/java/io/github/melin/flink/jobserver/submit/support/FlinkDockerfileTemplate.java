@@ -9,21 +9,29 @@ import static io.github.melin.flink.jobserver.FlinkJobServerConf.JOBSERVER_FLINK
 
 public class FlinkDockerfileTemplate {
 
-    private String clusterCode;
+    private final String clusterCode;
 
-    private ClusterConfig clusterConfig;
+    private final ClusterConfig clusterConfig;
 
-    private String clusterConfDir;
+    private final String clusterConfDir;
+
+    private final String baseImageTag;
+
+    public FlinkDockerfileTemplate(String clusterCode, ClusterConfig clusterConfig, String clusterConfDir) {
+        this.clusterCode = clusterCode;
+        this.clusterConfig = clusterConfig;
+        this.clusterConfDir = clusterConfDir;
+        this.baseImageTag = "apache/flink:" + clusterConfig.getValue(clusterCode, JOBSERVER_FLINK_VERSION);
+    }
 
     public String offerDockerfileContent() {
-        final String flinkBaseImage = "apache/flink:" + clusterConfig.getValue(clusterCode, JOBSERVER_FLINK_VERSION);
         final String driverJarName = clusterConfig.getValue(clusterCode, JOBSERVER_DRIVER_JAR_NAME);
 
         File coreFile = new File(clusterConfDir + "core-site.xml");
         File hdfsFile = new File(clusterConfDir + "hdfs-site.xml");
         File hiveFile = new File(clusterConfDir + "hive-site.xml");
 
-        String dockerfile = "FROM " + flinkBaseImage + "\n" +
+        String dockerfile = "FROM " + baseImageTag + "\n" +
                 "RUN mkdir -p $FLINK_HOME/usrlib\n";
 
         if (coreFile.exists() && hdfsFile.exists()) {

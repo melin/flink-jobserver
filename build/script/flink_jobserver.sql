@@ -38,6 +38,8 @@ CREATE TABLE `fjs_cluster` (
   `hive_config` longtext COMMENT 'hive-site配置',
   `yarn_config` longtext COMMENT 'yarn-site配置',
   `kubernetes_config` longtext COMMENT 'kube 配置',
+  `jm_pod_template` longtext COMMENT 'jobmanager pod template',
+  `tm_pod_template` longtext COMMENT 'taskmanager pod template',
   `storage_type` varchar(45) DEFAULT 'HDFS' COMMENT '存储类型:HDFS、OBS、OSS、S3等文件系统',
   `storage_config` longtext COMMENT '对象存储配置',
   `status` smallint DEFAULT '1' COMMENT '0：无效，1：有效',

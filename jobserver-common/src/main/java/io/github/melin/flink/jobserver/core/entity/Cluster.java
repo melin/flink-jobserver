@@ -78,6 +78,12 @@ public class Cluster implements IEntity {
     @Column(name = "Kubernetes_config")
     private String kubernetesConfig;
 
+    @Column(name = "jm_pod_template")
+    private String jmPodTemplate;
+
+    @Column(name = "tm_pod_template")
+    private String tmPodTemplate;
+
     @Column(name = "storage_config")
     private String storageConfig;
 
