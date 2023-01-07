@@ -132,10 +132,9 @@ public class ClusterManager implements InitializingBean {
         String authentication = "simple";
         try {
             Configuration conf = getHadoopConf(cluserCode);
-
             UserGroupInformation userGroupInformation;
-
             LOGGER.debug(cluserCode + " login: " + authentication);
+
             if (clusterService.isKerberosEnabled(cluserCode)) {
                 authentication = "kerberos";
                 try {

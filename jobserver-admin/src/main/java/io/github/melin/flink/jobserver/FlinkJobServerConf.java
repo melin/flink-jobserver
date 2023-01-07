@@ -162,6 +162,49 @@ public class FlinkJobServerConf extends BeeConf {
                     .stringConf()
                     .createWithDefault("");
 
+    //--------------------------------docker config-----------------------------
+    public static final ConfigEntry<String> JOBSERVER_DOCKER_REGISTER_ADDRESS =
+            buildConf("jobserver.docker.register.address")
+                    .doc("docker register address")
+                    .version("1.0.0")
+                    .stringConf()
+                    .createWithDefault("");
+
+    public static final ConfigEntry<String> JOBSERVER_DOCKER_REGISTER_USERNAME =
+            buildConf("jobserver.docker.register.username")
+                    .doc("docker register username")
+                    .version("1.0.0")
+                    .stringConf()
+                    .createWithDefault("");
+
+    public static final ConfigEntry<String> JOBSERVER_DOCKER_REGISTER_PASSWORD =
+            buildConf("jobserver.docker.register.password")
+                    .doc("docker register password")
+                    .version("1.0.0")
+                    .stringConf()
+                    .createWithDefault("");
+
+    public static final ConfigEntry<Integer> JOBSERVER_DOCKER_MAX_CONNECTIONS =
+            buildConf("jobserver.docker.http-client.max-connections")
+                    .doc("instantiating max connections for DockerHttpClient")
+                    .version("1.0.0")
+                    .intConf()
+                    .createWithDefault(100);
+
+    public static final ConfigEntry<Long> JOBSERVER_DOCKER_CONNECTION_TIMEOUT_SEC =
+            buildConf("jobserver.docker.http-client.connection-timeout-sec")
+                    .doc("instantiating connection timeout for DockerHttpClient")
+                    .version("1.0.0")
+                    .longConf()
+                    .createWithDefault(100L);
+
+    public static final ConfigEntry<Long> JOBSERVER_DOCKER_RESPONSE_TIMEOUT_SEC =
+            buildConf("jobserver.docker.http-client.response-timeout-sec")
+                    .doc("instantiating connection timeout for DockerHttpClient")
+                    .version("1.0.0")
+                    .longConf()
+                    .createWithDefault(120L);
+
     public static String printConfWithDefaultValue() throws IllegalAccessException {
         StringBuilder sb = new StringBuilder();
         Field[] fields = FlinkJobServerConf.class.getDeclaredFields();
