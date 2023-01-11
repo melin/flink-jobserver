@@ -89,7 +89,7 @@ var Cluster = function () {
                         width: 100,
                         templet: function(record) {
                             const kerberosEnabled = record.kerberosEnabled;
-                            if (kerberosEnabled === 1) {
+                            if (kerberosEnabled) {
                                 return '<span style="font-weight:bold; color: #5FB878">启用</span>'
                             } else {
                                 return '<span style="font-weight:bold;color: #FF5722">关闭</span>'
@@ -243,11 +243,11 @@ var Cluster = function () {
                     content: '<div id="krb5ConfEditor" style="width: 100%;" class="editor"></div>'});
                 krb5ConfEditor = Cluster.getEditor(krb5ConfEditor, "krb5ConfEditor", "ace/mode/properties");
 
-                $("#kerberos_span").show()
+                $(".kerberos_span").show()
             } else {
                 element.tabDelete('config_tabs', 'kerberos_tab')
 
-                $("#kerberos_span").hide()
+                $(".kerberos_span").hide()
             }
         },
 
@@ -300,6 +300,7 @@ var Cluster = function () {
                                 Cluster.changeKerberosTab("true")
                                 Cluster.setEditorValue(krb5ConfEditor, data.kerberosConfig)
                                 data.kerberosEnabled = "true";
+                                $("#kerberosDown").html(data.kerberosFileName);
                             } else {
                                 Cluster.changeKerberosTab("false")
                                 data.kerberosEnabled = "false";

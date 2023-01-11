@@ -16,6 +16,7 @@ import io.github.melin.flink.jobserver.submit.dto.JobInstanceInfo;
 import io.github.melin.flink.jobserver.submit.dto.SubmitYarnResult;
 import io.github.melin.flink.jobserver.support.ClusterConfig;
 import io.github.melin.flink.jobserver.support.ClusterManager;
+import io.github.melin.flink.jobserver.support.KerberosInfo;
 import io.github.melin.flink.jobserver.support.leader.RedisLeaderElection;
 import io.github.melin.flink.jobserver.util.FSUtils;
 import io.github.melin.flink.jobserver.util.JobServerUtils;
@@ -40,6 +41,9 @@ import static io.github.melin.flink.jobserver.FlinkJobServerConf.*;
 import static io.github.melin.flink.jobserver.core.enums.DriverInstance.NEW_INSTANCE;
 import static org.apache.flink.configuration.CoreOptions.FLINK_JM_JVM_OPTIONS;
 import static org.apache.flink.configuration.CoreOptions.FLINK_TM_JVM_OPTIONS;
+import static org.apache.flink.configuration.SecurityOptions.KERBEROS_KRB5_PATH;
+import static org.apache.flink.configuration.SecurityOptions.KERBEROS_LOGIN_KEYTAB;
+import static org.apache.flink.configuration.SecurityOptions.KERBEROS_LOGIN_PRINCIPAL;
 import static org.apache.flink.yarn.configuration.YarnConfigOptions.*;
 
 abstract public class AbstractDriverDeployer {
@@ -73,16 +77,53 @@ abstract public class AbstractDriverDeployer {
     @Value("${spring.datasource.password}")
     private String datasourcePassword;
 
+
     abstract protected String startDriver(DriverDeploymentInfo deploymentInfo, Long driverId) throws Exception;
 
     protected Configuration buildFlinkConfig(DriverDeploymentInfo deploymentInfo) throws Exception {
         final String clusterCode = deploymentInfo.getClusterCode();
-        final String confDir = clusterManager.loadYarnConfig(clusterCode);
-        org.apache.hadoop.conf.Configuration hadoopConf = clusterManager.getHadoopConf(clusterCode);
-        String defaultFS = hadoopConf.get("fs.defaultFS", "hdfs://dzcluster");
-        String driverHome = defaultFS + clusterConfig.getValue(clusterCode, JOBSERVER_DRIVER_HOME);
-        Configuration flinkConfig = GlobalConfiguration.loadConfiguration(confDir);
+        return clusterManager.runSecured(clusterCode, () -> {
+            final String confDir = clusterManager.loadYarnConfig(clusterCode);
+            org.apache.hadoop.conf.Configuration hadoopConf = clusterManager.getHadoopConf(clusterCode);
+            String defaultFS = hadoopConf.get("fs.defaultFS", "hdfs://dzcluster");
+            String driverHome = defaultFS + clusterConfig.getValue(clusterCode, JOBSERVER_DRIVER_HOME);
+            Configuration flinkConfig = GlobalConfiguration.loadConfiguration(confDir);
+            String hadoopUserName = clusterConfig.getDriverHadoopUserName(clusterCode);
+            System.setProperty("HADOOP_USER_NAME", hadoopUserName);
 
+            addYarnConfig(flinkConfig, clusterCode, deploymentInfo.getYarnQueue());
+            Properties params = addJobConfig(flinkConfig, deploymentInfo.getJobConfig());
+            // jm 和 tm jvm 参数
+            jvmConfig(clusterCode, flinkConfig, params, driverHome);
+
+            // Detached模式下，Flink Client创建完集群之后，可以退出命令行窗口，集群独立运行。Attached模式下，Flink Client创建完集群后，不能关闭命令行窗口，需要与集群之间维持连接
+            flinkConfig.setBoolean(DeploymentOptions.ATTACHED, false);
+            String flinkVersion = clusterConfig.getValue(clusterCode, JOBSERVER_FLINK_VERSION);
+            String flinkYarnJarsDir = driverHome + "/flink-" + flinkVersion;
+            FSUtils.checkHdfsPathExist(hadoopConf, flinkYarnJarsDir);
+            flinkConfig.set(PROVIDED_LIB_DIRS, Lists.newArrayList(flinkYarnJarsDir));
+            flinkConfig.set(FLINK_DIST_JAR, driverHome + "/flink-" + flinkVersion + "/flink-dist-" + flinkVersion + ".jar");
+
+            String driverJar = driverHome + "/" + clusterConfig.getValue(clusterCode, JOBSERVER_DRIVER_JAR_NAME);
+            List<String> jobJars = Lists.newArrayList(driverJar);
+            ConfigUtils.encodeCollectionToConfig(flinkConfig, PipelineOptions.JARS, jobJars, Object::toString);
+
+            addKerberosConfig(flinkConfig, clusterCode);
+            return flinkConfig;
+        });
+    }
+
+    private void addKerberosConfig(Configuration flinkConfig, final String clusterCode) {
+        KerberosInfo kerberosInfo = clusterManager.getKerberosInfo(clusterCode);
+        if (kerberosInfo != null && kerberosInfo.isEnabled()) {
+            flinkConfig.setString(KERBEROS_LOGIN_PRINCIPAL, kerberosInfo.getPrincipal());
+            flinkConfig.setString(KERBEROS_LOGIN_KEYTAB, kerberosInfo.getKeytabFile());
+            flinkConfig.setString(KERBEROS_KRB5_PATH, kerberosInfo.getKrb5File());
+        }
+    }
+
+    private void addYarnConfig(Configuration flinkConfig, String clusterCode, String yarnQueue) throws Exception {
+        final String confDir = clusterManager.loadYarnConfig(clusterCode);
         // 加载core-site.xml 和 hdfs-site.xml
         flinkConfig.setString(ConfigConstants.PATH_HADOOP_CONFIG, confDir);
         // 加载 yarn-site.xml
@@ -93,12 +134,7 @@ abstract public class AbstractDriverDeployer {
             flinkConfig.setString("flink." + entry.getKey(), entry.getValue());
         }
 
-        Properties params = addJobConfig(flinkConfig, deploymentInfo.getJobConfig());
-        // jm 和 tm jvm 参数
-        jvmConfig(clusterCode, flinkConfig, params, driverHome);
-
         //设置队列
-        String yarnQueue = deploymentInfo.getYarnQueue();
         if (StringUtils.isNotBlank(yarnQueue)) {
             flinkConfig.setString(APPLICATION_QUEUE, yarnQueue);
         } else {
@@ -108,22 +144,6 @@ abstract public class AbstractDriverDeployer {
         String appName = JobServerUtils.appName(profiles);
         flinkConfig.setString(APPLICATION_NAME, appName);
         flinkConfig.setString(APPLICATION_TYPE, "flink-jobserver");
-
-        String hadoopUserName = clusterConfig.getDriverHadoopUserName(clusterCode);
-        System.setProperty("HADOOP_USER_NAME", hadoopUserName);
-        // Detached模式下，Flink Client创建完集群之后，可以退出命令行窗口，集群独立运行。Attached模式下，Flink Client创建完集群后，不能关闭命令行窗口，需要与集群之间维持连接
-        flinkConfig.setBoolean(DeploymentOptions.ATTACHED, false);
-
-        String flinkVersion = clusterConfig.getValue(clusterCode, JOBSERVER_FLINK_VERSION);
-        String flinkYarnJarsDir = driverHome + "/flink-" + flinkVersion;
-        FSUtils.checkHdfsPathExist(hadoopConf, flinkYarnJarsDir);
-        flinkConfig.set(PROVIDED_LIB_DIRS, Lists.newArrayList(flinkYarnJarsDir));
-        flinkConfig.set(FLINK_DIST_JAR, driverHome + "/flink-" + flinkVersion + "/flink-dist-" + flinkVersion + ".jar");
-
-        String driverJar = driverHome + "/" + clusterConfig.getValue(clusterCode, JOBSERVER_DRIVER_JAR_NAME);
-        List<String> jobJars = Lists.newArrayList(driverJar);
-        ConfigUtils.encodeCollectionToConfig(flinkConfig, PipelineOptions.JARS, jobJars, Object::toString);
-        return flinkConfig;
     }
 
     private Properties addJobConfig(Configuration flinkConfig, String jobConfig) throws IOException {

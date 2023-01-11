@@ -33,7 +33,6 @@ import java.util.*;
 import java.util.concurrent.*;
 
 import static io.github.melin.flink.jobserver.FlinkJobServerConf.*;
-import static io.github.melin.flink.jobserver.support.KerberosLogin.DEFAULT_KEYTAB_FILE_NAME;
 
 @Service
 public class ClusterManager implements InitializingBean {
@@ -42,14 +41,13 @@ public class ClusterManager implements InitializingBean {
 
     public static final String LOCAL_CLUSTER_CONFIG_DIR = FileUtils.getUserDirectory() + "/tmp/jobserver-config";
 
+    private static final ConcurrentMap<String, KerberosInfo> CLUSTER_KERBEROS_INFO_MAP = Maps.newConcurrentMap();
+
     @Autowired
     private ClusterService clusterService;
 
     @Autowired
     protected ClusterConfig clusterConfig;
-
-    @Autowired
-    private KerberosLogin kerberosLogin;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -67,10 +65,6 @@ public class ClusterManager implements InitializingBean {
     private final Map<String, Long> clusterUpdateTimeMap = Maps.newHashMap();
 
     private final Map<String, Configuration> hadoopConfList = Maps.newHashMap();
-
-    private final Map<String, String> keytabFileMap = Maps.newHashMap();
-
-    private final Map<String, String> kerberosConfMap = Maps.newHashMap();
 
     private final ConcurrentMap<String, String> yarnRMAddrMap = Maps.newConcurrentMap();
 
@@ -131,19 +125,12 @@ public class ClusterManager implements InitializingBean {
     public <T> T runSecured(String cluserCode, final Callable<T> securedCallable) {
         String authentication = "simple";
         try {
-            Configuration conf = getHadoopConf(cluserCode);
-            UserGroupInformation userGroupInformation;
-            LOGGER.debug(cluserCode + " login: " + authentication);
+            KerberosInfo kerberosInfo = CLUSTER_KERBEROS_INFO_MAP.get(cluserCode);
 
-            if (clusterService.isKerberosEnabled(cluserCode)) {
+            UserGroupInformation userGroupInformation;
+            if (kerberosInfo != null && kerberosInfo.isEnabled()) {
                 authentication = "kerberos";
-                try {
-                    UserGroupInformation.setConfiguration(conf);
-                    userGroupInformation = loginToKerberos(cluserCode);
-                } catch (IOException e1) {
-                    throw new RuntimeException("setAcl kerberos login error, dataCenter code:"
-                            + cluserCode + " errorMsg: " + e1.getMessage(), e1);
-                }
+                userGroupInformation = loginToKerberos(kerberosInfo, cluserCode);
             } else {
                 String user = clusterConfig.getDriverHadoopUserName(cluserCode);
                 userGroupInformation = UserGroupInformation.createRemoteUser(user, SaslRpcServer.AuthMethod.SIMPLE);
@@ -272,78 +259,68 @@ public class ClusterManager implements InitializingBean {
 
         if (StringUtils.isNotBlank(cluster.getCoreConfig()) &&
                 StringUtils.isNotBlank(cluster.getHdfsConfig())) {
-            FileUtils.write(new File(destDir + "/core-site.xml"),
-                    cluster.getCoreConfig(), StandardCharsets.UTF_8);
-            FileUtils.write(new File(destDir + "/hdfs-site.xml"),
-                    cluster.getHdfsConfig(), StandardCharsets.UTF_8);
-
-            FileUtils.write(new File(destDir + "/flink-conf.yaml"),
-                    cluster.getFlinkConfig(), StandardCharsets.UTF_8);
+            FileUtils.write(new File(destDir + "/core-site.xml"), cluster.getCoreConfig(), StandardCharsets.UTF_8);
+            FileUtils.write(new File(destDir + "/hdfs-site.xml"), cluster.getHdfsConfig(), StandardCharsets.UTF_8);
+            FileUtils.write(new File(destDir + "/flink-conf.yaml"), cluster.getFlinkConfig(), StandardCharsets.UTF_8);
         } else {
             LOGGER.error("集群 " + cluster.getCode() + " hadoop config 有空");
         }
 
         if (StringUtils.isNotBlank(cluster.getHiveConfig())) {
-            FileUtils.write(new File(destDir + "/hive-site.xml"),
-                    cluster.getHiveConfig(), StandardCharsets.UTF_8);
+            FileUtils.write(new File(destDir + "/hive-site.xml"), cluster.getHiveConfig(), StandardCharsets.UTF_8);
         }
 
         boolean yarnEnabled = false;
         if (cluster.getSchedulerType() == SchedulerType.YARN) {
             if (StringUtils.isNotBlank(cluster.getYarnConfig())) {
                 yarnEnabled = true;
-                FileUtils.write(new File(destDir + "/yarn-site.xml"),
-                        cluster.getYarnConfig(), StandardCharsets.UTF_8);
+                FileUtils.write(new File(destDir + "/yarn-site.xml"), cluster.getYarnConfig(), StandardCharsets.UTF_8);
             }
         } else {
             FileUtils.write(new File(destDir + "/kubenetes.yml"),
                     cluster.getYarnConfig(), StandardCharsets.UTF_8);
             if (StringUtils.isNotBlank(cluster.getJmPodTemplate())) {
-                FileUtils.write(new File(destDir + "/jm-pod-manager.yml"),
-                        cluster.getJmPodTemplate(), StandardCharsets.UTF_8);
+                FileUtils.write(new File(destDir + "/jm-pod-manager.yml"), cluster.getJmPodTemplate(), StandardCharsets.UTF_8);
             }
             if (StringUtils.isNotBlank(cluster.getTmPodTemplate())) {
-                FileUtils.write(new File(destDir + "/tm-pod-manager.yml"),
-                        cluster.getTmPodTemplate(), StandardCharsets.UTF_8);
+                FileUtils.write(new File(destDir + "/tm-pod-manager.yml"), cluster.getTmPodTemplate(), StandardCharsets.UTF_8);
             }
         }
 
         Configuration configuration = initConfiguration(cluster, yarnEnabled, destDir);
         if (configuration != null) {
-            yarnConfigDirLists.put(clusterCode, destDir);
-            hadoopConfList.put(clusterCode, configuration);
-
             long updateTime = clusterService.getClusterUpdateTime(clusterCode);
             if (updateTime > 0) {
                 clusterUpdateTimeMap.put(clusterCode, updateTime);
             }
             LOGGER.info("load config {} of cluster {}", destDir, cluster.getName());
 
-            String authentication = configuration.get("hadoop.security.authentication", "");
             if (cluster.isKerberosEnabled()) {
-                if (!"kerberos".equals(authentication)) {
-                    throw new RuntimeException(clusterCode + "存储集群开启kerberos, hadoop.security.authentication 不为 kerberos");
+                LOGGER.info("load kerberos config: {}", clusterCode);
+                String krb5File = destDir + "/krb5.conf";
+                String keytabFile = destDir + "/kerberos.keytab";
+
+                if (StringUtils.isBlank(cluster.getKerberosConfig())) {
+                    LOGGER.error("cluster {} kerberos enabled, krb5 conf is blank", clusterCode);
+                    return;
+                }
+                if (cluster.getKerberosKeytab() == null || cluster.getKerberosKeytab().length == 0) {
+                    LOGGER.error("cluster {} kerberos enabled, Keytab file is blank", clusterCode);
+                    return;
                 }
 
-                LOGGER.info("load kerberos config: {} -> {}", clusterCode, cluster.getCode());
-                String confDir = LOCAL_CLUSTER_CONFIG_DIR + "/" + cluster.getCode();
-                String keytabFile = confDir + "/" + DEFAULT_KEYTAB_FILE_NAME;
-                FileUtils.forceMkdir(new File(confDir));
+                FileUtils.write(new File(krb5File), cluster.getKerberosConfig(), StandardCharsets.UTF_8);
+                FileUtils.writeByteArrayToFile(new File(keytabFile), cluster.getKerberosKeytab());
 
-                kerberosLogin.downloadKeytabFile(cluster, confDir);
-                LOGGER.info("重新加载 kerberos 证书：{}", keytabFile);
-                String kerberosConfFile = confDir + "/krb5.conf";
-                if (!new File(kerberosConfFile).exists()) {
-                    throw new IllegalArgumentException("kerberos conf 文件不存在：" + kerberosConfFile);
-                }
-
-                keytabFileMap.put(clusterCode, keytabFile);
-                kerberosConfMap.put(clusterCode, kerberosConfFile);
-            } else {
-                if ("kerberos".equals(authentication)) {
-                    throw new RuntimeException(clusterCode + "存储集群没有开启kerberos, hadoop.security.authentication=kerberos");
-                }
+                KerberosInfo kerberosInfo = KerberosInfo.builder().enabled(true)
+                        .krb5File(krb5File)
+                        .keytabFile(keytabFile)
+                        .principal(cluster.getKerberosUser()).build();
+                CLUSTER_KERBEROS_INFO_MAP.put(clusterCode, kerberosInfo);
             }
+
+            yarnConfigDirLists.put(clusterCode, destDir);
+            hadoopConfList.put(clusterCode, configuration);
         }
     }
 
@@ -357,17 +334,24 @@ public class ClusterManager implements InitializingBean {
         }
     }
 
-    private UserGroupInformation loginToKerberos(String clusterCode) throws IOException {
-        String kertabFile = keytabFileMap.get(clusterCode);
-        String kerberConfFile = kerberosConfMap.get(clusterCode);
-        String kerberosUser = clusterService.queryKerberosUser(clusterCode);
+    private UserGroupInformation loginToKerberos(KerberosInfo kerberosInfo, String clusterCode) throws IOException {
+        //https://stackoverflow.com/questions/34616676/should-i-call-ugi-checktgtandreloginfromkeytab-before-every-action-on-hadoop
+        UserGroupInformation connectUgi = UserGroupInformation.getCurrentUser();
+        if (!connectUgi.isFromKeytab()) {
+            System.setProperty("java.security.krb5.conf", kerberosInfo.getKrb5File());
+            Configuration conf = hadoopConfList.get(clusterCode);
+            UserGroupInformation.setConfiguration(conf);
+            connectUgi = UserGroupInformation.loginUserFromKeytabAndReturnUGI(
+                    kerberosInfo.getPrincipal(), kerberosInfo.getKeytabFile());
+        }
 
-        Configuration conf = hadoopConfList.get(clusterCode);
-        return kerberosLogin.loginToKerberos(kertabFile, kerberConfFile, kerberosUser, conf);
+        connectUgi.checkTGTAndReloginFromKeytab();
+
+        return connectUgi;
     }
 
-    public String getKeyTabPath(String clusterCode) {
-        return keytabFileMap.get(clusterCode);
+    public KerberosInfo getKerberosInfo(String clusterCode) {
+        return CLUSTER_KERBEROS_INFO_MAP.get(clusterCode);
     }
 
     private YarnResource getResource(String addr) {
