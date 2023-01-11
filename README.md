@@ -1,4 +1,4 @@
-## REST job server for Apache Flink
+## REST job server for Apache Flink (Flink as a Service)
 
 主要特点
 1. 通过Rest API 提交spark 作业运行，支持sql，java/scala 类型作业，解耦业务系统与Flink 集群。
