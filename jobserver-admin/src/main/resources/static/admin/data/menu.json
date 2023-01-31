@@ -8,7 +8,7 @@
 	},
 	{
 		"id": "driver",
-		"title": "Flink Driver",
+		"title": "Flink Application",
 		"icon": "layui-icon layui-icon-component",
 		"type": 1,
 		"openType": "_iframe",
@@ -40,7 +40,7 @@
 	},
 	{
 		"id": "uploadJar",
-		"title": "资源上传",
+		"title": "Resource Upload",
 		"icon": "layui-icon layui-icon-upload",
 		"type": 1,
 		"openType": "_blank",
@@ -48,7 +48,7 @@
 	},
 	{
 		"id": "document",
-		"title": "文档",
+		"title": "API Docs",
 		"icon": "layui-icon layui-icon-template-1",
 		"type": 1,
 		"openType": "_blank",

@@ -1,5 +1,6 @@
 package io.github.melin.flink.jobserver.web.controller;
 
+import com.gitee.melin.bee.util.HibernateUtils;
 import io.github.melin.flink.jobserver.FlinkJobServerConf;
 import io.github.melin.flink.jobserver.core.entity.Cluster;
 import io.github.melin.flink.jobserver.core.enums.SchedulerType;
@@ -71,6 +72,14 @@ public class ClusterController {
                 Lists.newArrayList(order1), page, limit);
     }
 
+    @RequestMapping("/cluster/queryClusterNames")
+    @ResponseBody
+    public List<Cluster> queryClusters() {
+        return clusterService.findByNamedParam(
+                HibernateUtils.projectionList("code", "name", "schedulerType"),
+                new String[]{}, new Object[]{});
+    }
+
     @RequestMapping("/cluster/queryCluster")
     @ResponseBody
     public Result<Cluster> queryCluster(Long clusterId) {
@@ -97,8 +106,16 @@ public class ClusterController {
 
         if (cluster.isKerberosEnabled()) {
             if (StringUtils.isBlank(keytabBase64) || StringUtils.isBlank(cluster.getKerberosConfig())) {
-                throw new IllegalArgumentException("kerberos 配置不能为空");
+                return Result.failureResult("kerberos 配置不能为空");
             }
+
+            if (StringUtils.isNotBlank(cluster.getHdfsConfig())) {
+                if (!StringUtils.contains(cluster.getHdfsConfig(), "dfs.namenode.kerberos.principal")) {
+                    String msg = "开启kerberos 认证，hdfs-site.xml 缺少 dfs.namenode.kerberos.principal 参数配置";
+                    return Result.failureResult(msg);
+                }
+            }
+
             byte[] bytes = keytabBytes(keytabBase64);
             cluster.setKerberosKeytab(bytes);
         }

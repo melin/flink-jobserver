@@ -75,7 +75,7 @@ var Session = function () {
 
             table.render({
                 elem: '#session-table',
-                url: '/cluster/queryClusters',
+                url: '/session/queryClusters',
                 page: true,
                 cols: cols,
                 skin: 'line',
@@ -95,7 +95,7 @@ var Session = function () {
                 if (obj.event === 'remove') {
                     Session.closeCluster(data.id, data.code)
                 } else if (obj.event === 'edit') {
-                    Session.newClusterWin(data.id)
+                    Session.newSessionClusterWin(data.id)
                 }
             });
 
@@ -133,12 +133,28 @@ var Session = function () {
             editor.clearSelection();
         },
 
-        newClusterWin : function(clusterId) {
+        queryClusters: function () {
+            $.ajax({
+                async: false,
+                type : "GET",
+                url: '/cluster/queryClusterNames',
+                success: function (rows) {
+                    let html = "<option value=''>请选择集群</option>";
+                    for (var i = 0, len = rows.length; i < len; i++) {
+                        html += '<option value="' + rows[i].code + '">【' + rows[i].schedulerType + "】" + rows[i].name + '</option>'
+                    }
+                    $("#clusterCode").html(html);
+                }
+            })
+        },
+
+        newSessionClusterWin : function(clusterId) {
+            Session.queryClusters();
             if (clusterId) {
                 $.ajax({
                     async: true,
                     type : "GET",
-                    url: '/cluster/queryCluster',
+                    url: '/session/queryCluster',
                     data: { clusterId: clusterId },
                     success: function (result) {
                         if (result.success) {
@@ -158,7 +174,7 @@ var Session = function () {
                     }
                 })
             } else {
-                form.val('newClusterForm', {code: "", name: ""});
+                form.val('newSessionClusterForm', {code: "", name: ""});
             }
 
             var index = layer.open({
@@ -168,10 +184,10 @@ var Session = function () {
                 shade: 0, //去掉遮罩
                 resize: false,
                 btnAlign: 'c',
-                content: $("#newClusterDiv"),
+                content: $("#newSessionClusterDiv"),
                 btn: ['保存'],
                 btn1: function(index, layero) {
-                    let data = form.val('newClusterForm');
+                    let data = form.val('newSessionClusterForm');
                     if (!data.code) {
                         toastr.error("集群code不能为空");
                         return
@@ -185,7 +201,7 @@ var Session = function () {
                     $.ajax({
                         async: true,
                         type: "POST",
-                        url: '/cluster/saveCluster',
+                        url: '/session/saveCluster',
                         data: data,
                         success: function (result) {
                             if (result.success) {
@@ -209,7 +225,7 @@ var Session = function () {
                 $.ajax({
                     async: true,
                     type : "POST",
-                    url: '/cluster/closeCluster',
+                    url: '/session/closeCluster',
                     data: { clusterId: clusterId },
                     success: function (result) {
                         if (result.success) {

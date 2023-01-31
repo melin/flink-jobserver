@@ -83,12 +83,6 @@ public class YarnApplicationDriverDeployer extends AbstractDriverDeployer {
             LOG.info("start share jobserver: {}, times: {}s", applicationId, times);
 
             if (StringUtils.isNotBlank(applicationId)) {
-                ApplicationDriver driver = driverService.getEntity(driverId);
-                if (driver != null) {
-                    driver.setApplicationId(applicationId);
-                    driverService.updateEntity(driver);
-                }
-
                 waitDriverStartup(clusterCode, applicationId);
             }
 
@@ -110,42 +104,44 @@ public class YarnApplicationDriverDeployer extends AbstractDriverDeployer {
 
     @Override
     protected String startDriver(DriverDeploymentInfo deploymentInfo, Long driverId) throws Exception {
-        final Configuration flinkConfig = buildFlinkConfig(deploymentInfo);
-        flinkConfig.setString(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName());
+        return clusterManager.runSecured(deploymentInfo.getClusterCode(), () -> {
+            final Configuration flinkConfig = buildFlinkConfig(deploymentInfo);
+            flinkConfig.setString(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName());
 
-        final String conf = Base64.getEncoder().encodeToString("{}".getBytes(StandardCharsets.UTF_8));
-        final String clusterCode = deploymentInfo.getClusterCode();
-        List<String> programArgs = Lists.newArrayList("-j", String.valueOf(driverId), "-conf", conf,
-                "-c", clusterCode, "-mode", deploymentInfo.getRuntimeMode().getValue());
-        boolean hiveEnabled = clusterConfig.getBoolean(clusterCode, JOBSERVER_DRIVER_HIVE_ENABLED);
-        if (hiveEnabled) {
-            programArgs.add("-hive");
-        }
+            final String conf = Base64.getEncoder().encodeToString("{}".getBytes(StandardCharsets.UTF_8));
+            final String clusterCode = deploymentInfo.getClusterCode();
+            List<String> programArgs = Lists.newArrayList("-j", String.valueOf(driverId), "-conf", conf,
+                    "-c", clusterCode, "-mode", deploymentInfo.getRuntimeMode().getValue());
+            boolean hiveEnabled = clusterConfig.getBoolean(clusterCode, JOBSERVER_DRIVER_HIVE_ENABLED);
+            if (hiveEnabled) {
+                programArgs.add("-hive");
+            }
 
-        DefaultClusterClientServiceLoader clusterClientServiceLoader = new DefaultClusterClientServiceLoader();
-        ClusterClientFactory<ApplicationId> clientFactory = clusterClientServiceLoader.getClusterClientFactory(flinkConfig);
-        ClusterDescriptor<ApplicationId> clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig);
-        ClusterClient<ApplicationId> clusterClient = null;
-        try {
-            ClusterSpecification clusterSpecification = clientFactory.getClusterSpecification(flinkConfig);
-            LOG.info("------------------------<<specification>>-------------------------");
-            LOG.info(clusterSpecification.toString());
-            LOG.info("------------------------------------------------------------------");
+            DefaultClusterClientServiceLoader clusterClientServiceLoader = new DefaultClusterClientServiceLoader();
+            ClusterClientFactory<ApplicationId> clientFactory = clusterClientServiceLoader.getClusterClientFactory(flinkConfig);
+            ClusterDescriptor<ApplicationId> clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig);
+            ClusterClient<ApplicationId> clusterClient = null;
+            try {
+                ClusterSpecification clusterSpecification = clientFactory.getClusterSpecification(flinkConfig);
+                LOG.info("------------------------<<specification>>-------------------------");
+                LOG.info(clusterSpecification.toString());
+                LOG.info("------------------------------------------------------------------");
 
-            final ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration(
-                    programArgs.toArray(new String[0]), "io.github.melin.flink.jobserver.driver.FlinkDriverServer");
+                final ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration(
+                        programArgs.toArray(new String[0]), "io.github.melin.flink.jobserver.driver.FlinkDriverServer");
 
-            clusterClient = clusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient();
-            ApplicationId applicationId = clusterClient.getClusterId();
-            String jobManagerUrl = clusterClient.getWebInterfaceURL();
-            LOG.info("-------------------------<<applicationId>>------------------------");
-            LOG.info("Flink Job Started: applicationId: " + applicationId + " JobManager Web Interface: " + jobManagerUrl);
-            LOG.info("------------------------------------------------------------------");
+                clusterClient = clusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient();
+                ApplicationId applicationId = clusterClient.getClusterId();
+                String jobManagerUrl = clusterClient.getWebInterfaceURL();
+                LOG.info("-------------------------<<applicationId>>------------------------");
+                LOG.info("Flink Job Started: applicationId: " + applicationId + " JobManager Web Interface: " + jobManagerUrl);
+                LOG.info("------------------------------------------------------------------");
 
-            return applicationId.toString();
-        } finally {
-            IOUtils.closeQuietly(clusterDescriptor, clusterClient);
-        }
+                return applicationId.toString();
+            } finally {
+                IOUtils.closeQuietly(clusterDescriptor, clusterClient);
+            }
+        });
     }
 
     /**

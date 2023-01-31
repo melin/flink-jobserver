@@ -29,9 +29,9 @@
 <body class="pear-container">
 <script type="text/html" id="toolbarDemo">
     <div class="layui-btn-container">
-        <button class="pear-btn pear-btn-primary pear-btn-md" onclick="Session.newClusterWin()">
+        <button class="pear-btn pear-btn-primary pear-btn-md" onclick="Session.newSessionClusterWin()">
             <i class="layui-icon layui-icon-add-1"></i>
-            新建集群
+            新建Session集群
         </button>
     </div>
 </script>
@@ -69,8 +69,8 @@
 </div>
 
 <!--日志显示窗口-->
-<div id="newClusterDiv" title="新建集群" style="display: none;">
-    <form class="layui-form" action="javascript:void(0);" style="margin: 10px" lay-filter="newClusterForm">
+<div id="newSessionClusterDiv" title="新建集群" style="display: none;">
+    <form class="layui-form" action="javascript:void(0);" style="margin: 10px" lay-filter="newSessionClusterForm">
         <div class="layui-card-body layui-row layui-col-space10">
             <div class="layui-col-md3">
                 <label class="layui-form-label form-label">Code</label>
@@ -88,9 +88,7 @@
                 <label class="layui-form-label form-label">Flink 集群</label>
             </div>
             <div class="layui-col-md3">
-                <select name="clusterName" class="layui-input">
-                    <option value="yarn">Yarn</option>
-                    <option value="k8s">Kubernetes</option>
+                <select name="clusterCode" class="layui-input" id="clusterCode">
                 </select>
             </div>
             <div class="layui-col-md3">

@@ -21,7 +21,7 @@ import java.time.Instant;
 @ToString
 @NoArgsConstructor
 @Entity
-@Table(name = "fjs_session_driver")
+@Table(name = "fjs_session_cluster")
 public class SessionCluster implements IEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
