@@ -75,9 +75,8 @@ public class ClusterController {
     @RequestMapping("/cluster/queryClusterNames")
     @ResponseBody
     public List<Cluster> queryClusters() {
-        return clusterService.findByNamedParam(
-                HibernateUtils.projectionList("code", "name", "schedulerType"),
-                new String[]{}, new Object[]{});
+        return clusterService.findAllEntity(
+                HibernateUtils.projectionList("code", "name", "schedulerType"));
     }
 
     @RequestMapping("/cluster/queryCluster")

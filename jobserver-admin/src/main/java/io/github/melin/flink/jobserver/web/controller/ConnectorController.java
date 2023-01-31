@@ -1,6 +1,6 @@
 package io.github.melin.flink.jobserver.web.controller;
 
-import com.gitee.melin.bee.core.jdbc.JDBCDataSourceInfo;
+import com.gitee.melin.bee.core.jdbc.DataSourceInfo;
 import com.gitee.melin.bee.core.support.Pagination;
 import com.gitee.melin.bee.core.support.Result;
 import com.google.common.collect.Lists;
@@ -83,22 +83,9 @@ public class ConnectorController {
 
     @PostMapping("/connector/testConnection")
     @ResponseBody
-    public Result<JDBCDataSourceInfo> testConnection(DataConnector dataConnector) {
-        /*String hostName = connector.get();
-        int port = connector.getPort();
-        SocketAddress socketAddress = new InetSocketAddress(hostName, port);
-        try (Socket socket = new Socket()) {
-            int timeout = 2000;
-            LOG.info("test db connect, code: {}, hostName: {}, port: {}",
-                    dataSource.getCode(), hostName, port);
-            socket.connect(socketAddress, timeout);
-        } catch (IOException e) {
-            LOG.info(e.getMessage(), e);
-            return Result.failureResult("测试连接失败，网络不通: " + e.getMessage());
-        }*/
-
+    public Result<DataSourceInfo> testConnection(DataConnector dataConnector) {
         try {
-            JDBCDataSourceInfo sourceInfo = connectorService.testConnection(dataConnector);
+            DataSourceInfo sourceInfo = connectorService.testConnection(dataConnector);
             return Result.successDataResult(sourceInfo);
         } catch (Exception e) {
             LOG.info(e.getMessage(), e);

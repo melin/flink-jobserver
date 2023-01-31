@@ -1,7 +1,7 @@
 package io.github.melin.flink.jobserver.service;
 
 import com.gitee.melin.bee.core.support.Result;
-import com.gitee.melin.bee.util.MapperUtils;
+import com.gitee.melin.bee.util.JsonUtils;
 import com.gitee.melin.bee.util.RestTemplateUtils;
 import io.github.melin.flink.jobserver.ConfigProperties;
 import io.github.melin.flink.jobserver.api.FlinkJobServerException;
@@ -69,7 +69,7 @@ public class JobServerServiceImpl implements InitializingBean {
     }
 
     public String submitJobInstance(JobSubmitRequet request) {
-        LOG.info("submit job: {}", MapperUtils.toJSONString(request));
+        LOG.info("submit job: {}", JsonUtils.toJSONString(request));
 
         String jobText = request.getJobText();
         if (StringUtils.isBlank(jobText)) {

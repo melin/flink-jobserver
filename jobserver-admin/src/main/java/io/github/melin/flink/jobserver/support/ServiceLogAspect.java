@@ -1,6 +1,6 @@
 package io.github.melin.flink.jobserver.support;
 
-import com.gitee.melin.bee.util.MapperUtils;
+import com.gitee.melin.bee.util.JsonUtils;
 import com.google.common.collect.Maps;
 import io.github.melin.flink.jobserver.util.DateUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -47,12 +47,12 @@ public class ServiceLogAspect {
         json.put("requetTime", DateUtils.getCurrentDateTime());
         json.put("execTime", stopWatch.getTotalTimeMillis());
         json.put("success", success);
-        json.put("params", MapperUtils.toJSONString(joinPoint.getArgs()));
+        json.put("params", JsonUtils.toJSONString(joinPoint.getArgs()));
         if (!success) {
             String rootMsg = ExceptionUtils.getRootCauseMessage(ex);
             json.put("exception", rootMsg);
         }
-        LOG.info(MapperUtils.toJSONString(json));
+        LOG.info(JsonUtils.toJSONString(json));
 
         if (!success) {
             throw ex;

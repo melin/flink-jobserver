@@ -2,8 +2,8 @@ package io.github.melin.flink.jobserver.core.service;
 
 import com.gitee.melin.bee.core.hibernate5.HibernateBaseDao;
 import com.gitee.melin.bee.core.jdbc.AbstractDialect;
-import com.gitee.melin.bee.core.jdbc.Connector;
-import com.gitee.melin.bee.core.jdbc.JDBCDataSourceInfo;
+import com.gitee.melin.bee.core.jdbc.ConnectionDesc;
+import com.gitee.melin.bee.core.jdbc.DataSourceInfo;
 import com.gitee.melin.bee.core.jdbc.JdbcDialectHolder;
 import com.gitee.melin.bee.core.service.BaseServiceImpl;
 import io.github.melin.flink.jobserver.core.dao.DataConnectorDao;
@@ -28,9 +28,9 @@ public class DataConnectorService extends BaseServiceImpl<DataConnector, Long> {
         return connectorDao;
     }
 
-    public JDBCDataSourceInfo testConnection(DataConnector dataConnector) throws SQLException {
-        Connector connector = dataConnector.buildDataConnector();
+    public DataSourceInfo testConnection(DataConnector dataConnector) throws SQLException {
+        ConnectionDesc connector = dataConnector.buildDataConnector();
         AbstractDialect dialect = JdbcDialectHolder.getJdbcDialect(connector);
-        return dialect.checkAccount();
+        return dialect.testConnection();
     }
 }

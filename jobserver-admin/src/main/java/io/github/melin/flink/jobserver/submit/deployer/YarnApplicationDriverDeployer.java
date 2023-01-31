@@ -83,6 +83,7 @@ public class YarnApplicationDriverDeployer extends AbstractDriverDeployer {
             LOG.info("start share jobserver: {}, times: {}s", applicationId, times);
 
             if (StringUtils.isNotBlank(applicationId)) {
+                driverService.updateDriverAppId(driverId, applicationId);
                 waitDriverStartup(clusterCode, applicationId);
             }
 

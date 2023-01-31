@@ -38,17 +38,17 @@ public class ApplicationDriverService extends BaseServiceImpl<ApplicationDriver,
         return applicationDriverDao;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, rollbackFor = Exception.class)
     public ApplicationDriver queryDriverByAppId(String applicationId) {
         return this.queryByNamedParam("applicationId", applicationId);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, rollbackFor = Exception.class)
     public long queryDriverCount(String clusterCode) {
         return this.queryCount("clusterCode", clusterCode);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, rollbackFor = Exception.class)
     public String queryDriverAddressByAppId(String applicationId) {
         ApplicationDriver driver = this.queryDriverByAppId(applicationId);
         if (driver != null) {
@@ -58,7 +58,7 @@ public class ApplicationDriverService extends BaseServiceImpl<ApplicationDriver,
         }
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateServerRunning(ApplicationDriver driver) {
         driver.setStatus(DriverStatus.RUNNING);
         driver.setGmtModified(Instant.now());
@@ -66,7 +66,7 @@ public class ApplicationDriverService extends BaseServiceImpl<ApplicationDriver,
         this.updateEntity(driver);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateServerFinished(String appId) {
         try {
             String hql = "update FlinkDriver set status=:afterStatus, gmtModified=:gmtModified " +
@@ -83,14 +83,14 @@ public class ApplicationDriverService extends BaseServiceImpl<ApplicationDriver,
         }
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, rollbackFor = Exception.class)
     public List<ApplicationDriver> queryAllIdleDrivers(String clusterCode) {
         return findByNamedParamAndOrder(new String[] {"status", "clusterCode"},
                 new Object[]{DriverStatus.IDLE, clusterCode},
                 Order.asc("gmtModified"));
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateYarnQueue(String appId, String yarnQueue) {
         ApplicationDriver driver = queryDriverByAppId(appId);
         if (driver != null) {
@@ -99,7 +99,7 @@ public class ApplicationDriverService extends BaseServiceImpl<ApplicationDriver,
         }
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateDriverStatusIdle(String appId) {
         ApplicationDriver driver = queryDriverByAppId(appId);
         if (driver != null) {
@@ -110,7 +110,7 @@ public class ApplicationDriverService extends BaseServiceImpl<ApplicationDriver,
         }
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void deleteJobServerByAppId(String appId) {
         ApplicationDriver driver = queryDriverByAppId(appId);
         if (driver != null) {
@@ -122,7 +122,7 @@ public class ApplicationDriverService extends BaseServiceImpl<ApplicationDriver,
     /**
      * 清空driver logThread hostName
      */
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void clearCurrentLogServer() {
         try {
             String hql = "update ApplicationDriver set logServer = null where logServer = :logServer";
@@ -133,7 +133,7 @@ public class ApplicationDriverService extends BaseServiceImpl<ApplicationDriver,
         }
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean lockCurrentLogServer(String appId) {
         try {
             String hql = "update ApplicationDriver set logServer=:logServer where logServer is null and applicationId=:appId";
@@ -150,13 +150,13 @@ public class ApplicationDriverService extends BaseServiceImpl<ApplicationDriver,
         return false;
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public List<ApplicationDriver> queryEmptyLogServers() {
         Criterion logServerCtr = Restrictions.isNull("logServer");
         return findByCriterions(logServerCtr);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int updateServerLocked(String applicationId, int version) {
         String hql = "update ApplicationDriver set status=:afterStatus, gmtModified=:gmtModified, version=:afterVersion " +
                 "where status=:beforeStatus and applicationId=:applicationId and version =:beforeVersion";
@@ -170,7 +170,7 @@ public class ApplicationDriverService extends BaseServiceImpl<ApplicationDriver,
         return batch;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, rollbackFor = Exception.class)
     public List<ApplicationDriver> queryAvailableApplication(int maxInstanceCount, Long minJobserverId) {
         Criterion statusCrt = Restrictions.eq("status", DriverStatus.IDLE);
         Criterion shareDriverCrt = Restrictions.eq("shareDriver", true);
@@ -182,6 +182,15 @@ public class ApplicationDriverService extends BaseServiceImpl<ApplicationDriver,
                     instanceCountCrt, idCrt);
         } else {
             return findByCriterions(Order.asc("gmtCreated"), statusCrt, shareDriverCrt, instanceCountCrt);
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void updateDriverAppId(Long driverId, String applicationId) {
+        ApplicationDriver driver = this.getEntity(driverId);
+        if (driver != null) {
+            driver.setApplicationId(applicationId);
+            this.updateEntity(driver);
         }
     }
 }

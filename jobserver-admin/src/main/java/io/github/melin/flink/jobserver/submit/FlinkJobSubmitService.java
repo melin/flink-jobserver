@@ -1,7 +1,7 @@
 package io.github.melin.flink.jobserver.submit;
 
 import com.gitee.melin.bee.core.support.Result;
-import com.gitee.melin.bee.util.MapperUtils;
+import com.gitee.melin.bee.util.JsonUtils;
 import com.gitee.melin.bee.util.NetUtils;
 import com.gitee.melin.bee.util.RestTemplateUtils;
 import io.github.melin.flink.jobserver.ConfigProperties;
@@ -360,7 +360,7 @@ public class FlinkJobSubmitService implements InitializingBean {
 
             instanceDto.setJobText(null);
             LOG.info("requet execute job times: {}ms, url : {}, params: {}",
-                    watch.getTime(), url, MapperUtils.toJSONString(instanceDto));
+                    watch.getTime(), url, JsonUtils.toJSONString(instanceDto));
         } catch (Exception e) {
             instanceService.unLockInstance(instanceCode);
             throw new FlinkJobServerException("提交作业到 " + applicationId + " 失败: " + e.getMessage());

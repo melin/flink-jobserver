@@ -1,6 +1,6 @@
 package io.github.melin.flink.jobserver.util;
 
-import com.gitee.melin.bee.util.MapperUtils;
+import com.gitee.melin.bee.util.JsonUtils;
 import lombok.Data;
 import org.apache.flink.configuration.*;
 import org.apache.flink.configuration.description.BlockElement;
@@ -41,7 +41,7 @@ public class FlinkUtils {
 
         parseConfig(AkkaOptions.class, 350);
         parseConfig(SecurityOptions.class, 300);*/
-        System.out.println(MapperUtils.toJSONString(configs, true));
+        System.out.println(JsonUtils.toJSONString(configs, true));
     }
 
     public static void parseConfig(Class<?> clazz, Integer score) throws Exception {

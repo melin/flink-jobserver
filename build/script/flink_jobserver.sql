@@ -184,7 +184,7 @@ CREATE TABLE `sjs_data_connector` (
     `id` int NOT NULL AUTO_INCREMENT COMMENT 'id',
     `code` varchar(64) DEFAULT NULL COMMENT 'Code，随机字符8位长',
     `name` varchar(128) DEFAULT NULL COMMENT '数据源名称',
-    `db_type` varchar(45) DEFAULT NULL COMMENT 'mysql, db2, pg等',
+    `ds_type` varchar(45) DEFAULT NULL COMMENT 'mysql, db2, pg等',
     `username` varchar(45) DEFAULT NULL COMMENT '数据库账号',
     `password` varchar(45) DEFAULT NULL COMMENT '密码',
     `db_url` varchar(256) DEFAULT NULL COMMENT '数据库连接地址',
