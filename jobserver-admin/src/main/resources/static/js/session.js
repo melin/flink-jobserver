@@ -4,6 +4,20 @@ var Session = function () {
     let dropdown = layui.dropdown;
 
     let otherConfigEditor;
+
+    let flinkCompleter = {
+        identifierRegexps: [/[a-zA-Z_0-9\.\$\-\u00A2-\uFFFF]/], //解决输入点启动提示
+        getCompletions: function(editor, session, pos, prefix, callback) {
+            let currentLine = session.getLine(pos.row)
+            if (currentLine.indexOf(":") > 0) { callback(null, []); return }
+            if (prefix.length === 0) { callback(null, []); return }
+
+            callback(null, FLINK_CONFIG_OPTIONS)
+        }
+    }
+    let langTools = ace.require("ace/ext/language_tools");
+    langTools.setCompleters([flinkCompleter]);
+
     return {
         init: function () {
             let cols = [
@@ -12,36 +26,16 @@ var Session = function () {
                     type: 'numbers'
                 },
                     {
-                        title: '集群Code',
-                        field: 'code',
-                        align: 'left',
-                        width: 120
-                    },
-                    {
-                        title: '集群名称',
-                        field: 'name',
+                        title: 'Session Name',
+                        field: 'sessionName',
                         align: 'left',
                         width: 120,
                     },
                     {
-                        title: '调度类型',
-                        field: 'schedulerType',
+                        title: 'Flink Cluster',
+                        field: 'clusterCode',
                         align: 'left',
-                        width: 100,
-                    },
-                    {
-                        title: '开启kerberos',
-                        field: 'kerberosEnabled',
-                        align: 'left',
-                        width: 100,
-                        templet: function(record) {
-                            const kerberosEnabled = record.kerberosEnabled;
-                            if (kerberosEnabled === 1) {
-                                return '<span style="font-weight:bold; color: #5FB878">启用</span>'
-                            } else {
-                                return '<span style="font-weight:bold;color: #FF5722">关闭</span>'
-                            }
-                        }
+                        width: 120,
                     },
                     {
                         title: '状态',
@@ -50,10 +44,12 @@ var Session = function () {
                         width: 80,
                         templet: function(record) {
                             const status = record.status;
-                            if (status) {
-                                return '<span style="font-weight:bold; color: #5FB878">启用</span>'
-                            } else {
+                            if (status === "running") {
+                                return '<span style="font-weight:bold; color: #5FB878">运行中</span>'
+                            } else if (status === "stopped") {
                                 return '<span style="font-weight:bold;color: #FF5722">关闭</span>'
+                            } else {
+                                return '<span style="font-weight:bold;color: #FF5722">初始化中</span>'
                             }
                         }
                     },
@@ -117,10 +113,22 @@ var Session = function () {
 
         getEditor: function(editor, editorId, mode) {
             editor = ace.edit(editorId);
+            editor.commands.on("afterExec", function (e) {
+                if (e.command.name === "insertstring" && /^[\w.]$/.test(e.args)) {
+                    editor.execCommand("startAutocomplete");
+                }
+            });
+
             editor.setTheme("ace/theme/cobalt");
             editor.getSession().setMode(mode);
             $('#' + editorId).height("260px");
             editor.resize();
+
+            editor.setOptions({
+                enableBasicAutocompletion: true,
+                enableSnippets: true,
+                enableLiveAutocompletion: true
+            });
             return editor;
         },
 
@@ -151,6 +159,7 @@ var Session = function () {
         newSessionClusterWin : function(clusterId) {
             Session.queryClusters();
             if (clusterId) {
+                $("#session_name").attr("readonly", "readonly");
                 $.ajax({
                     async: true,
                     type : "GET",
@@ -159,22 +168,21 @@ var Session = function () {
                     success: function (result) {
                         if (result.success) {
                             let data = result.data;
-                            if (data.kerberosEnabled) {
-                                data.kerberosEnabled = 1;
-                            } else {
-                                data.kerberosEnabled = 0;
-                            }
-                            if (data.status) {
-                                data.status = 1;
-                            } else {
-                                data.status = 0;
-                            }
+                            let config = JSON.parse(data.config);
+                            data.numberOfTaskManagers = config.numberOfTaskManagers
+                            data.jobmanagerCpu = config.jobmanagerCpu
+                            data.jobmanagerMemory = config.jobmanagerMemory
+                            data.taskmanagerCpu = config.taskmanagerCpu
+                            data.taskmanagerMemory = config.taskmanagerMemory
                             form.val('newClusterForm', data);
+
+                            Session.setEditorValue(otherConfigEditor, data.others)
                         }
                     }
                 })
             } else {
                 form.val('newSessionClusterForm', {code: "", name: ""});
+                $("#session_name").attr("readonly", false);
             }
 
             var index = layer.open({
@@ -185,17 +193,27 @@ var Session = function () {
                 resize: false,
                 btnAlign: 'c',
                 content: $("#newSessionClusterDiv"),
-                btn: ['保存'],
+                btn: ['保存', '关闭'],
+                zIndex: 1111,
                 btn1: function(index, layero) {
                     let data = form.val('newSessionClusterForm');
-                    if (!data.code) {
-                        toastr.error("集群code不能为空");
+                    if (!data.sessionName) {
+                        toastr.error("集群 Session Name 不能为空");
                         return
                     }
-                    if (!data.name) {
-                        toastr.error("集群名称不能为空");
+                    if (!data.clusterCode) {
+                        toastr.error("Flink Cluster 不能为空");
                         return
                     }
+
+                    var config = {};
+                    config.numberOfTaskManagers = data.numberOfTaskManagers
+                    config.jobmanagerCpu = data.jobmanagerCpu
+                    config.jobmanagerMemory = data.jobmanagerMemory
+                    config.taskmanagerCpu = data.taskmanagerCpu
+                    config.taskmanagerMemory = data.taskmanagerMemory
+                    config.others = $.trim(otherConfigEditor.getValue());
+                    data.config = JSON.stringify(config);
 
                     data.id = clusterId
                     $.ajax({

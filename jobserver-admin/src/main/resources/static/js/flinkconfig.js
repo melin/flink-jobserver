@@ -1,8 +1,10 @@
 let FLINK_CONFIG_OPTIONS = [ {
     "caption" : "jobmanager.rpc.address",
+    "value" : "jobmanager.rpc.address : ",
     "docHTML" : "The config parameter defining the network address to connect to for communication with the job manager. This value is only interpreted in setups where a single JobManager with static name or address exists (simple standalone setups, or container setups with dynamic service name resolution). It is not used in many high-availability setups, when a leader-election service (like ZooKeeper) is used to elect and discover the JobManager leader from potentially multiple standby JobManagers."
 }, {
     "caption" : "jobmanager.bind-host",
+    "value" : "jobmanager.bind-host : ",
     "docHTML" : "The local address of the network interface that the job manager binds to. If not configured, '0.0.0.0' will be used."
 }, {
     "caption" : "jobmanager.rpc.port",
@@ -11,21 +13,27 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "The config parameter defining the network port to connect to for communication with the job manager. Like jobmanager.rpc.address, this value is only interpreted in setups where a single JobManager with static name/address and port exists (simple standalone setups, or container setups with dynamic service name resolution). This config option is not used in many high-availability setups, when a leader-election service (like ZooKeeper) is used to elect and discover the JobManager leader from potentially multiple standby JobManagers."
 }, {
     "caption" : "jobmanager.rpc.bind-port",
+    "value" : "jobmanager.rpc.bind-port : ",
     "docHTML" : "The local RPC port that the JobManager binds to. If not configured, the external port (configured by 'jobmanager.rpc.port') will be used."
 }, {
     "caption" : "jobmanager.heap.size",
+    "value" : "jobmanager.heap.size : ",
     "docHTML" : "JVM heap size for the JobManager."
 }, {
     "caption" : "jobmanager.heap.mb",
+    "value" : "jobmanager.heap.mb : ",
     "docHTML" : "JVM heap size (in megabytes) for the JobManager."
 }, {
     "caption" : "jobmanager.memory.process.size",
+    "value" : "jobmanager.memory.process.size : ",
     "docHTML" : "Total Process Memory size for the JobManager. This includes all the memory that a JobManager JVM process consumes, consisting of Total Flink Memory, JVM Metaspace, and JVM Overhead. In containerized setups, this should be set to the container memory. See also 'jobmanager.memory.flink.size' for Total Flink Memory size configuration."
 }, {
     "caption" : "jobmanager.memory.flink.size",
+    "value" : "jobmanager.memory.flink.size : ",
     "docHTML" : "Total Flink Memory size for the JobManager. This includes all the memory that a JobManager consumes, except for JVM Metaspace and JVM Overhead. It consists of JVM Heap Memory and Off-heap Memory. See also 'jobmanager.memory.process.size' for total process memory size configuration."
 }, {
     "caption" : "jobmanager.memory.heap.size",
+    "value" : "jobmanager.memory.heap.size : ",
     "docHTML" : "JVM Heap Memory size for JobManager. The minimum recommended JVM Heap size is 128.000mb (134217728 bytes)."
 }, {
     "caption" : "jobmanager.memory.off-heap.size",
@@ -68,6 +76,7 @@ let FLINK_CONFIG_OPTIONS = [ {
     "meta" : "default: region"
 }, {
     "caption" : "jobmanager.archive.fs.dir",
+    "value" : "jobmanager.archive.fs.dir : ",
     "docHTML" : "Dictionary for JobManager to store the archives of completed jobs."
 }, {
     "caption" : "jobstore.cache-size",
@@ -95,9 +104,11 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "Flag indicating whether JobManager would retrieve canonical host name of TaskManager during registration. If the option is set to \"false\", TaskManager registration with JobManager could be faster, since no reverse DNS lookup is performed. However, local input split assignment (such as for HDFS files) may be impacted."
 }, {
     "caption" : "jobmanager.future-pool.size",
+    "value" : "jobmanager.future-pool.size : ",
     "docHTML" : "The size of the future thread pool to execute future callbacks for all spawned JobMasters. If no value is specified, then Flink defaults to the number of available CPU cores."
 }, {
     "caption" : "jobmanager.io-pool.size",
+    "value" : "jobmanager.io-pool.size : ",
     "docHTML" : "The size of the IO thread pool to run blocking operations for all spawned JobMasters. This includes recovery and completion of checkpoints. Increase this value if you experience slow checkpoint operations when running many jobs. If no value is specified, then Flink defaults to the number of available CPU cores."
 }, {
     "caption" : "slot.request.timeout",
@@ -115,6 +126,7 @@ let FLINK_CONFIG_OPTIONS = [ {
     "meta" : "default: Default"
 }, {
     "caption" : "scheduler-mode",
+    "value" : "scheduler-mode : ",
     "docHTML" : "Determines the mode of the scheduler. Note that %s=%s is only supported by standalone application deployments, not by active resource managers (YARN, Kubernetes) or session clusters."
 }, {
     "caption" : "jobmanager.adaptive-scheduler.min-parallelism-increase",
@@ -171,12 +183,15 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "Controls how long an detected slow node should be blocked for."
 }, {
     "caption" : "jobmanager.resource-id",
+    "value" : "jobmanager.resource-id : ",
     "docHTML" : "The JobManager's ResourceID. If not configured, the ResourceID will be generated randomly."
 }, {
     "caption" : "taskmanager.heap.size",
+    "value" : "taskmanager.heap.size : ",
     "docHTML" : "JVM heap size for the TaskManagers, which are the parallel workers of the system. On YARN setups, this value is automatically configured to the size of the TaskManager's YARN container, minus a certain tolerance value."
 }, {
     "caption" : "taskmanager.heap.mb",
+    "value" : "taskmanager.heap.mb : ",
     "docHTML" : "JVM heap size (in megabytes) for the TaskManagers, which are the parallel workers of the system. On YARN setups, this value is automatically configured to the size of the TaskManager's YARN container, minus a certain tolerance value."
 }, {
     "caption" : "taskmanager.jvm-exit-on-oom",
@@ -190,9 +205,11 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "Whether the quarantine monitor for task managers shall be started. The quarantine monitor shuts down the actor system if it detects that it has quarantined another actor system or if it has been quarantined by another actor system."
 }, {
     "caption" : "taskmanager.host",
+    "value" : "taskmanager.host : ",
     "docHTML" : "The external address of the network interface where the TaskManager is exposed. Because different TaskManagers need different values for this option, usually it is specified in an additional non-shared TaskManager-specific config file."
 }, {
     "caption" : "taskmanager.bind-host",
+    "value" : "taskmanager.bind-host : ",
     "docHTML" : "The local address of the network interface that the task manager binds to. If not configured, '0.0.0.0' will be used."
 }, {
     "caption" : "taskmanager.rpc.port",
@@ -201,6 +218,7 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "The external RPC port where the TaskManager is exposed. Accepts a list of ports (“50100,50101”), ranges (“50100-50200”) or a combination of both. It is recommended to set a range of ports to avoid collisions when multiple TaskManagers are running on the same machine."
 }, {
     "caption" : "taskmanager.rpc.bind-port",
+    "value" : "taskmanager.rpc.bind-port : ",
     "docHTML" : "The local RPC port that the TaskManager binds to. If not configured, the external port (configured by 'taskmanager.rpc.port') will be used."
 }, {
     "caption" : "taskmanager.registration.initial-backoff",
@@ -258,15 +276,19 @@ let FLINK_CONFIG_OPTIONS = [ {
     "meta" : "default: ip"
 }, {
     "caption" : "taskmanager.resource-id",
+    "value" : "taskmanager.resource-id : ",
     "docHTML" : "The TaskManager's ResourceID. If not configured, the ResourceID will be generated with the \"RpcAddress:RpcPort\" and a 6-character random string. Notice that this option is not valid in Yarn and Native Kubernetes mode."
 }, {
     "caption" : "taskmanager.cpu.cores",
+    "value" : "taskmanager.cpu.cores : ",
     "docHTML" : "CPU cores for the TaskExecutors. In case of Yarn setups, this value will be rounded to the closest positive integer. If not explicitly configured, legacy config options 'yarn.containers.vcores' and 'kubernetes.taskmanager.cpu' will be used for Yarn / Kubernetes setups, and 'taskmanager.numberOfTaskSlots' will be used for standalone setups (approximate number of slots)."
 }, {
     "caption" : "taskmanager.memory.process.size",
+    "value" : "taskmanager.memory.process.size : ",
     "docHTML" : "Total Process Memory size for the TaskExecutors. This includes all the memory that a TaskExecutor consumes, consisting of Total Flink Memory, JVM Metaspace, and JVM Overhead. On containerized setups, this should be set to the container memory. See also 'taskmanager.memory.flink.size' for total Flink memory size configuration."
 }, {
     "caption" : "taskmanager.memory.flink.size",
+    "value" : "taskmanager.memory.flink.size : ",
     "docHTML" : "Total Flink Memory size for the TaskExecutors. This includes all the memory that a TaskExecutor consumes, except for JVM Metaspace and JVM Overhead. It consists of Framework Heap Memory, Task Heap Memory, Task Off-Heap Memory, Managed Memory, and Network Memory. See also 'taskmanager.memory.process.size' for total process memory size configuration."
 }, {
     "caption" : "taskmanager.memory.framework.heap.size",
@@ -280,6 +302,7 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "Framework Off-Heap Memory size for TaskExecutors. This is the size of off-heap memory (JVM direct memory and native memory) reserved for TaskExecutor framework, which will not be allocated to task slots. The configured value will be fully counted when Flink calculates the JVM max direct memory size parameter."
 }, {
     "caption" : "taskmanager.memory.task.heap.size",
+    "value" : "taskmanager.memory.task.heap.size : ",
     "docHTML" : "Task Heap Memory size for TaskExecutors. This is the size of JVM heap memory reserved for tasks. If not specified, it will be derived as Total Flink Memory minus Framework Heap Memory, Framework Off-Heap Memory, Task Off-Heap Memory, Managed Memory and Network Memory."
 }, {
     "caption" : "taskmanager.memory.task.off-heap.size",
@@ -288,6 +311,7 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "Task Off-Heap Memory size for TaskExecutors. This is the size of off heap memory (JVM direct memory and native memory) reserved for tasks. The configured value will be fully counted when Flink calculates the JVM max direct memory size parameter."
 }, {
     "caption" : "taskmanager.memory.managed.size",
+    "value" : "taskmanager.memory.managed.size : ",
     "docHTML" : "Managed Memory size for TaskExecutors. This is the size of off-heap memory managed by the memory manager, reserved for sorting, hash tables, caching of intermediate results and RocksDB state backend. Memory consumers can either allocate memory from the memory manager in the form of MemorySegments, or reserve bytes from the memory manager and keep their memory usage within that boundary. If unspecified, it will be derived to make up the configured fraction of the Total Flink Memory."
 }, {
     "caption" : "taskmanager.memory.managed.fraction",
@@ -436,11 +460,12 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "Java options to start the JVM of the HistoryServer with."
 }, {
     "caption" : "env.java.opts.client",
-    "value" : "env.java.opts.client = ",
+    "value" : "env.java.opts.client : ",
     "meta" : "default: ",
     "docHTML" : "Java options to start the JVM of the Flink Client with."
 }, {
     "caption" : "env.log.dir",
+    "value" : "env.log.dir : ",
     "docHTML" : "Defines the directory where the Flink logs are saved. It has to be an absolute path. (Defaults to the log directory under Flink’s home)"
 }, {
     "caption" : "env.pid.dir",
@@ -454,15 +479,19 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "The maximum number of old log files to keep."
 }, {
     "caption" : "env.ssh.opts",
+    "value" : "env.ssh.opts : ",
     "docHTML" : "Additional command line options passed to SSH clients when starting or stopping JobManager, TaskManager, and Zookeeper services (start-cluster.sh, stop-cluster.sh, start-zookeeper-quorum.sh, stop-zookeeper-quorum.sh)."
 }, {
     "caption" : "env.hadoop.conf.dir",
+    "value" : "env.hadoop.conf.dir : ",
     "docHTML" : "Path to hadoop configuration directory. It is required to read HDFS and/or YARN configuration. You can also set it via environment variable."
 }, {
     "caption" : "env.yarn.conf.dir",
+    "value" : "env.yarn.conf.dir : ",
     "docHTML" : "Path to yarn configuration directory. It is required to run flink on YARN. You can also set it via environment variable."
 }, {
     "caption" : "env.hbase.conf.dir",
+    "value" : "env.hbase.conf.dir : ",
     "docHTML" : "Path to hbase configuration directory. It is required to read HBASE configuration. You can also set it via environment variable."
 }, {
     "caption" : "io.tmp.dirs",
@@ -476,6 +505,7 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "Default parallelism for jobs."
 }, {
     "caption" : "fs.default-scheme",
+    "value" : "fs.default-scheme : ",
     "docHTML" : "The default filesystem scheme, used for paths that do not declare a scheme explicitly. May contain an authority, e.g. host:port in case of an HDFS NameNode."
 }, {
     "caption" : "fs.allowed-fallback-filesystems",
@@ -611,9 +641,11 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "The maximum number of input records can be buffered for MiniBatch. MiniBatch is an optimization to buffer input records to reduce state access. MiniBatch is triggered with the allowed latency interval and when the maximum number of buffered records reached. NOTE: MiniBatch only works for non-windowed aggregations currently. If table.exec.mini-batch.enabled is set true, its value must be positive."
 }, {
     "caption" : "table.exec.disabled-operators",
+    "value" : "table.exec.disabled-operators : ",
     "docHTML" : "Mainly for testing. A comma-separated list of operator names, each name represents a kind of disabled operator.\nOperators that can be disabled include \"NestedLoopJoin\", \"ShuffleHashJoin\", \"BroadcastHashJoin\", \"SortMergeJoin\", \"HashAgg\", \"SortAgg\".\nBy default no operator is disabled."
 }, {
-    "caption" : "table.exec.shuffle-mode"
+    "caption" : "table.exec.shuffle-mode",
+    "value" : "table.exec.shuffle-mode : "
 }, {
     "caption" : "table.exec.legacy-cast-behaviour",
     "value" : "table.exec.legacy-cast-behaviour : DISABLED",
@@ -774,6 +806,7 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "Java options to start the JVM of the Flink Client with."
 }, {
     "caption" : "env.log.dir",
+    "value" : "env.log.dir : ",
     "docHTML" : "Defines the directory where the Flink logs are saved. It has to be an absolute path. (Defaults to the log directory under Flink’s home)"
 }, {
     "caption" : "env.pid.dir",
@@ -787,15 +820,19 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "The maximum number of old log files to keep."
 }, {
     "caption" : "env.ssh.opts",
+    "value" : "env.ssh.opts : ",
     "docHTML" : "Additional command line options passed to SSH clients when starting or stopping JobManager, TaskManager, and Zookeeper services (start-cluster.sh, stop-cluster.sh, start-zookeeper-quorum.sh, stop-zookeeper-quorum.sh)."
 }, {
     "caption" : "env.hadoop.conf.dir",
+    "value" : "env.hadoop.conf.dir : ",
     "docHTML" : "Path to hadoop configuration directory. It is required to read HDFS and/or YARN configuration. You can also set it via environment variable."
 }, {
     "caption" : "env.yarn.conf.dir",
+    "value" : "env.yarn.conf.dir : ",
     "docHTML" : "Path to yarn configuration directory. It is required to run flink on YARN. You can also set it via environment variable."
 }, {
     "caption" : "env.hbase.conf.dir",
+    "value" : "env.hbase.conf.dir : ",
     "docHTML" : "Path to hbase configuration directory. It is required to read HBASE configuration. You can also set it via environment variable."
 }, {
     "caption" : "io.tmp.dirs",
@@ -809,6 +846,7 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "Default parallelism for jobs."
 }, {
     "caption" : "fs.default-scheme",
+    "value" : "fs.default-scheme : ",
     "docHTML" : "The default filesystem scheme, used for paths that do not declare a scheme explicitly. May contain an authority, e.g. host:port in case of an HDFS NameNode."
 }, {
     "caption" : "fs.allowed-fallback-filesystems",
@@ -827,6 +865,7 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "File writers running with a parallelism larger than one create a directory for the output file path and put the different result files (one per parallel writer task) into that directory. If this option is set to \"true\", writers with a parallelism of 1 will also create a directory and place a single result file into it. If the option is set to \"false\", the writer will directly create the file directly at the output path, without creating a containing directory."
 }, {
     "caption" : "rest.bind-address",
+    "value" : "rest.bind-address : ",
     "docHTML" : "The address that the server binds itself."
 }, {
     "caption" : "rest.bind-port",
@@ -835,6 +874,7 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "The port that the server binds itself. Accepts a list of ports (“50100,50101”), ranges (“50100-50200”) or a combination of both. It is recommended to set a range of ports to avoid collisions when multiple Rest servers are running on the same machine."
 }, {
     "caption" : "rest.address",
+    "value" : "rest.address : ",
     "docHTML" : "The address that should be used by clients to connect to the server. Attention: This option is respected only if the high-availability configuration is NONE."
 }, {
     "caption" : "rest.port",
@@ -938,6 +978,7 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "The number of virtual cores (vcores) per YARN container. By default, the number of vcores is set to the number of slots per TaskManager, if set, or to 1, otherwise. In order for this parameter to be used your cluster must have CPU scheduling enabled. You can do this by setting the %s."
 }, {
     "caption" : "yarn.application-attempts",
+    "value" : "yarn.application-attempts : ",
     "docHTML" : "Number of ApplicationMaster restarts. By default, the value will be set to 1. If high availability is enabled, then the default value will be 2. The restart number is also limited by YARN (configured via %s). Note that that the entire Flink cluster will restart and the YARN Client will lose the connection."
 }, {
     "caption" : "yarn.application-attempt-failures-validity-interval",
@@ -955,6 +996,7 @@ let FLINK_CONFIG_OPTIONS = [ {
     "meta" : "default: 500"
 }, {
     "caption" : "yarn.properties-file.location",
+    "value" : "yarn.properties-file.location : ",
     "docHTML" : "When a Flink job is submitted to YARN, the JobManager’s host and the number of available processing slots is written into a properties file, so that the Flink client is able to pick those details up. This configuration parameter allows changing the default location of that file (for example for environments sharing a Flink installation between users)."
 }, {
     "caption" : "yarn.application-master.port",
@@ -978,33 +1020,43 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "A comma-separated list of tags to apply to the Flink YARN application."
 }, {
     "caption" : "yarn.staging-directory",
+    "value" : "yarn.staging-directory : ",
     "docHTML" : "Staging directory used to store YARN files while submitting applications. Per default, it uses the home directory of the configured file system."
 }, {
     "caption" : "yarn.ship-files",
+    "value" : "yarn.ship-files : ",
     "docHTML" : "A semicolon-separated list of files and/or directories to be shipped to the YARN cluster."
 }, {
     "caption" : "yarn.ship-archives",
+    "value" : "yarn.ship-archives : ",
     "docHTML" : "A semicolon-separated list of archives to be shipped to the YARN cluster. These archives will be un-packed when localizing and they can be any of the following types: \".tar.gz\", \".tar\", \".tgz\", \".dst\", \".jar\", \".zip\"."
 }, {
     "caption" : "yarn.flink-dist-jar",
+    "value" : "yarn.flink-dist-jar : ",
     "docHTML" : "The location of the Flink dist jar."
 }, {
     "caption" : "yarn.application.id",
+    "value" : "yarn.application.id : ",
     "docHTML" : "The YARN application id of the running yarn cluster. This is the YARN cluster where the pipeline is going to be executed."
 }, {
     "caption" : "yarn.application.queue",
+    "value" : "yarn.application.queue : ",
     "docHTML" : "The YARN queue on which to put the current pipeline."
 }, {
     "caption" : "yarn.application.name",
+    "value" : "yarn.application.name : ",
     "docHTML" : "A custom name for your YARN application."
 }, {
     "caption" : "yarn.application.type",
+    "value" : "yarn.application.type : ",
     "docHTML" : "A custom type for your YARN application.."
 }, {
     "caption" : "yarn.application.node-label",
+    "value" : "yarn.application.node-label : ",
     "docHTML" : "Specify YARN node label for the YARN application."
 }, {
     "caption" : "yarn.taskmanager.node-label",
+    "value" : "yarn.taskmanager.node-label : ",
     "docHTML" : "Specify YARN node label for the Flink TaskManagers, it will override the yarn.application.node-label for TaskManagers if both are set."
 }, {
     "caption" : "yarn.security.kerberos.ship-local-keytab",
@@ -1018,21 +1070,27 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "Local (on NodeManager) path where kerberos keytab file will be localized to. If yarn.security.kerberos.ship-local-keytab set to true, Flink willl ship the keytab file as a YARN local resource. In this case, the path is relative to the local resource directory. If set to false, Flink will try to directly locate the keytab from the path itself."
 }, {
     "caption" : "yarn.provided.lib.dirs",
+    "value" : "yarn.provided.lib.dirs : ",
     "docHTML" : "A semicolon-separated list of provided lib directories. They should be pre-uploaded and world-readable. Flink will use them to exclude the local Flink jars(e.g. flink-dist, lib/, plugins/)uploading to accelerate the job submission process. Also YARN will cache them on the nodes so that they doesn't need to be downloaded every time for each application. An example could be hdfs://$namenode_address/path/of/flink/lib"
 }, {
     "caption" : "yarn.provided.usrlib.dir",
+    "value" : "yarn.provided.usrlib.dir : ",
     "docHTML" : "The provided usrlib directory in remote. It should be pre-uploaded and world-readable. Flink will use it to exclude the local usrlib directory(i.e. usrlib/ under the parent directory of FLINK_LIB_DIR). Unlike yarn.provided.lib.dirs, YARN will not cache it on the nodes as it is for each application. An example could be hdfs://$namenode_address/path/of/flink/usrlib"
 }, {
     "caption" : "flink.hadoop.<key>",
+    "value" : "flink.hadoop.<key> : ",
     "docHTML" : "A general option to probe Hadoop configuration through prefix 'flink.hadoop.'. Flink will remove the prefix to get <key> (from %s and %s) then set the <key> and value to Hadoop configuration. For example, flink.hadoop.dfs.replication=5 in Flink configuration and convert to dfs.replication=5 in Hadoop configuration."
 }, {
     "caption" : "flink.yarn.<key>",
+    "value" : "flink.yarn.<key> : ",
     "docHTML" : "A general option to probe Yarn configuration through prefix 'flink.yarn.'. Flink will remove the prefix 'flink.' to get yarn.<key> (from %s) then set the yarn.<key> and value to Yarn configuration. For example, flink.yarn.resourcemanager.container.liveness-monitor.interval-ms=300000 in Flink configuration and convert to yarn.resourcemanager.container.liveness-monitor.interval-ms=300000 in Yarn configuration."
 }, {
     "caption" : "external-resource.<resource_name>.yarn.config-key",
+    "value" : "external-resource.<resource_name>.yarn.config-key : ",
     "docHTML" : "If configured, Flink will add this key to the resource profile of container request to Yarn. The value will be set to the value of external-resource.<resource_name>.amount."
 }, {
     "caption" : "kubernetes.context",
+    "value" : "kubernetes.context : ",
     "docHTML" : "The desired context from your Kubernetes config file used to configure the Kubernetes client for interacting with the cluster. This could be helpful if one has multiple contexts configured and wants to administrate different Flink clusters on different Kubernetes clusters/contexts."
 }, {
     "caption" : "kubernetes.rest-service.exposed.type",
@@ -1061,6 +1119,7 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "Service account that is used by jobmanager and taskmanager within kubernetes cluster. Notice that this can be overwritten by config options 'kubernetes.jobmanager.service-account' and 'kubernetes.taskmanager.service-account' for jobmanager and taskmanager respectively."
 }, {
     "caption" : "kubernetes.jobmanager.owner.reference",
+    "value" : "kubernetes.jobmanager.owner.reference : ",
     "docHTML" : "The user-specified %s to be set to the JobManager Deployment. When all the owner resources are deleted, the JobManager Deployment will be deleted automatically, which also deletes all the resources created by this Flink cluster. The value should be formatted as a semicolon-separated list of owner references, where each owner reference is a comma-separated list of `key:value` pairs. E.g., apiVersion:v1,blockOwnerDeletion:true,controller:true,kind:FlinkApplication,name:flink-app-name,uid:flink-app-uid;apiVersion:v1,kind:Deployment,name:deploy-name,uid:deploy-uid"
 }, {
     "caption" : "kubernetes.jobmanager.cpu",
@@ -1099,9 +1158,11 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "The Kubernetes container image pull policy. The default policy is IfNotPresent to avoid putting pressure to image repository."
 }, {
     "caption" : "kubernetes.container.image.pull-secrets",
+    "value" : "kubernetes.container.image.pull-secrets : ",
     "docHTML" : "A semicolon-separated list of the Kubernetes secrets used to access private image registries."
 }, {
     "caption" : "kubernetes.config.file",
+    "value" : "kubernetes.config.file : ",
     "docHTML" : "The kubernetes config file will be used to create the client. The default is located at ~/.kube/config"
 }, {
     "caption" : "kubernetes.namespace",
@@ -1110,18 +1171,23 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "The namespace that will be used for running the jobmanager and taskmanager pods."
 }, {
     "caption" : "kubernetes.jobmanager.labels",
+    "value" : "kubernetes.jobmanager.labels : ",
     "docHTML" : "The labels to be set for JobManager pod. Specified as key:value pairs separated by commas. For example, version:alphav1,deploy:test."
 }, {
     "caption" : "kubernetes.taskmanager.labels",
+    "value" : "kubernetes.taskmanager.labels : ",
     "docHTML" : "The labels to be set for TaskManager pods. Specified as key:value pairs separated by commas. For example, version:alphav1,deploy:test."
 }, {
     "caption" : "kubernetes.jobmanager.node-selector",
+    "value" : "kubernetes.jobmanager.node-selector : ",
     "docHTML" : "The node selector to be set for JobManager pod. Specified as key:value pairs separated by commas. For example, environment:production,disk:ssd."
 }, {
     "caption" : "kubernetes.taskmanager.node-selector",
+    "value" : "kubernetes.taskmanager.node-selector : ",
     "docHTML" : "The node selector to be set for TaskManager pods. Specified as key:value pairs separated by commas. For example, environment:production,disk:ssd."
 }, {
     "caption" : "kubernetes.cluster-id",
+    "value" : "kubernetes.cluster-id : ",
     "docHTML" : "The cluster-id, which should be no more than 45 characters, is used for identifying a unique Flink cluster. The id must only contain lowercase alphanumeric characters and \"-\". The required format is %s. If not set, the client will automatically generate it with a random ID."
 }, {
     "caption" : "kubernetes.container.image",
@@ -1140,15 +1206,19 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "The flink conf directory that will be mounted in pod. The flink-conf.yaml, log4j.properties, logback.xml in this path will be overwritten from config map."
 }, {
     "caption" : "kubernetes.flink.log.dir",
+    "value" : "kubernetes.flink.log.dir : ",
     "docHTML" : "The directory that logs of jobmanager and taskmanager be saved in the pod. The default value is $FLINK_HOME/log."
 }, {
     "caption" : "kubernetes.hadoop.conf.config-map.name",
+    "value" : "kubernetes.hadoop.conf.config-map.name : ",
     "docHTML" : "Specify the name of an existing ConfigMap that contains custom Hadoop configuration to be mounted on the JobManager(s) and TaskManagers."
 }, {
     "caption" : "kubernetes.jobmanager.annotations",
+    "value" : "kubernetes.jobmanager.annotations : ",
     "docHTML" : "The user-specified annotations that are set to the JobManager pod. The value could be in the form of a1:v1,a2:v2"
 }, {
     "caption" : "kubernetes.taskmanager.annotations",
+    "value" : "kubernetes.taskmanager.annotations : ",
     "docHTML" : "The user-specified annotations that are set to the TaskManager pod. The value could be in the form of a1:v1,a2:v2"
 }, {
     "caption" : "kubernetes.jobmanager.entrypoint.args",
@@ -1162,21 +1232,27 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "Extra arguments used when starting the task manager."
 }, {
     "caption" : "kubernetes.jobmanager.tolerations",
+    "value" : "kubernetes.jobmanager.tolerations : ",
     "docHTML" : "The user-specified tolerations to be set to the JobManager pod. The value should be in the form of key:key1,operator:Equal,value:value1,effect:NoSchedule;key:key2,operator:Exists,effect:NoExecute,tolerationSeconds:6000"
 }, {
     "caption" : "kubernetes.taskmanager.tolerations",
+    "value" : "kubernetes.taskmanager.tolerations : ",
     "docHTML" : "The user-specified tolerations to be set to the TaskManager pod. The value should be in the form of key:key1,operator:Equal,value:value1,effect:NoSchedule;key:key2,operator:Exists,effect:NoExecute,tolerationSeconds:6000"
 }, {
     "caption" : "kubernetes.rest-service.annotations",
+    "value" : "kubernetes.rest-service.annotations : ",
     "docHTML" : "The user-specified annotations that are set to the rest Service. The value should be in the form of a1:v1,a2:v2"
 }, {
     "caption" : "kubernetes.secrets",
+    "value" : "kubernetes.secrets : ",
     "docHTML" : "The user-specified secrets that will be mounted into Flink container. The value should be in the form of %s."
 }, {
     "caption" : "kubernetes.env.secretKeyRef",
+    "value" : "kubernetes.env.secretKeyRef : ",
     "docHTML" : "The user-specified secrets to set env variables in Flink container. The value should be in the form of %s."
 }, {
     "caption" : "external-resource.<resource_name>.kubernetes.config-key",
+    "value" : "external-resource.<resource_name>.kubernetes.config-key : ",
     "docHTML" : "If configured, Flink will add \"resources.limits.<config-key>\" and \"resources.requests.<config-key>\" to the main container of TaskExecutor and set the value to the value of external-resource.<resource_name>.amount."
 }, {
     "caption" : "kubernetes.transactional-operation.max-retries",
@@ -1185,12 +1261,15 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "Defines the number of Kubernetes transactional operation retries before the client gives up. For example, %s."
 }, {
     "caption" : "kubernetes.pod-template-file.jobmanager",
+    "value" : "kubernetes.pod-template-file.jobmanager : ",
     "docHTML" : "Specify a local file that contains the jobmanager pod template definition. It will be used to initialize the jobmanager pod. The main container should be defined with name 'flink-main-container'. If not explicitly configured, config option 'kubernetes.pod-template-file' will be used."
 }, {
     "caption" : "kubernetes.pod-template-file.taskmanager",
+    "value" : "kubernetes.pod-template-file.taskmanager : ",
     "docHTML" : "Specify a local file that contains the taskmanager pod template definition. It will be used to initialize the taskmanager pod. The main container should be defined with name 'flink-main-container'. If not explicitly configured, config option 'kubernetes.pod-template-file' will be used."
 }, {
     "caption" : "kubernetes.pod-template-file",
+    "value" : "kubernetes.pod-template-file : ",
     "docHTML" : "Specify a local file that contains the pod template definition. It will be used to initialize the jobmanager and taskmanager pod. The main container should be defined with name 'flink-main-container'. Notice that this can be overwritten by config options 'kubernetes.pod-template-file.jobmanager' and 'kubernetes.pod-template-file.taskmanager' for jobmanager and taskmanager respectively."
 }, {
     "caption" : "kubernetes.client.io-pool.size",
@@ -1218,7 +1297,8 @@ let FLINK_CONFIG_OPTIONS = [ {
     "meta" : "default: kubernetes.io/hostname",
     "docHTML" : "The node label whose value is the same as the node name. Currently, this will only be used to set the node affinity of TM pods to avoid being scheduled on blocked nodes."
 }, {
-    "caption" : "restart-strategy"
+    "caption" : "restart-strategy",
+    "value" : "restart-strategy : "
 }, {
     "caption" : "restart-strategy.fixed-delay.attempts",
     "value" : "restart-strategy.fixed-delay.attempts : 1",
@@ -1299,9 +1379,11 @@ let FLINK_CONFIG_OPTIONS = [ {
     "meta" : "default: 2147483647",
     "docHTML" : "The number of times a failed cleanup is retried if %s has been set to %s. Reaching the configured limit means that the job artifacts (and the job's JobResultStore entry) might need to be cleaned up manually."
 }, {
-    "caption" : "state.backend"
+    "caption" : "state.backend",
+    "value" : "state.backend : "
 }, {
-    "caption" : "state.checkpoint-storage"
+    "caption" : "state.checkpoint-storage",
+    "value" : "state.checkpoint-storage : "
 }, {
     "caption" : "state.checkpoints.num-retained",
     "value" : "state.checkpoints.num-retained : 1",
@@ -1324,12 +1406,15 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "This option configures local recovery for this state backend. By default, local recovery is deactivated. Local recovery currently only covers keyed state backends (including both the EmbeddedRocksDBStateBackend and the HashMapStateBackend)."
 }, {
     "caption" : "taskmanager.state.local.root-dirs",
+    "value" : "taskmanager.state.local.root-dirs : ",
     "docHTML" : "The config parameter defining the root directories for storing file-based state for local recovery. Local recovery currently only covers keyed state backends. If not configured it will default to <WORKING_DIR>/localState. The <WORKING_DIR> can be configured via %s"
 }, {
     "caption" : "state.savepoints.dir",
+    "value" : "state.savepoints.dir : ",
     "docHTML" : "The default directory for savepoints. Used by the state backends that write savepoints to file systems (HashMapStateBackend, EmbeddedRocksDBStateBackend)."
 }, {
     "caption" : "state.checkpoints.dir",
+    "value" : "state.checkpoints.dir : ",
     "docHTML" : "The default directory used for storing the data files and meta data of checkpoints in a Flink supported filesystem. The storage path must be accessible from all participating processes/nodes(i.e. all TaskManagers and JobManagers)."
 }, {
     "caption" : "state.storage.fs.memory-threshold",
@@ -1353,6 +1438,7 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "The ID of the Flink cluster, used to separate multiple Flink clusters from each other. Needs to be set for standalone clusters but is automatically inferred in YARN."
 }, {
     "caption" : "high-availability.storageDir",
+    "value" : "high-availability.storageDir : ",
     "docHTML" : "File system path (URI) where Flink persists metadata in high-availability setups."
 }, {
     "caption" : "high-availability.jobmanager.port",
@@ -1361,6 +1447,7 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "The port (range) used by the Flink Master for its RPC connections in highly-available setups. In highly-available setups, this value is used instead of 'jobmanager.rpc.port'.A value of '0' means that a random free port is chosen. TaskManagers discover this port through the high-availability services (leader election), so a random port or a port range works without requiring any additional means of service discovery."
 }, {
     "caption" : "high-availability.zookeeper.quorum",
+    "value" : "high-availability.zookeeper.quorum : ",
     "docHTML" : "The ZooKeeper quorum to use, when running Flink in a high-availability mode with ZooKeeper."
 }, {
     "caption" : "high-availability.zookeeper.path.root",
@@ -1409,6 +1496,7 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "Defines whether a suspended ZooKeeper connection will be treated as an error that causes the leader information to be invalidated or not. In case you set this option to %s, Flink will wait until a ZooKeeper connection is marked as lost before it revokes the leadership of components. This has the effect that Flink is more resilient against temporary connection instabilities at the cost of running more likely into timing issues with ZooKeeper."
 }, {
     "caption" : "high-availability.job.delay",
+    "value" : "high-availability.job.delay : ",
     "docHTML" : "The time before a JobManager after a fail over recovers the current jobs."
 }, {
     "caption" : "state.backend.rocksdb.metrics.num-immutable-mem-table",
@@ -1587,6 +1675,7 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "Monitor the duration of writer requiring to wait for compaction or flush to finish in RocksDB."
 }, {
     "caption" : "state.backend.rocksdb.localdir",
+    "value" : "state.backend.rocksdb.localdir : ",
     "docHTML" : "The local directory (on the TaskManager) where RocksDB puts its files. Per default, it will be <WORKING_DIR>/tmp. See %s for more details."
 }, {
     "caption" : "state.backend.rocksdb.timer-service.factory",
@@ -1605,6 +1694,7 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "The predefined settings for RocksDB DBOptions and ColumnFamilyOptions by Flink community. Current supported candidate predefined-options are DEFAULT, SPINNING_DISK_OPTIMIZED, SPINNING_DISK_OPTIMIZED_HIGH_MEM or FLASH_SSD_OPTIMIZED. Note that user customized options and options from the RocksDBOptionsFactory are applied on top of these predefined ones."
 }, {
     "caption" : "state.backend.rocksdb.options-factory",
+    "value" : "state.backend.rocksdb.options-factory : ",
     "docHTML" : "The options factory class for users to add customized options in DBOptions and ColumnFamilyOptions for RocksDB. If set, the RocksDB state backend will load the class and apply configs to DBOptions and ColumnFamilyOptions after loading ones from 'RocksDBConfigurableOptions' and pre-defined options."
 }, {
     "caption" : "state.backend.rocksdb.memory.managed",
@@ -1613,6 +1703,7 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "If set, the RocksDB state backend will automatically configure itself to use the managed memory budget of the task slot, and divide the memory over write buffers, indexes, block caches, etc. That way, the three major uses of memory of RocksDB will be capped."
 }, {
     "caption" : "state.backend.rocksdb.memory.fixed-per-slot",
+    "value" : "state.backend.rocksdb.memory.fixed-per-slot : ",
     "docHTML" : "The fixed total amount of memory, shared among all RocksDB instances per slot. This option overrides the 'state.backend.rocksdb.memory.managed' option when configured. If neither this option, nor the 'state.backend.rocksdb.memory.managed' optionare set, then each RocksDB column family state has its own memory caches (as controlled by the column family options)."
 }, {
     "caption" : "state.backend.rocksdb.memory.write-buffer-ratio",
@@ -1690,13 +1781,15 @@ let FLINK_CONFIG_OPTIONS = [ {
     "meta" : "default: PT0S"
 }, {
     "caption" : "execution.checkpointing.tolerable-failed-checkpoints",
+    "value" : "execution.checkpointing.tolerable-failed-checkpoints : ",
     "docHTML" : "The tolerable checkpoint consecutive failure number. If set to 0, that means we do not tolerance any checkpoint failure. This only applies to the following failure reasons: IOException on the Job Manager, failures in the async phase on the Task Managers and checkpoint expiration due to a timeout. Failures originating from the sync phase on the Task Managers are always forcing failover of an affected task. Other types of checkpoint failures (such as checkpoint being subsumed) are being ignored."
 }, {
     "caption" : "execution.checkpointing.externalized-checkpoint-retention",
     "value" : "execution.checkpointing.externalized-checkpoint-retention : NO_EXTERNALIZED_CHECKPOINTS",
     "meta" : "default: NO_EXTERNALIZED_CHECKPOINTS"
 }, {
-    "caption" : "execution.checkpointing.interval"
+    "caption" : "execution.checkpointing.interval",
+    "value" : "execution.checkpointing.interval : "
 }, {
     "caption" : "execution.checkpointing.unaligned",
     "value" : "execution.checkpointing.unaligned : false",
@@ -1725,12 +1818,15 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "Feature toggle for enabling checkpointing even if some of tasks have finished. Before you enable it, please take a look at %s "
 }, {
     "caption" : "pipeline.name",
+    "value" : "pipeline.name : ",
     "docHTML" : "The job name used for printing and logging."
 }, {
     "caption" : "pipeline.jars",
+    "value" : "pipeline.jars : ",
     "docHTML" : "A semicolon-separated list of the jars to package with the job jars to be sent to the cluster. These have to be valid paths."
 }, {
     "caption" : "pipeline.classpaths",
+    "value" : "pipeline.classpaths : ",
     "docHTML" : "A semicolon-separated list of the classpaths to package with the job jars to be sent to the cluster. These have to be valid URLs."
 }, {
     "caption" : "pipeline.auto-generate-uids",
@@ -1766,6 +1862,7 @@ let FLINK_CONFIG_OPTIONS = [ {
     "meta" : "default: true"
 }, {
     "caption" : "pipeline.global-job-parameters",
+    "value" : "pipeline.global-job-parameters : ",
     "docHTML" : "Register a custom, serializable user configuration object. The configuration can be  accessed in operators"
 }, {
     "caption" : "pipeline.max-parallelism",
@@ -1778,12 +1875,15 @@ let FLINK_CONFIG_OPTIONS = [ {
     "meta" : "default: false",
     "docHTML" : "When enabled objects that Flink internally uses for deserialization and passing data to user-code functions will be reused. Keep in mind that this can lead to bugs when the user-code function of an operation is not aware of this behaviour."
 }, {
-    "caption" : "pipeline.default-kryo-serializers"
+    "caption" : "pipeline.default-kryo-serializers",
+    "value" : "pipeline.default-kryo-serializers : "
 }, {
     "caption" : "pipeline.registered-kryo-types",
+    "value" : "pipeline.registered-kryo-types : ",
     "docHTML" : "Semicolon separated list of types to be registered with the serialization stack. If the type is eventually serialized as a POJO, then the type is registered with the POJO serializer. If the type ends up being serialized with Kryo, then it will be registered at Kryo to make sure that only tags are written."
 }, {
     "caption" : "pipeline.registered-pojo-types",
+    "value" : "pipeline.registered-pojo-types : ",
     "docHTML" : "Semicolon separated list of types to be registered with the serialization stack. If the type is eventually serialized as a POJO, then the type is registered with the POJO serializer. If the type ends up being serialized with Kryo, then it will be registered at Kryo to make sure that only tags are written."
 }, {
     "caption" : "pipeline.operator-chaining",
@@ -1791,7 +1891,8 @@ let FLINK_CONFIG_OPTIONS = [ {
     "meta" : "default: true",
     "docHTML" : "Operator chaining allows non-shuffle operations to be co-located in the same thread fully avoiding serialization and de-serialization."
 }, {
-    "caption" : "pipeline.cached-files"
+    "caption" : "pipeline.cached-files",
+    "value" : "pipeline.cached-files : "
 }, {
     "caption" : "pipeline.vertex-description-mode",
     "value" : "pipeline.vertex-description-mode : TREE",
@@ -1804,12 +1905,15 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "Whether name of vertex includes topological index or not. When it is true, the name will have a prefix of index of the vertex, like '[vertex-0]Source: source'. It is false by default"
 }, {
     "caption" : "metrics.reporters",
+    "value" : "metrics.reporters : ",
     "docHTML" : "An optional list of reporter names. If configured, only reporters whose name matches any of the names in the list will be started. Otherwise, all reporters that could be found in the configuration will be started."
 }, {
     "caption" : "class",
+    "value" : "class : ",
     "docHTML" : "The reporter class to use for the reporter named <name>."
 }, {
     "caption" : "factory.class",
+    "value" : "factory.class : ",
     "docHTML" : "The reporter factory class to use for the reporter named <name>."
 }, {
     "caption" : "interval",
@@ -1841,6 +1945,7 @@ let FLINK_CONFIG_OPTIONS = [ {
     "meta" : "default: []"
 }, {
     "caption" : "<parameter>",
+    "value" : "<parameter> : ",
     "docHTML" : "Configures the parameter <parameter> for the reporter named <name>."
 }, {
     "caption" : "metrics.scope.delimiter",
@@ -1948,6 +2053,7 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "Timeout for all outbound connections. If you should experience problems with connecting to a TaskManager due to a slow network, you should increase this value."
 }, {
     "caption" : "akka.startup-timeout",
+    "value" : "akka.startup-timeout : ",
     "docHTML" : "Timeout after which the startup of a remote component is considered being failed."
 }, {
     "caption" : "akka.ssl.enabled",
@@ -2066,12 +2172,15 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "List of factories that should be used to instantiate security modules. All listed modules will be installed. Keep in mind that the configured security context might rely on some modules being present."
 }, {
     "caption" : "security.kerberos.login.principal",
+    "value" : "security.kerberos.login.principal : ",
     "docHTML" : "Kerberos principal name associated with the keytab."
 }, {
     "caption" : "security.kerberos.login.keytab",
+    "value" : "security.kerberos.login.keytab : ",
     "docHTML" : "Absolute path to a Kerberos keytab file that contains the user credentials."
 }, {
     "caption" : "security.kerberos.krb5-conf.path",
+    "value" : "security.kerberos.krb5-conf.path : ",
     "docHTML" : "Specify the local location of the krb5.conf file. If defined, this conf would be mounted on the JobManager and TaskManager containers/pods for Kubernetes and Yarn. Note: The KDC defined needs to be visible from inside the containers."
 }, {
     "caption" : "security.kerberos.login.use-ticket-cache",
@@ -2080,6 +2189,7 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "Indicates whether to read from your Kerberos ticket cache."
 }, {
     "caption" : "security.kerberos.login.contexts",
+    "value" : "security.kerberos.login.contexts : ",
     "docHTML" : "A comma-separated list of login contexts to provide the Kerberos credentials to (for example, `Client,KafkaClient` to use the credentials for ZooKeeper authentication and for Kafka authentication)"
 }, {
     "caption" : "security.kerberos.fetch.delegation-token",
@@ -2103,6 +2213,7 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "Ratio of the tokens's expiration time when new credentials should be re-obtained."
 }, {
     "caption" : "security.kerberos.access.hadoopFileSystems",
+    "value" : "security.kerberos.access.hadoopFileSystems : ",
     "docHTML" : "A comma-separated list of Kerberos-secured Hadoop filesystems Flink is going to access. For example, security.kerberos.access.hadoopFileSystems=hdfs://namenode2:9002,hdfs://namenode3:9003. The JobManager needs to have access to these filesystems to retrieve the security tokens."
 }, {
     "caption" : "zookeeper.sasl.disable",
@@ -2141,54 +2252,71 @@ let FLINK_CONFIG_OPTIONS = [ {
     "docHTML" : "Turns on mutual SSL authentication for external communication via the REST endpoints."
 }, {
     "caption" : "security.ssl.keystore",
+    "value" : "security.ssl.keystore : ",
     "docHTML" : "The Java keystore file to be used by the flink endpoint for its SSL Key and Certificate."
 }, {
     "caption" : "security.ssl.keystore-password",
+    "value" : "security.ssl.keystore-password : ",
     "docHTML" : "The secret to decrypt the keystore file."
 }, {
     "caption" : "security.ssl.key-password",
+    "value" : "security.ssl.key-password : ",
     "docHTML" : "The secret to decrypt the server key in the keystore."
 }, {
     "caption" : "security.ssl.truststore",
+    "value" : "security.ssl.truststore : ",
     "docHTML" : "The truststore file containing the public CA certificates to be used by flink endpoints to verify the peer’s certificate."
 }, {
     "caption" : "security.ssl.truststore-password",
+    "value" : "security.ssl.truststore-password : ",
     "docHTML" : "The secret to decrypt the truststore."
 }, {
     "caption" : "security.ssl.internal.keystore",
+    "value" : "security.ssl.internal.keystore : ",
     "docHTML" : "The Java keystore file with SSL Key and Certificate, to be used Flink's internal endpoints (rpc, data transport, blob server)."
 }, {
     "caption" : "security.ssl.internal.keystore-password",
+    "value" : "security.ssl.internal.keystore-password : ",
     "docHTML" : "The secret to decrypt the keystore file for Flink's for Flink's internal endpoints (rpc, data transport, blob server)."
 }, {
     "caption" : "security.ssl.internal.key-password",
+    "value" : "security.ssl.internal.key-password : ",
     "docHTML" : "The secret to decrypt the key in the keystore for Flink's internal endpoints (rpc, data transport, blob server)."
 }, {
     "caption" : "security.ssl.internal.truststore",
+    "value" : "security.ssl.internal.truststore : ",
     "docHTML" : "The truststore file containing the public CA certificates to verify the peer for Flink's internal endpoints (rpc, data transport, blob server)."
 }, {
     "caption" : "security.ssl.internal.truststore-password",
+    "value" : "security.ssl.internal.truststore-password : ",
     "docHTML" : "The password to decrypt the truststore for Flink's internal endpoints (rpc, data transport, blob server)."
 }, {
     "caption" : "security.ssl.internal.cert.fingerprint",
+    "value" : "security.ssl.internal.cert.fingerprint : ",
     "docHTML" : "The sha1 fingerprint of the internal certificate. This further protects the internal communication to present the exact certificate used by Flink.This is necessary where one cannot use private CA(self signed) or there is internal firm wide CA is required"
 }, {
     "caption" : "security.ssl.rest.keystore",
+    "value" : "security.ssl.rest.keystore : ",
     "docHTML" : "The Java keystore file with SSL Key and Certificate, to be used Flink's external REST endpoints."
 }, {
     "caption" : "security.ssl.rest.keystore-password",
+    "value" : "security.ssl.rest.keystore-password : ",
     "docHTML" : "The secret to decrypt the keystore file for Flink's for Flink's external REST endpoints."
 }, {
     "caption" : "security.ssl.rest.key-password",
+    "value" : "security.ssl.rest.key-password : ",
     "docHTML" : "The secret to decrypt the key in the keystore for Flink's external REST endpoints."
 }, {
     "caption" : "security.ssl.rest.truststore",
+    "value" : "security.ssl.rest.truststore : ",
     "docHTML" : "The truststore file containing the public CA certificates to verify the peer for Flink's external REST endpoints."
 }, {
     "caption" : "security.ssl.rest.truststore-password",
+    "value" : "security.ssl.rest.truststore-password : ",
     "docHTML" : "The password to decrypt the truststore for Flink's external REST endpoints."
 }, {
     "caption" : "security.ssl.rest.cert.fingerprint",
+    "value" : "security.ssl.rest.cert.fingerprint : ",
     "docHTML" : "The sha1 fingerprint of the rest certificate. This further protects the rest REST endpoints to present certificate which is only used by proxy serverThis is necessary where once uses public CA or internal firm wide CA"
 }, {
     "caption" : "security.ssl.protocol",
@@ -2213,12 +2341,12 @@ let FLINK_CONFIG_OPTIONS = [ {
     "caption" : "security.ssl.internal.session-cache-size",
     "value" : "security.ssl.internal.session-cache-size : -1",
     "meta" : "default: -1",
-    "docHTML" : "The size of the cache used for storing SSL session objects. According to %s, you should always set this to an appropriate number to not run into a bug with stalling IO threads during garbage collection. (-1 = use system default)."
+    "docHTML" : "The size of the cache used for storing SSL session objects. According to %s, you should always set this to an appropriate number to not run into a bug with stalling IO threads during garbage collection. (-1 : use system default)."
 }, {
     "caption" : "security.ssl.internal.session-timeout",
     "value" : "security.ssl.internal.session-timeout : -1",
     "meta" : "default: -1",
-    "docHTML" : "The timeout (in ms) for the cached SSL session objects. (-1 = use system default)"
+    "docHTML" : "The timeout (in ms) for the cached SSL session objects. (-1 : use system default)"
 }, {
     "caption" : "security.ssl.internal.handshake-timeout",
     "value" : "security.ssl.internal.handshake-timeout : -1",
@@ -2228,5 +2356,5 @@ let FLINK_CONFIG_OPTIONS = [ {
     "caption" : "security.ssl.internal.close-notify-flush-timeout",
     "value" : "security.ssl.internal.close-notify-flush-timeout : -1",
     "meta" : "default: -1",
-    "docHTML" : "The timeout (in ms) for flushing the `close_notify` that was triggered by closing a channel. If the `close_notify` was not flushed in the given timeout the channel will be closed forcibly. (-1 = use system default)"
+    "docHTML" : "The timeout (in ms) for flushing the `close_notify` that was triggered by closing a channel. If the `close_notify` was not flushed in the given timeout the channel will be closed forcibly. (-1 : use system default)"
 } ]

@@ -141,7 +141,6 @@ public class KubenetesSessionDriverDeployer extends AbstractKubernetesDeployer {
         try {
             SessionCluster driver = SessionCluster.buildSessionDriver(clusterCode, sessionName);
             String yarnQueue = clusterConfig.getValue(clusterCode, JOBSERVER_DRIVER_YARN_QUEUE_NAME);
-            driver.setYarnQueue(yarnQueue);
 
             while (!redisLeaderElection.trylock()) {
                 TimeUnit.MILLISECONDS.sleep(100);

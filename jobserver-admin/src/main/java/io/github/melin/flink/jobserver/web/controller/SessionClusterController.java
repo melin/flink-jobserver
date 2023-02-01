@@ -1,12 +1,10 @@
 package io.github.melin.flink.jobserver.web.controller;
 
 import com.gitee.melin.bee.core.support.Pagination;
+import com.gitee.melin.bee.core.support.Result;
 import com.google.common.collect.Lists;
-import io.github.melin.flink.jobserver.ConfigProperties;
 import io.github.melin.flink.jobserver.FlinkJobServerConf;
-import io.github.melin.flink.jobserver.core.entity.Cluster;
 import io.github.melin.flink.jobserver.core.entity.SessionCluster;
-import io.github.melin.flink.jobserver.core.service.ClusterService;
 import io.github.melin.flink.jobserver.core.service.SessionClusterService;
 import io.github.melin.flink.jobserver.support.ClusterConfig;
 import org.apache.commons.lang3.StringUtils;
@@ -20,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.Instant;
 import java.util.List;
 
 @Controller
@@ -31,18 +30,13 @@ public class SessionClusterController {
     private SessionClusterService driverService;
 
     @Autowired
-    private ConfigProperties configProperties;
-
-    @Autowired
-    private ClusterService clusterService;
+    private SessionClusterService sessionClusterService;
 
     @Autowired
     private ClusterConfig clusterConfig;
 
     @RequestMapping("/session")
     public String home(ModelMap model) {
-        List<Cluster> clusters = clusterService.queryValidClusters();
-        model.addAttribute("clusters", clusters);
         return "session";
     }
 
@@ -76,5 +70,30 @@ public class SessionClusterController {
         });
 
         return pagination;
+    }
+
+    @RequestMapping("/session/saveCluster")
+    @ResponseBody
+    public Result<Void> saveCluster(SessionCluster cluster) {
+        try {
+            cluster.setGmtCreated(Instant.now());
+            cluster.setGmtModified(Instant.now());
+
+            if (cluster.getId() == null) {
+                cluster.setCreater("jobserver");
+                cluster.setModifier("jobserver");
+                sessionClusterService.insertEntity(cluster);
+            } else {
+                SessionCluster old = sessionClusterService.getEntity(cluster.getId());
+                old.setConfig(cluster.getConfig());
+                old.setClusterCode(cluster.getClusterCode());
+                old.setGmtModified(Instant.now());
+                sessionClusterService.updateEntity(old);
+            }
+            return Result.successResult();
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return Result.failureResult(e.getMessage());
+        }
     }
 }

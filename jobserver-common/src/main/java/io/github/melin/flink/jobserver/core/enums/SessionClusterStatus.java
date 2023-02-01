@@ -11,12 +11,11 @@ import com.gitee.melin.bee.core.enums.jackson.JacksonEnumStringSerializer;
 @JsonSerialize(using = JacksonEnumStringSerializer.class)
 public enum SessionClusterStatus implements BaseStringEnum {
 
+    STOPPED("停止", "stopped"),
+
     INIT("初始化", "init"),
 
-
-    RUNNING("运行", "running"),
-
-    FINISHED("完成", "stopped");
+    RUNNING("运行", "running");
 
     private final String name;
 

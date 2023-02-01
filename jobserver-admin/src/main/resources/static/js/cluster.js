@@ -288,6 +288,7 @@ var Cluster = function () {
         newClusterWin : function(clusterId) {
             if (clusterId) {
                 editClusterId = clusterId;
+                $("#cluster_code").attr("readonly", "readonly");
                 $.ajax({
                     async: true,
                     type : "GET",
@@ -333,6 +334,7 @@ var Cluster = function () {
                 $("#schedulerType").attr("disabled","disabled");
                 form.render('select');
             } else {
+                $("#cluster_code").attr("readonly", false);
                 form.val('newClusterForm', {code: "", name: ""});
                 Cluster.setEditorValue(jobserverEditor, $("#confDefaultValue").val())
                 Cluster.setEditorValue(flinkEditor, "")
@@ -356,7 +358,7 @@ var Cluster = function () {
                 resize: false,
                 btnAlign: 'c',
                 content: $("#newClusterDiv"),
-                btn: ['保存', '取消'],
+                btn: ['保存', '关闭'],
                 zIndex: 1111,
                 btn1: function(index, layero) {
                     let data = form.val('newClusterForm');

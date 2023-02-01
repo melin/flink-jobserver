@@ -73,19 +73,13 @@
     <form class="layui-form" action="javascript:void(0);" style="margin: 10px" lay-filter="newSessionClusterForm">
         <div class="layui-card-body layui-row layui-col-space10">
             <div class="layui-col-md3">
-                <label class="layui-form-label form-label">Code</label>
+                <label class="layui-form-label form-label">Session Name</label>
             </div>
             <div class="layui-col-md3">
-                <input type="text" name="code" hover placeholder="只能字母、数字和下划线组成" autocomplete="off" id="cluster_code" class="layui-input">
+                <input type="text" name="sessionName" hover placeholder="只能字母、数字和下划线组成" autocomplete="off" id="session_name" class="layui-input">
             </div>
             <div class="layui-col-md3">
-                <label class="layui-form-label form-label">名称</label>
-            </div>
-            <div class="layui-col-md3">
-                <input type="text" name="name" hover placeholder="集群名称" autocomplete="off" id="cluster_name" class="layui-input">
-            </div>
-            <div class="layui-col-md3">
-                <label class="layui-form-label form-label">Flink 集群</label>
+                <label class="layui-form-label form-label">Flink Cluster</label>
             </div>
             <div class="layui-col-md3">
                 <select name="clusterCode" class="layui-input" id="clusterCode">
@@ -104,7 +98,7 @@
                 <input type="text" name="jobmanagerCpu" value="1" autocomplete="off" class="layui-input">
             </div>
             <div class="layui-col-md3">
-                <label class="layui-form-label form-label">JobManager Memory</label>
+                <label class="layui-form-label form-label">JobManager Memory(G)</label>
             </div>
             <div class="layui-col-md3">
                 <input type="text" name="jobmanagerMemory" value="2" autocomplete="off" class="layui-input">
@@ -116,7 +110,7 @@
                 <input type="text" name="taskmanagerCpu" value="2" autocomplete="off" class="layui-input">
             </div>
             <div class="layui-col-md3">
-                <label class="layui-form-label form-label">JobManager Memory</label>
+                <label class="layui-form-label form-label">JobManager Memory(G)</label>
             </div>
             <div class="layui-col-md3">
                 <input type="text" name="taskmanagerMemory" value="4" autocomplete="off" class="layui-input">
@@ -124,7 +118,7 @@
             <div class="layui-col-md3">
                 <label class="layui-form-label form-label">其他配置</label>
             </div>
-            <div class="layui-col-md9">
+            <div class="layui-col-md12">
                 <div id="otherConfigEditor" style="width: 100%;" class="editor"></div>
             </div>
         </div>
@@ -141,8 +135,14 @@
 <script type="text/javascript" src="/component/pear/pear.js"></script>
 <script src="/component/toast/toast.min.js" type="text/javascript" charset="utf-8"></script>
 <script src="/common/ace/ace.js" type="text/javascript" charset="utf-8"></script>
-<script src="/common/ace/mode-yaml.js" type="text/javascript" charset="utf-8"></script>
+<script src="/common/ace/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
+<script src="/common/ace/mode-log.js" type="text/javascript" charset="utf-8"></script>
+<script src="/common/ace/mode-text.js" type="text/javascript" charset="utf-8"></script>
+<script src="/common/ace/mode-xml.js" type="text/javascript" charset="utf-8"></script>
 <script src="/common/ace/mode-properties.js" type="text/javascript" charset="utf-8"></script>
+<script src="/common/ace/mode-yaml.js" type="text/javascript" charset="utf-8"></script>
+<script src="/common/ace/theme-all.js" type="text/javascript" charset="utf-8"></script>
+<script src="/js/flinkconfig.js" type="text/javascript" charset="utf-8"></script>
 <script src="/js/session.js" type="text/javascript" charset="utf-8"></script>
 </body>
 </html>

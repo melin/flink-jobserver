@@ -54,7 +54,9 @@ public class FlinkUtils {
                 config.setCaption(entry.key());
                 if (entry.hasDefaultValue()) {
                     config.setMeta("default: " + entry.defaultValue());
-                    config.setValue(entry.key() + " = " + entry.defaultValue());
+                    config.setValue(entry.key() + " : " + entry.defaultValue());
+                } else {
+                    config.setValue(entry.key() + " : ");
                 }
                 if (entry.description().getBlocks().size() == 1) {
                     BlockElement element = entry.description().getBlocks().get(0);

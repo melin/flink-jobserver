@@ -28,11 +28,14 @@ public class SessionCluster implements IEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "sessionName")
+    @Column(name = "session_name")
     private String sessionName;
 
     @Column(name = "cluster_code")
     private String clusterCode;
+
+    @Column(name = "config")
+    private String config;
 
     @Column(name = "version")
     private Integer version;
@@ -43,17 +46,11 @@ public class SessionCluster implements IEntity {
     @Column(name = "server_port", nullable = false)
     private Integer serverPort;
 
-    @Column(name = "scheduler_type")
-    @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
-            parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
-                    value = "io.github.melin.flink.jobserver.core.enums.SchedulerType")})
-    private SchedulerType schedulerType; // 调度框架:YARN、K8S
-
     @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
             parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
                     value = "io.github.melin.flink.jobserver.core.enums.SessionClusterStatus")})
     @Column(name = "status", nullable = false, length = 45)
-    private SessionClusterStatus status;
+    private SessionClusterStatus status = SessionClusterStatus.STOPPED;
 
     @Column(name = "application_id", nullable = false, length = 64)
     private String applicationId;
@@ -61,17 +58,11 @@ public class SessionCluster implements IEntity {
     @Column(name = "log_server", length = 64)
     private String logServer;
 
-    @Column(name = "instance_count")
-    private Integer instanceCount;
-
     @Column(name = "server_cores", nullable = false)
     private Integer serverCores;
 
     @Column(name = "server_memory", nullable = false)
     private Long serverMemory;
-
-    @Column(name = "yarn_queue")
-    private String yarnQueue;
 
     @Column(name = "creater", length = 45)
     private String creater;
@@ -84,9 +75,6 @@ public class SessionCluster implements IEntity {
 
     @Column(name = "gmt_modified")
     private Instant gmtModified;
-
-    @Formula("(select p.code from fjs_job_instance p where p.application_id = application_id and p.status='RUNNING' limit 1)")
-    private String instanceCode;
 
     @Transient
     private String flinkYarnProxyUri;
@@ -107,13 +95,11 @@ public class SessionCluster implements IEntity {
         jobServer.setVersion(0);
         jobServer.setServerIp("0.0.0.0");
         jobServer.setServerPort(-1);
-        jobServer.setSchedulerType(SchedulerType.YARN);
         jobServer.setStatus(SessionClusterStatus.INIT);
         jobServer.setApplicationId("");
         jobServer.setCreater("");
         jobServer.setGmtCreated(Instant.now());
         jobServer.setGmtModified(Instant.now());
-        jobServer.setInstanceCount(0);
         jobServer.setServerCores(0);
         jobServer.setServerMemory(0L);
         jobServer.setLogServer(hostName);
