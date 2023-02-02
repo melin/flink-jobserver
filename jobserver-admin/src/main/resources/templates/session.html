@@ -126,8 +126,14 @@
 </div>
 
 <script type="text/html" id="cluster-bar">
-    <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i></button>
-    <button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove"><i class="layui-icon layui-icon-delete"></i></button>
+    <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="editSession"><i class="layui-icon layui-icon-edit"></i></button>
+    <button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="deleteSession"><i class="layui-icon layui-icon-delete"></i></button>
+    {{#  if(d.status == "closed"){ }}
+        <button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="startSession"><i class="layui-icon layui-icon-play"></i></button>
+    {{#  } }}
+    {{#  if(d.status == "running"){ }}
+        <button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="closeSession"><i class="layui-icon layui-icon-close"></i></button>
+    {{#  } }}
 </script>
 
 <script type="text/javascript" src="/component/jquery.min.js"></script>

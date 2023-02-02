@@ -11,7 +11,7 @@ import com.gitee.melin.bee.core.enums.jackson.JacksonEnumStringSerializer;
 @JsonSerialize(using = JacksonEnumStringSerializer.class)
 public enum SessionClusterStatus implements BaseStringEnum {
 
-    STOPPED("停止", "stopped"),
+    CLOSED("关闭", "closed"),
 
     INIT("初始化", "init"),
 

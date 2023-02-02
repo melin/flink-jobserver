@@ -72,6 +72,18 @@ public class SessionClusterController {
         return pagination;
     }
 
+    @RequestMapping("/session/queryCluster")
+    @ResponseBody
+    public Result<SessionCluster> queryCluster(Long clusterId) {
+        try {
+            SessionCluster cluster = sessionClusterService.getEntity(clusterId);
+            return Result.successDataResult(cluster);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return Result.failureResult(e.getMessage());
+        }
+    }
+
     @RequestMapping("/session/saveCluster")
     @ResponseBody
     public Result<Void> saveCluster(SessionCluster cluster) {
@@ -90,6 +102,41 @@ public class SessionClusterController {
                 old.setGmtModified(Instant.now());
                 sessionClusterService.updateEntity(old);
             }
+            return Result.successResult();
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return Result.failureResult(e.getMessage());
+        }
+    }
+
+    @RequestMapping("/session/deleteCluster")
+    @ResponseBody
+    public Result<Void> deleteCluster(Long clusterId) {
+        try {
+            SessionCluster cluster = sessionClusterService.getEntity(clusterId);
+            sessionClusterService.deleteEntity(cluster);
+            return Result.successResult();
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return Result.failureResult(e.getMessage());
+        }
+    }
+
+    @RequestMapping("/session/startCluster")
+    @ResponseBody
+    public Result<Void> startCluster(Long clusterId) {
+        try {
+            return Result.successResult();
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return Result.failureResult(e.getMessage());
+        }
+    }
+
+    @RequestMapping("/session/closeCluster")
+    @ResponseBody
+    public Result<Void> closeCluster(Long clusterId) {
+        try {
             return Result.successResult();
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);

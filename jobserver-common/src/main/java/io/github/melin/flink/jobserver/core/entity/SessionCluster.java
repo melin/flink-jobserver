@@ -2,15 +2,11 @@ package io.github.melin.flink.jobserver.core.entity;
 
 import com.gitee.melin.bee.model.IEntity;
 import com.gitee.melin.bee.util.NetUtils;
-import io.github.melin.flink.jobserver.core.enums.DriverStatus;
-import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
-import io.github.melin.flink.jobserver.core.enums.SchedulerType;
 import io.github.melin.flink.jobserver.core.enums.SessionClusterStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
@@ -50,7 +46,7 @@ public class SessionCluster implements IEntity {
             parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
                     value = "io.github.melin.flink.jobserver.core.enums.SessionClusterStatus")})
     @Column(name = "status", nullable = false, length = 45)
-    private SessionClusterStatus status = SessionClusterStatus.STOPPED;
+    private SessionClusterStatus status = SessionClusterStatus.CLOSED;
 
     @Column(name = "application_id", nullable = false, length = 64)
     private String applicationId;

@@ -46,7 +46,7 @@ var Session = function () {
                             const status = record.status;
                             if (status === "running") {
                                 return '<span style="font-weight:bold; color: #5FB878">运行中</span>'
-                            } else if (status === "stopped") {
+                            } else if (status === "closed") {
                                 return '<span style="font-weight:bold;color: #FF5722">关闭</span>'
                             } else {
                                 return '<span style="font-weight:bold;color: #FF5722">初始化中</span>'
@@ -63,7 +63,6 @@ var Session = function () {
                         title: '操作',
                         toolbar: '#cluster-bar',
                         align: 'right',
-                        width: 100,
                         fixed: "right"
                     }
                 ]
@@ -88,10 +87,14 @@ var Session = function () {
 
             table.on('tool(session-table)', function(obj) {
                 let data = obj.data;
-                if (obj.event === 'remove') {
-                    Session.closeCluster(data.id, data.code)
-                } else if (obj.event === 'edit') {
+                if (obj.event === 'deleteSession') {
+                    Session.deleteCluster(data.id, data.sessionName)
+                } else if (obj.event === 'editSession') {
                     Session.newSessionClusterWin(data.id)
+                } else if (obj.event === 'startSession') {
+                    Session.startCluster(data.id, data.sessionName)
+                } else if (obj.event === 'closeSession') {
+                    Session.closeCluster(data.id, data.sessionName)
                 }
             });
 
@@ -174,9 +177,9 @@ var Session = function () {
                             data.jobmanagerMemory = config.jobmanagerMemory
                             data.taskmanagerCpu = config.taskmanagerCpu
                             data.taskmanagerMemory = config.taskmanagerMemory
-                            form.val('newClusterForm', data);
+                            form.val('newSessionClusterForm', data);
 
-                            Session.setEditorValue(otherConfigEditor, data.others)
+                            Session.setEditorValue(otherConfigEditor, config.others)
                         }
                     }
                 })
@@ -234,8 +237,54 @@ var Session = function () {
             });
         },
 
-        closeCluster : function (clusterId, clusterCode) {
-            layer.confirm('确定关闭: ' + clusterCode + " ?", {
+        deleteCluster : function (clusterId, sessionName) {
+            layer.confirm('确定删除Session集群: ' + sessionName + " ?", {
+                btn: ['确认','取消'],
+                title: '提示'
+            }, function (index) {
+                layer.close(index);
+                $.ajax({
+                    async: true,
+                    type : "POST",
+                    url: '/session/deleteCluster',
+                    data: { clusterId: clusterId },
+                    success: function (result) {
+                        if (result.success) {
+                            toastr.success("成功删除Session集群: " + sessionName)
+                            table.reload('session-table');
+                        } else {
+                            toastr.error(result.message)
+                        }
+                    }
+                })
+            })
+        },
+
+        startCluster : function (clusterId, sessionName) {
+            layer.confirm('确定启动Session集群: ' + sessionName + " ?", {
+                btn: ['确认','取消'],
+                title: '提示'
+            }, function (index) {
+                layer.close(index);
+                $.ajax({
+                    async: true,
+                    type : "POST",
+                    url: '/session/startCluster',
+                    data: { clusterId: clusterId },
+                    success: function (result) {
+                        if (result.success) {
+                            toastr.success("成功启动Session集群: " + sessionName)
+                            table.reload('session-table');
+                        } else {
+                            toastr.error(result.message)
+                        }
+                    }
+                })
+            })
+        },
+
+        closeCluster : function (clusterId, sessionName) {
+            layer.confirm('确定关闭Session集群: ' + sessionName + " ?", {
                 btn: ['确认','取消'],
                 title: '提示'
             }, function (index) {
@@ -247,7 +296,7 @@ var Session = function () {
                     data: { clusterId: clusterId },
                     success: function (result) {
                         if (result.success) {
-                            toastr.success("成功关闭集群: " + clusterCode)
+                            toastr.success("成功关闭Session集群: " + sessionName)
                             table.reload('session-table');
                         } else {
                             toastr.error(result.message)
