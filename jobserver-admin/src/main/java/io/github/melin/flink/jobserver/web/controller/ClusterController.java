@@ -4,10 +4,12 @@ import com.gitee.melin.bee.util.HibernateUtils;
 import io.github.melin.flink.jobserver.FlinkJobServerConf;
 import io.github.melin.flink.jobserver.core.entity.Cluster;
 import io.github.melin.flink.jobserver.core.enums.SchedulerType;
+import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
 import io.github.melin.flink.jobserver.core.service.ClusterService;
 import com.gitee.melin.bee.core.support.Pagination;
 import com.gitee.melin.bee.core.support.Result;
 import com.google.common.collect.Lists;
+import io.github.melin.flink.jobserver.core.service.SessionClusterService;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.Order;
@@ -36,6 +38,12 @@ public class ClusterController {
 
     @Autowired
     private ClusterService clusterService;
+
+    @Autowired
+    private ApplicationDriverService applicationDriverService;
+
+    @Autowired
+    private SessionClusterService sessionClusterService;
 
     @Autowired
     protected RestTemplate restTemplate;
@@ -192,6 +200,13 @@ public class ClusterController {
     public Result<Void> deleteCluster(Long clusterId) {
         try {
             Cluster cluster = clusterService.getEntity(clusterId);
+            long appDriverCount = applicationDriverService.queryDriverCount(cluster.getCode());
+            long sessionCount = sessionClusterService.queryDriverCount(cluster.getCode());
+
+            if (appDriverCount > 0 || sessionCount > 0) {
+                return Result.failureResult("The cluster " + cluster.getCode() + " is used and cannot be deleted");
+            }
+
             clusterService.deleteEntity(cluster);
             return Result.successResult();
         } catch (Exception e) {
