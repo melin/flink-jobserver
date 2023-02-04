@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import io.github.melin.flink.jobserver.FlinkJobServerConf;
 import io.github.melin.flink.jobserver.core.entity.SessionCluster;
 import io.github.melin.flink.jobserver.core.service.SessionClusterService;
+import io.github.melin.flink.jobserver.submit.deployer.YarnSessionClusterDeployer;
 import io.github.melin.flink.jobserver.support.ClusterConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.Order;
@@ -33,7 +34,12 @@ public class SessionClusterController {
     private SessionClusterService sessionClusterService;
 
     @Autowired
+    private YarnSessionClusterDeployer yarnSessionClusterDeployer;
+
+    @Autowired
     private ClusterConfig clusterConfig;
+
+    public static String flinkLauncherFailedMsg = "";
 
     @RequestMapping("/session")
     public String home(ModelMap model) {
@@ -126,7 +132,12 @@ public class SessionClusterController {
     @ResponseBody
     public Result<Void> startCluster(Long clusterId) {
         try {
-            return Result.successResult();
+            SessionCluster sessionCluster = sessionClusterService.getEntity(clusterId);
+            if (sessionCluster != null) {
+                yarnSessionClusterDeployer.startSessionCluster(sessionCluster);
+                return Result.successResult();
+            }
+            return Result.failureResult("Session cluster not exists");
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             return Result.failureResult(e.getMessage());

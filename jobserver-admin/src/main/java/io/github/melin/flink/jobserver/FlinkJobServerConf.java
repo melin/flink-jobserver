@@ -95,7 +95,7 @@ public class FlinkJobServerConf extends BeeConf {
                     .doc("flink driver 开启远程调试")
                     .version("1.0.0")
                     .booleanConf()
-                    .createWithDefault(true);
+                    .createWithDefault(false);
 
     //------------------------------------------------------------------------------
 

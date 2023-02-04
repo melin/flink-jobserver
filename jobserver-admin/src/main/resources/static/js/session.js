@@ -54,6 +54,21 @@ var Session = function () {
                         }
                     },
                     {
+                        title: 'ApplicationID',
+                        field: 'applicationId',
+                        align: 'left',
+                        width: 220,
+                        templet: function(record) {
+                            const applicationId = record.applicationId;
+                            const flinkYarnProxyUri = record.flinkYarnProxyUri;
+                            if (applicationId && "null" !== applicationId) {
+                                return '<a href="' + flinkYarnProxyUri + '/proxy/' + applicationId + '/" target="_blank">' + applicationId + '</a>';
+                            } else {
+                                return "";
+                            }
+                        }
+                    },
+                    {
                         title: '更新时间',
                         field: 'gmtModified',
                         align: 'left',

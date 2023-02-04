@@ -77,7 +77,6 @@ abstract public class AbstractDriverDeployer {
     @Value("${spring.datasource.password}")
     private String datasourcePassword;
 
-
     abstract protected String startDriver(DriverDeploymentInfo deploymentInfo, Long driverId) throws Exception;
 
     protected Configuration buildFlinkConfig(DriverDeploymentInfo deploymentInfo) throws Exception {

@@ -110,10 +110,17 @@
             <version>${docker.client.version}</version>
         </dependency>
 
-        <!--<dependency>
+        <!--
+        <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-yarn</artifactId>
             <version>${flink.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
