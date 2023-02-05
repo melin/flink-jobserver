@@ -25,7 +25,7 @@ import java.time.Duration;
 
 import static io.github.melin.flink.jobserver.FlinkJobServerConf.*;
 
-abstract public class AbstractKubernetesDeployer extends AbstractDriverDeployer {
+abstract public class AbstractKubernetesDeployer<T> extends AbstractDriverDeployer<T> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractKubernetesDeployer.class);
 

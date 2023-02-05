@@ -42,7 +42,7 @@ import static org.apache.hadoop.yarn.api.records.YarnApplicationState.*;
  * 参考 Flink CliFrontend 启动提交FLink Driver
  */
 @Service
-public class KubernetesApplicationDriverDeployer extends AbstractKubernetesDeployer {
+public class KubernetesApplicationDriverDeployer extends AbstractKubernetesDeployer<Cluster> {
 
     private static final Logger LOG = LoggerFactory.getLogger(KubernetesApplicationDriverDeployer.class);
 
@@ -116,7 +116,7 @@ public class KubernetesApplicationDriverDeployer extends AbstractKubernetesDeplo
     }
 
     @Override
-    protected String startDriver(DriverDeploymentInfo deploymentInfo, Long driverId) throws Exception {
+    protected String startDriver(DriverDeploymentInfo<Cluster> deploymentInfo, Long driverId) throws Exception {
         Configuration flinkConfig = buildFlinkConfig(deploymentInfo);
         flinkConfig.setString(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName());
 

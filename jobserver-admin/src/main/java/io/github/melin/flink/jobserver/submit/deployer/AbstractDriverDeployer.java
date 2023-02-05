@@ -1,9 +1,11 @@
 package io.github.melin.flink.jobserver.submit.deployer;
 
+import com.gitee.melin.bee.util.JsonUtils;
 import com.gitee.melin.bee.util.NetUtils;
 import com.google.common.collect.Lists;
 import io.github.melin.flink.jobserver.ConfigProperties;
 import io.github.melin.flink.jobserver.core.entity.ApplicationDriver;
+import io.github.melin.flink.jobserver.core.entity.SessionCluster;
 import io.github.melin.flink.jobserver.core.enums.DriverInstance;
 import io.github.melin.flink.jobserver.core.enums.DriverStatus;
 import io.github.melin.flink.jobserver.core.exception.FlinkJobException;
@@ -35,6 +37,7 @@ import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static io.github.melin.flink.jobserver.FlinkJobServerConf.*;
@@ -46,7 +49,7 @@ import static org.apache.flink.configuration.SecurityOptions.KERBEROS_LOGIN_KEYT
 import static org.apache.flink.configuration.SecurityOptions.KERBEROS_LOGIN_PRINCIPAL;
 import static org.apache.flink.yarn.configuration.YarnConfigOptions.*;
 
-abstract public class AbstractDriverDeployer {
+abstract public class AbstractDriverDeployer<T> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDriverDeployer.class);
 
@@ -77,9 +80,9 @@ abstract public class AbstractDriverDeployer {
     @Value("${spring.datasource.password}")
     private String datasourcePassword;
 
-    abstract protected String startDriver(DriverDeploymentInfo deploymentInfo, Long driverId) throws Exception;
+    abstract protected String startDriver(DriverDeploymentInfo<T> deploymentInfo, Long driverId) throws Exception;
 
-    protected Configuration buildFlinkConfig(DriverDeploymentInfo deploymentInfo) throws Exception {
+    protected Configuration buildFlinkConfig(DriverDeploymentInfo<T> deploymentInfo) throws Exception {
         final String clusterCode = deploymentInfo.getClusterCode();
         return clusterManager.runSecured(clusterCode, () -> {
             final String confDir = clusterManager.loadYarnConfig(clusterCode);
@@ -349,6 +352,29 @@ abstract public class AbstractDriverDeployer {
         String sparkDriverUrl = driver.getFlinkDriverUrl();
         LOG.info("InstanceCode {} Application {} stared at {}", jobInstanceCode, applicationId, sparkDriverUrl);
         return new SubmitYarnResult(applicationId, sparkDriverUrl, yarnQueue);
+    }
+
+    protected void addSessionConfig(Configuration flinkConf, SessionCluster sessionCluster) {
+        String config = sessionCluster.getConfig();
+        Map<String, String> map = JsonUtils.toJavaMap(config);
+        long jobmanagerMemory = Long.parseLong(map.getOrDefault("jobmanagerMemory", "2")) * 1024 * 1024 * 1024;
+        long taskmanagerMemory = Long.parseLong(map.getOrDefault("taskmanagerMemory", "2")) * 1024 * 1024 * 1024;
+
+        flinkConf.setLong("jobmanager.memory.process.size", jobmanagerMemory);
+        flinkConf.setString("taskmanager.numberOfTaskSlots", map.getOrDefault("numberOfTaskSlots", "1"));
+        flinkConf.setLong("taskmanager.memory.process.size", taskmanagerMemory);
+
+        try {
+            String others = map.getOrDefault("others", "");
+            Properties properties = new Properties();
+            properties.load(new StringReader(others));
+            Set<String> set = properties.stringPropertyNames();
+            for (String key : set) {
+                flinkConf.setString(key, properties.getProperty(key));
+            }
+        } catch (Exception e) {
+            throw new FlinkJobException("load flink session " + sessionCluster.getSessionName() +" config failed: " + e.getMessage());
+        }
     }
 
     abstract protected void waitDriverStartup(String clusterCode, String applicationId) throws Exception;

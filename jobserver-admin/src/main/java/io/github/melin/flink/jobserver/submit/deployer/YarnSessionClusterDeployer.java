@@ -34,7 +34,7 @@ import static org.apache.hadoop.yarn.api.records.YarnApplicationState.*;
  * 参考 Flink FlinkYarnSessionCli 启动提交FLink Driver
  */
 @Service
-public class YarnSessionClusterDeployer extends AbstractDriverDeployer {
+public class YarnSessionClusterDeployer extends AbstractDriverDeployer<SessionCluster> {
 
     private static final Logger LOG = LoggerFactory.getLogger(YarnSessionClusterDeployer.class);
 
@@ -55,7 +55,8 @@ public class YarnSessionClusterDeployer extends AbstractDriverDeployer {
         try {
             LOG.info("启动 session cluster : {}", sessionCluster.getSessionName());
 
-            DriverDeploymentInfo deploymentInfo = DriverDeploymentInfo.builder()
+            DriverDeploymentInfo<SessionCluster> deploymentInfo = DriverDeploymentInfo.<SessionCluster>builder()
+                    .setCluster(sessionCluster)
                     .setClusterCode(clusterCode)
                     .build();
 
@@ -89,10 +90,11 @@ public class YarnSessionClusterDeployer extends AbstractDriverDeployer {
     }
 
     @Override
-    protected String startDriver(DriverDeploymentInfo deploymentInfo, Long driverId) throws Exception {
+    protected String startDriver(DriverDeploymentInfo<SessionCluster> deploymentInfo, Long driverId) throws Exception {
         return clusterManager.runSecured(deploymentInfo.getClusterCode(), () -> {
             Configuration effectiveConfiguration = buildFlinkConfig(deploymentInfo);
             effectiveConfiguration.set(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName());
+            addSessionConfig(effectiveConfiguration, deploymentInfo.getCluster());
             final ClusterClientFactory<ApplicationId> yarnClusterClientFactory =
                     clusterClientServiceLoader.getClusterClientFactory(effectiveConfiguration);
 

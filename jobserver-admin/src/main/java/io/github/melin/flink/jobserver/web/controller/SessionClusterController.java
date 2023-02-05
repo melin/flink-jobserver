@@ -5,9 +5,12 @@ import com.gitee.melin.bee.core.support.Result;
 import com.google.common.collect.Lists;
 import io.github.melin.flink.jobserver.FlinkJobServerConf;
 import io.github.melin.flink.jobserver.core.entity.SessionCluster;
+import io.github.melin.flink.jobserver.core.enums.SessionClusterStatus;
 import io.github.melin.flink.jobserver.core.service.SessionClusterService;
 import io.github.melin.flink.jobserver.submit.deployer.YarnSessionClusterDeployer;
 import io.github.melin.flink.jobserver.support.ClusterConfig;
+import io.github.melin.flink.jobserver.support.ClusterManager;
+import io.github.melin.flink.jobserver.support.YarnClientService;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.Order;
 import org.slf4j.Logger;
@@ -38,6 +41,9 @@ public class SessionClusterController {
 
     @Autowired
     private ClusterConfig clusterConfig;
+
+    @Autowired
+    private YarnClientService yarnClientService;
 
     public static String flinkLauncherFailedMsg = "";
 
@@ -148,7 +154,16 @@ public class SessionClusterController {
     @ResponseBody
     public Result<Void> closeCluster(Long clusterId) {
         try {
-            return Result.successResult();
+            SessionCluster cluster = sessionClusterService.getEntity(clusterId);
+            if (cluster != null) {
+                yarnClientService.getYarnApplicationReport(cluster.getClusterCode(), cluster.getApplicationId());
+                cluster.setStatus(SessionClusterStatus.CLOSED);
+                cluster.setApplicationId(null);
+                sessionClusterService.updateEntity(cluster);
+                return Result.successResult();
+            }
+
+            return Result.failureResult("Session cluster not exists");
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             return Result.failureResult(e.getMessage());

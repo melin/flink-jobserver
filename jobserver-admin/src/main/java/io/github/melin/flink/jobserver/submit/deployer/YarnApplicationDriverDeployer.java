@@ -38,7 +38,7 @@ import static org.apache.hadoop.yarn.api.records.YarnApplicationState.*;
  * 参考 Flink CliFrontend 启动提交FLink Driver
  */
 @Service
-public class YarnApplicationDriverDeployer extends AbstractDriverDeployer {
+public class YarnApplicationDriverDeployer extends AbstractDriverDeployer<Cluster> {
 
     private static final Logger LOG = LoggerFactory.getLogger(YarnApplicationDriverDeployer.class);
 
@@ -67,8 +67,9 @@ public class YarnApplicationDriverDeployer extends AbstractDriverDeployer {
             clusterManager.checkYarnResourceLimit(clusterCode);
 
             String yarnQueue = clusterConfig.getValue(clusterCode, JOBSERVER_DRIVER_YARN_QUEUE_NAME);
-            DriverDeploymentInfo deploymentInfo = DriverDeploymentInfo.builder()
+            DriverDeploymentInfo<Cluster> deploymentInfo = DriverDeploymentInfo.<Cluster>builder()
                     .setClusterCode(clusterCode)
+                    .setCluster(cluster)
                     .setYarnQueue(yarnQueue)
                     .setRuntimeMode(runtimeMode)
                     .build();
@@ -104,7 +105,7 @@ public class YarnApplicationDriverDeployer extends AbstractDriverDeployer {
     }
 
     @Override
-    protected String startDriver(DriverDeploymentInfo deploymentInfo, Long driverId) throws Exception {
+    protected String startDriver(DriverDeploymentInfo<Cluster> deploymentInfo, Long driverId) throws Exception {
         return clusterManager.runSecured(deploymentInfo.getClusterCode(), () -> {
             final Configuration flinkConfig = buildFlinkConfig(deploymentInfo);
             flinkConfig.setString(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName());

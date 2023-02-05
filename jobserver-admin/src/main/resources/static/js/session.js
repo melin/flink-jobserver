@@ -187,10 +187,8 @@ var Session = function () {
                         if (result.success) {
                             let data = result.data;
                             let config = JSON.parse(data.config);
-                            data.numberOfTaskManagers = config.numberOfTaskManagers
-                            data.jobmanagerCpu = config.jobmanagerCpu
+                            data.numberOfTaskSlots = config.numberOfTaskSlots
                             data.jobmanagerMemory = config.jobmanagerMemory
-                            data.taskmanagerCpu = config.taskmanagerCpu
                             data.taskmanagerMemory = config.taskmanagerMemory
                             form.val('newSessionClusterForm', data);
 
@@ -225,10 +223,8 @@ var Session = function () {
                     }
 
                     var config = {};
-                    config.numberOfTaskManagers = data.numberOfTaskManagers
-                    config.jobmanagerCpu = data.jobmanagerCpu
+                    config.numberOfTaskSlots = data.numberOfTaskSlots
                     config.jobmanagerMemory = data.jobmanagerMemory
-                    config.taskmanagerCpu = data.taskmanagerCpu
                     config.taskmanagerMemory = data.taskmanagerMemory
                     config.others = $.trim(otherConfigEditor.getValue());
                     data.config = JSON.stringify(config);
