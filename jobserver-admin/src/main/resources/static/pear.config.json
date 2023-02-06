@@ -20,7 +20,7 @@
 		"muiltTab": true,
 		"max": "30",
 		"index": {
-			"title": "作业实例",
+			"title": "Flink 作业",
 			"id": "instance",
 			"href": "/instance"
 		}
