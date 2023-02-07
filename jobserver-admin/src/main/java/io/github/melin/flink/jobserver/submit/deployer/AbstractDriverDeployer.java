@@ -12,7 +12,7 @@ import io.github.melin.flink.jobserver.core.exception.FlinkJobException;
 import io.github.melin.flink.jobserver.core.exception.ResouceLimitException;
 import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
 import io.github.melin.flink.jobserver.core.util.CommonUtils;
-import io.github.melin.flink.jobserver.submit.dto.DriverDeploymentInfo;
+import io.github.melin.flink.jobserver.submit.dto.DeploymentInfo;
 import io.github.melin.flink.jobserver.submit.dto.DriverInfo;
 import io.github.melin.flink.jobserver.submit.dto.JobInstanceInfo;
 import io.github.melin.flink.jobserver.submit.dto.SubmitYarnResult;
@@ -42,6 +42,7 @@ import java.util.concurrent.TimeUnit;
 
 import static io.github.melin.flink.jobserver.FlinkJobServerConf.*;
 import static io.github.melin.flink.jobserver.core.enums.DriverInstance.NEW_INSTANCE;
+import static io.github.melin.flink.jobserver.util.Constant.YARN_APPLICATION_TYPE;
 import static org.apache.flink.configuration.CoreOptions.FLINK_JM_JVM_OPTIONS;
 import static org.apache.flink.configuration.CoreOptions.FLINK_TM_JVM_OPTIONS;
 import static org.apache.flink.configuration.SecurityOptions.KERBEROS_KRB5_PATH;
@@ -80,9 +81,9 @@ abstract public class AbstractDriverDeployer<T> {
     @Value("${spring.datasource.password}")
     private String datasourcePassword;
 
-    abstract protected String startDriver(DriverDeploymentInfo<T> deploymentInfo, Long driverId) throws Exception;
+    abstract protected String startDriver(DeploymentInfo<T> deploymentInfo, Long driverId) throws Exception;
 
-    protected Configuration buildFlinkConfig(DriverDeploymentInfo<T> deploymentInfo) throws Exception {
+    protected Configuration buildFlinkConfig(DeploymentInfo<T> deploymentInfo) throws Exception {
         final String clusterCode = deploymentInfo.getClusterCode();
         return clusterManager.runSecured(clusterCode, () -> {
             final String confDir = clusterManager.loadYarnConfig(clusterCode);
@@ -93,7 +94,7 @@ abstract public class AbstractDriverDeployer<T> {
             String hadoopUserName = clusterConfig.getDriverHadoopUserName(clusterCode);
             System.setProperty("HADOOP_USER_NAME", hadoopUserName);
 
-            addYarnConfig(flinkConfig, clusterCode, deploymentInfo.getYarnQueue());
+            addYarnConfig(flinkConfig, deploymentInfo);
             Properties params = addJobConfig(flinkConfig, deploymentInfo.getJobConfig());
             // jm 和 tm jvm 参数
             jvmConfig(clusterCode, flinkConfig, params, driverHome);
@@ -124,7 +125,8 @@ abstract public class AbstractDriverDeployer<T> {
         }
     }
 
-    private void addYarnConfig(Configuration flinkConfig, String clusterCode, String yarnQueue) throws Exception {
+    private void addYarnConfig(Configuration flinkConfig, DeploymentInfo<T> deploymentInfo) throws Exception {
+        final String clusterCode = deploymentInfo.getClusterCode();
         final String confDir = clusterManager.loadYarnConfig(clusterCode);
         // 加载core-site.xml 和 hdfs-site.xml
         flinkConfig.setString(ConfigConstants.PATH_HADOOP_CONFIG, confDir);
@@ -137,15 +139,22 @@ abstract public class AbstractDriverDeployer<T> {
         }
 
         //设置队列
+        String yarnQueue = deploymentInfo.getYarnQueue();
         if (StringUtils.isNotBlank(yarnQueue)) {
             flinkConfig.setString(APPLICATION_QUEUE, yarnQueue);
         } else {
             yarnQueue = clusterConfig.getValue(clusterCode, JOBSERVER_DRIVER_YARN_QUEUE_NAME);
             flinkConfig.setString(APPLICATION_QUEUE, yarnQueue);
         }
-        String appName = JobServerUtils.appName(profiles);
+
+        String appName = JobServerUtils.appNamePrefix(profiles);
+        if (deploymentInfo.getCluster() instanceof SessionCluster) {
+            appName += "[session][" + clusterCode + "]";
+        } else {
+            appName += "[share]";
+        }
         flinkConfig.setString(APPLICATION_NAME, appName);
-        flinkConfig.setString(APPLICATION_TYPE, "flink-jobserver");
+        flinkConfig.setString(APPLICATION_TYPE, YARN_APPLICATION_TYPE);
     }
 
     private Properties addJobConfig(Configuration flinkConfig, String jobConfig) throws IOException {
@@ -155,6 +164,10 @@ abstract public class AbstractDriverDeployer<T> {
 
             for (Object key : properties.keySet()) {
                 String propKey = (String) key;
+                if (APPLICATION_NAME.key().equals(propKey) || APPLICATION_TYPE.key().equals(propKey)) {
+                    continue;
+                }
+
                 String value = properties.getProperty(propKey);
                 flinkConfig.setString(propKey, value);
                 LOG.info("instance config: {} = {}", key, value);
@@ -326,7 +339,7 @@ abstract public class AbstractDriverDeployer<T> {
 
         long getServerTime = System.currentTimeMillis();
         String applicationId = startDriver(job.buildDriverDeploymentInfo(), driverId);
-        waitDriverStartup(job.getClusterCode(), applicationId);
+        waitClusterStartup(job.getClusterCode(), applicationId);
 
         ApplicationDriver driver = driverService.queryDriverByAppId(applicationId);
         if (driver == null || driver.getServerPort() == -1) { // 默认值: -1
@@ -369,13 +382,16 @@ abstract public class AbstractDriverDeployer<T> {
             Properties properties = new Properties();
             properties.load(new StringReader(others));
             Set<String> set = properties.stringPropertyNames();
-            for (String key : set) {
-                flinkConf.setString(key, properties.getProperty(key));
+            for (String propKey : set) {
+                if (APPLICATION_NAME.key().equals(propKey) || APPLICATION_TYPE.key().equals(propKey)) {
+                    continue;
+                }
+                flinkConf.setString(propKey, properties.getProperty(propKey));
             }
         } catch (Exception e) {
             throw new FlinkJobException("load flink session " + sessionCluster.getSessionName() +" config failed: " + e.getMessage());
         }
     }
 
-    abstract protected void waitDriverStartup(String clusterCode, String applicationId) throws Exception;
+    abstract protected void waitClusterStartup(String clusterCode, String applicationId) throws Exception;
 }

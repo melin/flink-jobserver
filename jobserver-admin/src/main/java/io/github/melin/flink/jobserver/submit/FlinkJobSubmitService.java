@@ -112,16 +112,7 @@ public class FlinkJobSubmitService implements InitializingBean {
         try {
             return innerSubmit(instanceInfo);
         } catch (FlinkJobException e) {
-            if (e instanceof HttpClientException) {
-                LOG.error("task {} submit error: {}, try to submit again", instanceCode, e.getMessage());
-                try {
-                    return innerSubmit(instanceInfo);
-                } catch (Throwable e1) {
-                    return resolveSubmitError(instanceCode, ExceptionUtils.getStackTrace(e1));
-                }
-            } else {
-                return resolveSubmitError(instanceCode, ExceptionUtils.getStackTrace(e));
-            }
+            return resolveSubmitError(instanceCode, ExceptionUtils.getStackTrace(e));
         } catch (Throwable e) {
             LOG.error(e.getMessage(), e);
             return resolveSubmitError(instanceCode, ExceptionUtils.getStackTrace(e));
@@ -327,7 +318,7 @@ public class FlinkJobSubmitService implements InitializingBean {
 
         boolean hasLocked = instanceService.lockInstance(instanceCode);
         if (!hasLocked) {
-            LOG.warn("作业已经运行: {}", instanceCode);
+            LOG.warn("作业已经在运行: {}", instanceCode);
             return;
         }
 
@@ -362,13 +353,13 @@ public class FlinkJobSubmitService implements InitializingBean {
             LOG.info("requet execute job times: {}ms, url : {}, params: {}",
                     watch.getTime(), url, JsonUtils.toJSONString(instanceDto));
         } catch (Exception e) {
-            instanceService.unLockInstance(instanceCode);
+            instanceService.unLockInstance(applicationId, instanceCode);
             throw new FlinkJobServerException("提交作业到 " + applicationId + " 失败: " + e.getMessage());
         }
 
         if (result != null && !result.isSuccess()) {
             flinkLogService.removeLogThread(instanceCode);
-            instanceService.unLockInstance(instanceCode);
+            instanceService.unLockInstance(applicationId, instanceCode);
             throw new FlinkJobServerException(result.getMessage());
         }
     }

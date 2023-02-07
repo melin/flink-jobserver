@@ -10,7 +10,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Builder(builderClassName = "Builder", setterPrefix = "set")
-public class DriverDeploymentInfo<T> {
+public class DeploymentInfo<T> {
 
     private T cluster;
 

@@ -25,12 +25,12 @@ public class SessionClusterService extends BaseServiceImpl<SessionCluster, Long>
     }
 
     @Transactional(readOnly = true)
-    public SessionCluster queryDriverByAppId(String applicationId) {
+    public SessionCluster querySessionClusterByAppId(String applicationId) {
         return this.queryByNamedParam("applicationId", applicationId);
     }
 
     @Transactional(readOnly = true, rollbackFor = Exception.class)
-    public long queryDriverCount(String clusterCode) {
+    public long querySessionClusterCount(String clusterCode) {
         return this.queryCount("clusterCode", clusterCode);
     }
 }

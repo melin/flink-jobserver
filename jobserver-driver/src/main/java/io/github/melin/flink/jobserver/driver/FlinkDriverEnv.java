@@ -1,6 +1,7 @@
 package io.github.melin.flink.jobserver.driver;
 
 import io.github.melin.flink.jobserver.core.entity.Cluster;
+import io.github.melin.flink.jobserver.driver.lineage.LineageFlinkJobListener;
 import io.github.melin.flink.jobserver.driver.model.DriverParam;
 import org.apache.calcite.rel.metadata.JaninoRelMetadataProvider;
 import org.apache.calcite.rel.metadata.RelMetadataQueryBase;
@@ -51,6 +52,7 @@ public class FlinkDriverEnv {
         streamExecutionEnvironment = StreamExecutionEnvironment.getExecutionEnvironment(flinkConf);
         streamExecutionEnvironment.setRuntimeMode(driverParam.getRuntimeMode());
         tableEnvironment = StreamTableEnvironment.create(streamExecutionEnvironment);
+        streamExecutionEnvironment.registerJobListener(new LineageFlinkJobListener(streamExecutionEnvironment));
         LOG.info("flink runtime mode: {}", driverParam.getRuntimeMode());
 
         LOG.info("create hive catalog: {}", driverParam.isHiveEnable());

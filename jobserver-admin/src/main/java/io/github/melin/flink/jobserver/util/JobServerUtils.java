@@ -130,10 +130,6 @@ public class JobServerUtils {
         return false;
     }
 
-    public static String appName(String profiles) {
-        return "flink-jobserver[" + profiles + "][share]";
-    }
-
     public static String appNamePrefix(String profiles) {
         return "flink-jobserver[" + profiles + "]";
     }

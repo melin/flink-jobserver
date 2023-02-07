@@ -215,8 +215,8 @@ public class CommonUtils {
     }
 
     private static final String[] SQL_SPLIT_WORDKEYS =
-            new String[] {"insert", "delete", "update", "drop", "create", "explain",
-                    "alter", "select", "use", "set", "replace", "analyze", "show", "desc", "truncate",
+            new String[] {"delete", "update", "drop", "create", "explain",
+                    "alter", "use", "set", "replace", "analyze", "show", "desc", "truncate",
                     "merge", "call", "sync", "msck", "with", "load", "datatunnel"};
 
     /**

@@ -81,6 +81,7 @@ public class FlinkLogService implements ApplicationContextAware, InitializingBea
                                 instanceInfo.setInstanceCode(instanceCode);
                                 instanceInfo.setScheduleTime(instance.getScheduleTime());
                                 instanceInfo.setInstanceType(instance.getInstanceType());
+                                instanceInfo.setSchedulerType(instance.getSchedulerType());
                                 instanceInfo.setJobType(instance.getJobType());
                                 instanceInfo.setOwner(instance.getOwner());
 

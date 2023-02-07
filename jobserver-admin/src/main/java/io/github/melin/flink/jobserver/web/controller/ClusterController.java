@@ -201,7 +201,7 @@ public class ClusterController {
         try {
             Cluster cluster = clusterService.getEntity(clusterId);
             long appDriverCount = applicationDriverService.queryDriverCount(cluster.getCode());
-            long sessionCount = sessionClusterService.queryDriverCount(cluster.getCode());
+            long sessionCount = sessionClusterService.querySessionClusterCount(cluster.getCode());
 
             if (appDriverCount > 0 || sessionCount > 0) {
                 return Result.failureResult("The cluster " + cluster.getCode() + " is used and cannot be deleted");

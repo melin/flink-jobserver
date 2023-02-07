@@ -86,7 +86,7 @@ public class InstanceController {
         if (id == null) {
             String instanceCode = RandomUniqueIdGenerator.getNewString(32);
             Cluster cluster = clusterService.getClusterByCode(clusterCode);
-            if (cluster != null) {
+            if (cluster == null) {
                 throw new IllegalArgumentException("cluster " + clusterCode + " not exists");
             }
             JobInstance.Builder builder = JobInstance.builder()

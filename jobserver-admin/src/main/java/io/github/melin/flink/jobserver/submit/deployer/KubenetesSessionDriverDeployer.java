@@ -6,7 +6,7 @@ import io.github.melin.flink.jobserver.core.enums.SessionClusterStatus;
 import io.github.melin.flink.jobserver.core.exception.FlinkJobException;
 import io.github.melin.flink.jobserver.core.exception.ResouceLimitException;
 import io.github.melin.flink.jobserver.core.service.SessionClusterService;
-import io.github.melin.flink.jobserver.submit.dto.DriverDeploymentInfo;
+import io.github.melin.flink.jobserver.submit.dto.DeploymentInfo;
 import io.github.melin.flink.jobserver.support.YarnClientService;
 import io.github.melin.flink.jobserver.web.controller.SessionClusterController;
 import org.apache.commons.lang3.StringUtils;
@@ -59,7 +59,7 @@ public class KubenetesSessionDriverDeployer extends AbstractKubernetesDeployer<S
         try {
             LOG.info("启动 session cluster : {}", sessionCluster.getSessionName());
 
-            DriverDeploymentInfo<SessionCluster> deploymentInfo = DriverDeploymentInfo.<SessionCluster>builder()
+            DeploymentInfo<SessionCluster> deploymentInfo = DeploymentInfo.<SessionCluster>builder()
                     .setCluster(sessionCluster)
                     .setClusterCode(clusterCode)
                     .build();
@@ -76,8 +76,7 @@ public class KubenetesSessionDriverDeployer extends AbstractKubernetesDeployer<S
                 sessionCluster.setApplicationId(applicationId);
                 sessionCluster.setStatus(SessionClusterStatus.RUNNING);
                 driverService.updateEntity(sessionCluster);
-
-                waitDriverStartup(clusterCode, applicationId);
+                waitClusterStartup(clusterCode, applicationId);
             }
 
             SessionClusterController.flinkLauncherFailedMsg = "";
@@ -95,7 +94,7 @@ public class KubenetesSessionDriverDeployer extends AbstractKubernetesDeployer<S
     }
 
     @Override
-    protected String startDriver(DriverDeploymentInfo<SessionCluster> deploymentInfo, Long driverId) throws Exception {
+    protected String startDriver(DeploymentInfo<SessionCluster> deploymentInfo, Long driverId) throws Exception {
         Configuration effectiveConfiguration = buildFlinkConfig(deploymentInfo);
         final ClusterClientFactory<ApplicationId> yarnClusterClientFactory =
                 clusterClientServiceLoader.getClusterClientFactory(effectiveConfiguration);
@@ -162,7 +161,7 @@ public class KubenetesSessionDriverDeployer extends AbstractKubernetesDeployer<S
     }
 
     @Override
-    protected void waitDriverStartup(String clusterCode, String applicationId) throws Exception {
+    protected void waitClusterStartup(String clusterCode, String applicationId) throws Exception {
         if (StringUtils.isBlank(applicationId)) {
             throw new IllegalStateException("applicationId can not blank");
         }
@@ -179,12 +178,12 @@ public class KubenetesSessionDriverDeployer extends AbstractKubernetesDeployer<S
         // 等待 flink driver 启动中
         report = yarnClientService.getYarnApplicationReport(clusterCode, applicationId);
         state = report.getYarnApplicationState();
-        SessionCluster driver = driverService.queryDriverByAppId(applicationId);
+        SessionCluster driver = driverService.querySessionClusterByAppId(applicationId);
         while (state == RUNNING && driver.getStatus() == SessionClusterStatus.INIT) {
             TimeUnit.SECONDS.sleep(1);
             report = yarnClientService.getYarnApplicationReport(clusterCode, applicationId);
             state = report.getYarnApplicationState();
-            driver = driverService.queryDriverByAppId(applicationId);
+            driver = driverService.querySessionClusterByAppId(applicationId);
         }
 
         if (state != RUNNING) {

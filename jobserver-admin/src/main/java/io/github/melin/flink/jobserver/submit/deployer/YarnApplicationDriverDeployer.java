@@ -7,10 +7,10 @@ import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
 import io.github.melin.flink.jobserver.core.exception.ResouceLimitException;
 import io.github.melin.flink.jobserver.core.exception.FlinkJobException;
 import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
-import io.github.melin.flink.jobserver.submit.dto.DriverDeploymentInfo;
+import io.github.melin.flink.jobserver.submit.dto.DeploymentInfo;
 import io.github.melin.flink.jobserver.support.ClusterManager;
-import io.github.melin.flink.jobserver.support.YarnClientService;
 import io.github.melin.flink.jobserver.core.entity.Cluster;
+import io.github.melin.flink.jobserver.support.YarnClientService;
 import io.github.melin.flink.jobserver.util.IOUtils;
 import io.github.melin.flink.jobserver.web.controller.ApplicationDriverController;
 import org.apache.commons.lang3.StringUtils;
@@ -32,7 +32,11 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static io.github.melin.flink.jobserver.FlinkJobServerConf.*;
-import static org.apache.hadoop.yarn.api.records.YarnApplicationState.*;
+import static org.apache.hadoop.yarn.api.records.YarnApplicationState.ACCEPTED;
+import static org.apache.hadoop.yarn.api.records.YarnApplicationState.NEW;
+import static org.apache.hadoop.yarn.api.records.YarnApplicationState.NEW_SAVING;
+import static org.apache.hadoop.yarn.api.records.YarnApplicationState.RUNNING;
+import static org.apache.hadoop.yarn.api.records.YarnApplicationState.SUBMITTED;
 
 /**
  * 参考 Flink CliFrontend 启动提交FLink Driver
@@ -67,7 +71,7 @@ public class YarnApplicationDriverDeployer extends AbstractDriverDeployer<Cluste
             clusterManager.checkYarnResourceLimit(clusterCode);
 
             String yarnQueue = clusterConfig.getValue(clusterCode, JOBSERVER_DRIVER_YARN_QUEUE_NAME);
-            DriverDeploymentInfo<Cluster> deploymentInfo = DriverDeploymentInfo.<Cluster>builder()
+            DeploymentInfo<Cluster> deploymentInfo = DeploymentInfo.<Cluster>builder()
                     .setClusterCode(clusterCode)
                     .setCluster(cluster)
                     .setYarnQueue(yarnQueue)
@@ -85,7 +89,8 @@ public class YarnApplicationDriverDeployer extends AbstractDriverDeployer<Cluste
 
             if (StringUtils.isNotBlank(applicationId)) {
                 driverService.updateDriverAppId(driverId, applicationId);
-                waitDriverStartup(clusterCode, applicationId);
+                waitClusterStartup(clusterCode, applicationId);
+                driverService.updateDriverAppId(driverId, applicationId, DriverStatus.IDLE);
             }
 
             ApplicationDriverController.flinkLauncherFailedMsg = "";
@@ -105,7 +110,7 @@ public class YarnApplicationDriverDeployer extends AbstractDriverDeployer<Cluste
     }
 
     @Override
-    protected String startDriver(DriverDeploymentInfo<Cluster> deploymentInfo, Long driverId) throws Exception {
+    protected String startDriver(DeploymentInfo<Cluster> deploymentInfo, Long driverId) throws Exception {
         return clusterManager.runSecured(deploymentInfo.getClusterCode(), () -> {
             final Configuration flinkConfig = buildFlinkConfig(deploymentInfo);
             flinkConfig.setString(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName());
@@ -184,7 +189,7 @@ public class YarnApplicationDriverDeployer extends AbstractDriverDeployer<Cluste
     }
 
     @Override
-    protected void waitDriverStartup(String clusterCode, String applicationId) throws Exception {
+    protected void waitClusterStartup(String clusterCode, String applicationId) throws Exception {
         if (StringUtils.isBlank(applicationId)) {
             throw new IllegalStateException("applicationId can not blank");
         }

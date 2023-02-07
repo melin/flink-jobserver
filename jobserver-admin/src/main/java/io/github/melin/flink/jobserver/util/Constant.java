@@ -9,4 +9,6 @@ public interface Constant {
      * 如果作业实例没有上游实例，scheduleCode 默认值
      */
     String ROOT_SCHEDULE_NODE = "START";
+
+    String YARN_APPLICATION_TYPE = "flink_jobserver";
 }

@@ -8,7 +8,7 @@ import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
 import io.github.melin.flink.jobserver.core.exception.FlinkJobException;
 import io.github.melin.flink.jobserver.core.exception.ResouceLimitException;
 import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
-import io.github.melin.flink.jobserver.submit.dto.DriverDeploymentInfo;
+import io.github.melin.flink.jobserver.submit.dto.DeploymentInfo;
 import io.github.melin.flink.jobserver.support.ClusterManager;
 import io.github.melin.flink.jobserver.support.YarnClientService;
 import io.github.melin.flink.jobserver.support.leader.RedisLeaderElection;
@@ -74,7 +74,7 @@ public class KubernetesApplicationDriverDeployer extends AbstractKubernetesDeplo
             clusterManager.checkYarnResourceLimit(clusterCode);
 
             String yarnQueue = clusterConfig.getValue(clusterCode, JOBSERVER_DRIVER_YARN_QUEUE_NAME);
-            DriverDeploymentInfo deploymentInfo = DriverDeploymentInfo.builder()
+            DeploymentInfo deploymentInfo = DeploymentInfo.builder()
                     .setClusterCode(clusterCode)
                     .setYarnQueue(yarnQueue)
                     .setRuntimeMode(runtimeMode)
@@ -90,13 +90,9 @@ public class KubernetesApplicationDriverDeployer extends AbstractKubernetesDeplo
             LOG.info("start share jobserver: {}, times: {}s", applicationId, times);
 
             if (StringUtils.isNotBlank(applicationId)) {
-                ApplicationDriver driver = driverService.getEntity(driverId);
-                if (driver != null) {
-                    driver.setApplicationId(applicationId);
-                    driverService.updateEntity(driver);
-                }
-
-                waitDriverStartup(clusterCode, applicationId);
+                driverService.updateDriverAppId(driverId, applicationId);
+                waitClusterStartup(clusterCode, applicationId);
+                driverService.updateDriverAppId(driverId, applicationId, DriverStatus.IDLE);
             }
 
             ApplicationDriverController.flinkLauncherFailedMsg = "";
@@ -116,7 +112,7 @@ public class KubernetesApplicationDriverDeployer extends AbstractKubernetesDeplo
     }
 
     @Override
-    protected String startDriver(DriverDeploymentInfo<Cluster> deploymentInfo, Long driverId) throws Exception {
+    protected String startDriver(DeploymentInfo<Cluster> deploymentInfo, Long driverId) throws Exception {
         Configuration flinkConfig = buildFlinkConfig(deploymentInfo);
         flinkConfig.setString(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName());
 
@@ -174,7 +170,7 @@ public class KubernetesApplicationDriverDeployer extends AbstractKubernetesDeplo
     }
 
     @Override
-    protected void waitDriverStartup(String clusterCode, String applicationId) throws Exception {
+    protected void waitClusterStartup(String clusterCode, String applicationId) throws Exception {
         if (StringUtils.isBlank(applicationId)) {
             throw new IllegalStateException("applicationId can not blank");
         }

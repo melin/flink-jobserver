@@ -3,6 +3,7 @@ package io.github.melin.flink.jobserver.submit.dto;
 import io.github.melin.flink.jobserver.core.enums.InstanceType;
 import io.github.melin.flink.jobserver.core.enums.JobType;
 import io.github.melin.flink.jobserver.core.enums.RuntimeMode;
+import io.github.melin.flink.jobserver.core.enums.SchedulerType;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Tolerate;
@@ -20,6 +21,8 @@ public class JobInstanceInfo {
     private String accessKey;
 
     private String clusterCode;
+
+    private SchedulerType schedulerType;
 
     private JobType jobType;
 
@@ -50,8 +53,8 @@ public class JobInstanceInfo {
     public JobInstanceInfo() {
     }
 
-    public DriverDeploymentInfo buildDriverDeploymentInfo() {
-        return DriverDeploymentInfo.builder()
+    public DeploymentInfo buildDriverDeploymentInfo() {
+        return DeploymentInfo.builder()
                 .setClusterCode(this.clusterCode)
                 .setRuntimeMode(this.runtimeMode)
                 .setJobConfig(this.jobConfig)

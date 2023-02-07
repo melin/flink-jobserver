@@ -114,13 +114,13 @@ public class JobInstanceService extends BaseServiceImpl<JobInstance, Long> {
     /**
      * 乐观锁 控制实例同时被提交一次
      */
-    public void unLockInstance(String instanceCode) {
+    public void unLockInstance(String applicationId, String instanceCode) {
         int updateCount = jobInstanceDao.deleteOrUpdateByHQL("update JobInstance set status = :status " +
                         "where code = :code and status = :status1",
                 new String[]{"status", "code", "status1"}, WAITING, instanceCode, LOCKED);
 
         if (updateCount > 0) {
-            LOG.info("instance: {} lock release success", instanceCode);
+            LOG.info("driver: {}, instance: {} lock release success", applicationId, instanceCode);
         }
     }
 

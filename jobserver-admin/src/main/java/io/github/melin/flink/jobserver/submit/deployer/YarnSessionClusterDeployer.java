@@ -4,7 +4,7 @@ import io.github.melin.flink.jobserver.core.entity.SessionCluster;
 import io.github.melin.flink.jobserver.core.enums.SessionClusterStatus;
 import io.github.melin.flink.jobserver.core.exception.FlinkJobException;
 import io.github.melin.flink.jobserver.core.service.SessionClusterService;
-import io.github.melin.flink.jobserver.submit.dto.DriverDeploymentInfo;
+import io.github.melin.flink.jobserver.submit.dto.DeploymentInfo;
 import io.github.melin.flink.jobserver.support.YarnClientService;
 import io.github.melin.flink.jobserver.web.controller.SessionClusterController;
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +28,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.apache.hadoop.yarn.api.records.YarnApplicationState.*;
+import static org.apache.hadoop.yarn.api.records.YarnApplicationState.ACCEPTED;
+import static org.apache.hadoop.yarn.api.records.YarnApplicationState.NEW;
+import static org.apache.hadoop.yarn.api.records.YarnApplicationState.NEW_SAVING;
+import static org.apache.hadoop.yarn.api.records.YarnApplicationState.RUNNING;
+import static org.apache.hadoop.yarn.api.records.YarnApplicationState.SUBMITTED;
 
 /**
  * 参考 Flink FlinkYarnSessionCli 启动提交FLink Driver
@@ -44,7 +48,7 @@ public class YarnSessionClusterDeployer extends AbstractDriverDeployer<SessionCl
     private YarnClientService yarnClientService;
 
     @Autowired
-    protected SessionClusterService driverService;
+    protected SessionClusterService sessionClusterService;
 
     public YarnSessionClusterDeployer() {
         this.clusterClientServiceLoader = new DefaultClusterClientServiceLoader();
@@ -55,14 +59,14 @@ public class YarnSessionClusterDeployer extends AbstractDriverDeployer<SessionCl
         try {
             LOG.info("启动 session cluster : {}", sessionCluster.getSessionName());
 
-            DriverDeploymentInfo<SessionCluster> deploymentInfo = DriverDeploymentInfo.<SessionCluster>builder()
+            DeploymentInfo<SessionCluster> deploymentInfo = DeploymentInfo.<SessionCluster>builder()
                     .setCluster(sessionCluster)
                     .setClusterCode(clusterCode)
                     .build();
 
             long appSubmitTime = System.currentTimeMillis();
             sessionCluster.setStatus(SessionClusterStatus.INIT);
-            driverService.updateEntity(sessionCluster);
+            sessionClusterService.updateEntity(sessionCluster);
             String applicationId = startDriver(deploymentInfo, null);
 
             Long times = (System.currentTimeMillis() - appSubmitTime) / 1000L;
@@ -70,10 +74,13 @@ public class YarnSessionClusterDeployer extends AbstractDriverDeployer<SessionCl
 
             if (StringUtils.isNotBlank(applicationId)) {
                 sessionCluster.setApplicationId(applicationId);
-                sessionCluster.setStatus(SessionClusterStatus.RUNNING);
-                driverService.updateEntity(sessionCluster);
+                sessionClusterService.updateEntity(sessionCluster);
 
-                waitDriverStartup(clusterCode, applicationId);
+                waitClusterStartup(clusterCode, applicationId);
+
+                sessionCluster.setApplicationId(applicationId);
+                sessionCluster.setStatus(SessionClusterStatus.RUNNING);
+                sessionClusterService.updateEntity(sessionCluster);
             }
 
             SessionClusterController.flinkLauncherFailedMsg = "";
@@ -82,7 +89,7 @@ public class YarnSessionClusterDeployer extends AbstractDriverDeployer<SessionCl
             SessionClusterController.flinkLauncherFailedMsg = "启动 Session 失败: " + e.getMessage();
 
             sessionCluster.setStatus(SessionClusterStatus.CLOSED);
-            driverService.updateEntity(sessionCluster);
+            sessionClusterService.updateEntity(sessionCluster);
             try {
                 TimeUnit.SECONDS.sleep(10);
             } catch (Exception ignored) {}
@@ -90,7 +97,7 @@ public class YarnSessionClusterDeployer extends AbstractDriverDeployer<SessionCl
     }
 
     @Override
-    protected String startDriver(DriverDeploymentInfo<SessionCluster> deploymentInfo, Long driverId) throws Exception {
+    protected String startDriver(DeploymentInfo<SessionCluster> deploymentInfo, Long driverId) throws Exception {
         return clusterManager.runSecured(deploymentInfo.getClusterCode(), () -> {
             Configuration effectiveConfiguration = buildFlinkConfig(deploymentInfo);
             effectiveConfiguration.set(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName());
@@ -124,7 +131,7 @@ public class YarnSessionClusterDeployer extends AbstractDriverDeployer<SessionCl
     }
 
     @Override
-    protected void waitDriverStartup(String clusterCode, String applicationId) throws Exception {
+    protected void waitClusterStartup(String clusterCode, String applicationId) throws Exception {
         if (StringUtils.isBlank(applicationId)) {
             throw new IllegalStateException("applicationId can not blank");
         }
@@ -141,12 +148,12 @@ public class YarnSessionClusterDeployer extends AbstractDriverDeployer<SessionCl
         // 等待 flink driver 启动中
         report = yarnClientService.getYarnApplicationReport(clusterCode, applicationId);
         state = report.getYarnApplicationState();
-        SessionCluster driver = driverService.queryDriverByAppId(applicationId);
-        while (state == RUNNING && driver.getStatus() == SessionClusterStatus.INIT) {
+        SessionCluster cluster = sessionClusterService.querySessionClusterByAppId(applicationId);
+        while (state == RUNNING && cluster.getStatus() == SessionClusterStatus.INIT) {
             TimeUnit.SECONDS.sleep(1);
             report = yarnClientService.getYarnApplicationReport(clusterCode, applicationId);
             state = report.getYarnApplicationState();
-            driver = driverService.queryDriverByAppId(applicationId);
+            cluster = sessionClusterService.querySessionClusterByAppId(applicationId);
         }
 
         if (state != RUNNING) {

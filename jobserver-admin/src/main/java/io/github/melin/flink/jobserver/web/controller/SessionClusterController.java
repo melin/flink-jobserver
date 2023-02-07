@@ -9,7 +9,6 @@ import io.github.melin.flink.jobserver.core.enums.SessionClusterStatus;
 import io.github.melin.flink.jobserver.core.service.SessionClusterService;
 import io.github.melin.flink.jobserver.submit.deployer.YarnSessionClusterDeployer;
 import io.github.melin.flink.jobserver.support.ClusterConfig;
-import io.github.melin.flink.jobserver.support.ClusterManager;
 import io.github.melin.flink.jobserver.support.YarnClientService;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.Order;
@@ -156,7 +155,8 @@ public class SessionClusterController {
         try {
             SessionCluster cluster = sessionClusterService.getEntity(clusterId);
             if (cluster != null) {
-                yarnClientService.getYarnApplicationReport(cluster.getClusterCode(), cluster.getApplicationId());
+                yarnClientService.killYarnApp(cluster.getClusterCode(), cluster.getApplicationId());
+
                 cluster.setStatus(SessionClusterStatus.CLOSED);
                 cluster.setApplicationId(null);
                 sessionClusterService.updateEntity(cluster);
