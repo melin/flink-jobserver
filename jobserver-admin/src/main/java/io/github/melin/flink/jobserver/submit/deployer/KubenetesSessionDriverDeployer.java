@@ -76,7 +76,7 @@ public class KubenetesSessionDriverDeployer extends AbstractKubernetesDeployer<S
                 sessionCluster.setApplicationId(applicationId);
                 sessionCluster.setStatus(SessionClusterStatus.RUNNING);
                 driverService.updateEntity(sessionCluster);
-                waitClusterStartup(clusterCode, applicationId);
+                waitClusterStartup(clusterCode, applicationId, sessionCluster.getId());
             }
 
             SessionClusterController.flinkLauncherFailedMsg = "";
@@ -161,7 +161,7 @@ public class KubenetesSessionDriverDeployer extends AbstractKubernetesDeployer<S
     }
 
     @Override
-    protected void waitClusterStartup(String clusterCode, String applicationId) throws Exception {
+    protected void waitClusterStartup(String clusterCode, String applicationId, Long clusterId) throws Exception {
         if (StringUtils.isBlank(applicationId)) {
             throw new IllegalStateException("applicationId can not blank");
         }

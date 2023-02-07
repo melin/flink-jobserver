@@ -90,9 +90,7 @@ public class KubernetesApplicationDriverDeployer extends AbstractKubernetesDeplo
             LOG.info("start share jobserver: {}, times: {}s", applicationId, times);
 
             if (StringUtils.isNotBlank(applicationId)) {
-                driverService.updateDriverAppId(driverId, applicationId);
-                waitClusterStartup(clusterCode, applicationId);
-                driverService.updateDriverAppId(driverId, applicationId, DriverStatus.IDLE);
+                waitClusterStartup(clusterCode, applicationId, driverId);
             }
 
             ApplicationDriverController.flinkLauncherFailedMsg = "";
@@ -170,7 +168,7 @@ public class KubernetesApplicationDriverDeployer extends AbstractKubernetesDeplo
     }
 
     @Override
-    protected void waitClusterStartup(String clusterCode, String applicationId) throws Exception {
+    protected void waitClusterStartup(String clusterCode, String applicationId, Long driverId) throws Exception {
         if (StringUtils.isBlank(applicationId)) {
             throw new IllegalStateException("applicationId can not blank");
         }
@@ -187,12 +185,12 @@ public class KubernetesApplicationDriverDeployer extends AbstractKubernetesDeplo
         // 等待 flink driver 启动中
         report = yarnClientService.getYarnApplicationReport(clusterCode, applicationId);
         state = report.getYarnApplicationState();
-        ApplicationDriver driver = driverService.queryDriverByAppId(applicationId);
+        ApplicationDriver driver = driverService.getEntity(driverId);
         while (state == RUNNING && driver.getStatus() == DriverStatus.INIT) {
             TimeUnit.SECONDS.sleep(1);
             report = yarnClientService.getYarnApplicationReport(clusterCode, applicationId);
             state = report.getYarnApplicationState();
-            driver = driverService.queryDriverByAppId(applicationId);
+            driver = driverService.getEntity(driverId);
         }
 
         if (state != RUNNING) {

@@ -21,6 +21,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>io.github.melin</groupId>
+            <artifactId>superior-sql-parser</artifactId>
+            <version>3.3.0.4</version>
+        </dependency>
+
+        <dependency>
             <groupId>io.github.melin.flink.jobserver</groupId>
             <artifactId>flink-jobserver-common</artifactId>
             <version>${project.version}</version>

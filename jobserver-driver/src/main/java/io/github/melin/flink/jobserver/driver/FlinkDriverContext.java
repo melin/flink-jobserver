@@ -44,6 +44,7 @@ public class FlinkDriverContext {
         driver.setServerIp(NetUtils.getLocalHost());
         driver.setServerPort(serverPortService.getPort());
         driver.setStatus(DriverStatus.IDLE);
+        driver.setApplicationId(FlinkDriverEnv.applicationId);
         if (driverParam.getRuntimeMode() == RuntimeExecutionMode.BATCH) {
             driver.setRuntimeMode(RuntimeMode.BATCH);
         } else if (driverParam.getRuntimeMode() == RuntimeExecutionMode.STREAMING) {

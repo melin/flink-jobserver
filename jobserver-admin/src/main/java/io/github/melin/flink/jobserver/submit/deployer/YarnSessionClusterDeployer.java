@@ -76,7 +76,7 @@ public class YarnSessionClusterDeployer extends AbstractDriverDeployer<SessionCl
                 sessionCluster.setApplicationId(applicationId);
                 sessionClusterService.updateEntity(sessionCluster);
 
-                waitClusterStartup(clusterCode, applicationId);
+                waitClusterStartup(clusterCode, applicationId, sessionCluster.getId());
 
                 sessionCluster.setApplicationId(applicationId);
                 sessionCluster.setStatus(SessionClusterStatus.RUNNING);
@@ -131,7 +131,7 @@ public class YarnSessionClusterDeployer extends AbstractDriverDeployer<SessionCl
     }
 
     @Override
-    protected void waitClusterStartup(String clusterCode, String applicationId) throws Exception {
+    protected void waitClusterStartup(String clusterCode, String applicationId, Long clusterId) throws Exception {
         if (StringUtils.isBlank(applicationId)) {
             throw new IllegalStateException("applicationId can not blank");
         }

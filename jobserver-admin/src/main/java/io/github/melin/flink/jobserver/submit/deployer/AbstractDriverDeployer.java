@@ -106,6 +106,7 @@ abstract public class AbstractDriverDeployer<T> {
             FSUtils.checkHdfsPathExist(hadoopConf, flinkYarnJarsDir);
             flinkConfig.set(PROVIDED_LIB_DIRS, Lists.newArrayList(flinkYarnJarsDir));
             flinkConfig.set(FLINK_DIST_JAR, driverHome + "/flink-" + flinkVersion + "/flink-dist-" + flinkVersion + ".jar");
+            flinkConfig.setString("flink.hadoop.fs.defaultFS", defaultFS);
 
             String driverJar = driverHome + "/" + clusterConfig.getValue(clusterCode, JOBSERVER_DRIVER_JAR_NAME);
             List<String> jobJars = Lists.newArrayList(driverJar);
@@ -339,7 +340,7 @@ abstract public class AbstractDriverDeployer<T> {
 
         long getServerTime = System.currentTimeMillis();
         String applicationId = startDriver(job.buildDriverDeploymentInfo(), driverId);
-        waitClusterStartup(job.getClusterCode(), applicationId);
+        waitClusterStartup(job.getClusterCode(), applicationId, driverId);
 
         ApplicationDriver driver = driverService.queryDriverByAppId(applicationId);
         if (driver == null || driver.getServerPort() == -1) { // 默认值: -1
@@ -393,5 +394,5 @@ abstract public class AbstractDriverDeployer<T> {
         }
     }
 
-    abstract protected void waitClusterStartup(String clusterCode, String applicationId) throws Exception;
+    abstract protected void waitClusterStartup(String clusterCode, String applicationId, Long driverId) throws Exception;
 }

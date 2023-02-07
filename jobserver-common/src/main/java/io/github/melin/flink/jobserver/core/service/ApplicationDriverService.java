@@ -184,22 +184,4 @@ public class ApplicationDriverService extends BaseServiceImpl<ApplicationDriver,
             return findByCriterions(Order.asc("gmtCreated"), statusCrt, shareDriverCrt, instanceCountCrt);
         }
     }
-
-    @Transactional(rollbackFor = Exception.class)
-    public void updateDriverAppId(Long driverId, String applicationId) {
-        ApplicationDriver driver = this.getEntity(driverId);
-        if (driver != null) {
-            driver.setApplicationId(applicationId);
-            this.updateEntity(driver);
-        }
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public void updateDriverAppId(Long driverId, String applicationId, DriverStatus status) {
-        ApplicationDriver driver = this.getEntity(driverId);
-        if (driver != null) {
-            driver.setApplicationId(applicationId);
-            this.updateEntity(driver);
-        }
-    }
 }

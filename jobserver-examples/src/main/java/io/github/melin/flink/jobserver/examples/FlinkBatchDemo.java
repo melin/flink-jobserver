@@ -11,17 +11,7 @@ public class FlinkBatchDemo implements FlinkJob {
                        StreamTableEnvironment tableEnv,
                        String[] args) throws Exception {
 
-        tableEnv.executeSql(
-                // define the aggregation
-                "SELECT word, SUM(frequency) AS `count`\n"
-                        // read from an artificial fixed-size table with rows and columns
-                        + "FROM (\n"
-                        + "  VALUES ('Hello', 1), ('Ciao', 1), ('Hello', 2)\n"
-                        + ")\n"
-                        // name the table and its columns
-                        + "AS WordTable(word, frequency)\n"
-                        // group for aggregation
-                        + "GROUP BY word")
-                .print();
+        tableEnv.executeSql("select * from hive_catalog.bigdata.test_demo_test1").print();
+        System.out.println("hello world==================");
     }
 }

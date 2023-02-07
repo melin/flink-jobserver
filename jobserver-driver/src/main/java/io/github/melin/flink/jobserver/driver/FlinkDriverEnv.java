@@ -7,6 +7,8 @@ import org.apache.calcite.rel.metadata.JaninoRelMetadataProvider;
 import org.apache.calcite.rel.metadata.RelMetadataQueryBase;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.HighAvailabilityOptions;
+import org.apache.flink.configuration.ReadableConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.SqlDialect;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
@@ -31,6 +33,8 @@ public class FlinkDriverEnv {
 
     private static JaninoRelMetadataProvider metadataProvider;
 
+    private static Configuration flinkConfig;
+
     public static volatile String applicationId;
 
     private static final CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -53,7 +57,10 @@ public class FlinkDriverEnv {
         streamExecutionEnvironment.setRuntimeMode(driverParam.getRuntimeMode());
         tableEnvironment = StreamTableEnvironment.create(streamExecutionEnvironment);
         streamExecutionEnvironment.registerJobListener(new LineageFlinkJobListener(streamExecutionEnvironment));
-        LOG.info("flink runtime mode: {}", driverParam.getRuntimeMode());
+
+        flinkConfig = (Configuration) streamExecutionEnvironment.getConfiguration();
+        applicationId = flinkConfig.get(HighAvailabilityOptions.HA_CLUSTER_ID);
+        LOG.info("flink runtime mode: {}, applicationId: {}", driverParam.getRuntimeMode(), applicationId);
 
         LOG.info("create hive catalog: {}", driverParam.isHiveEnable());
         if (driverParam.isHiveEnable()) {
@@ -94,7 +101,15 @@ public class FlinkDriverEnv {
         return tableEnvironment;
     }
 
+    public static StreamExecutionEnvironment getStreamExecutionEnvironment() {
+        return streamExecutionEnvironment;
+    }
+
     public static JaninoRelMetadataProvider getMetadataProvider() {
         return metadataProvider;
+    }
+
+    public static Configuration getFlinkConfig() {
+        return flinkConfig;
     }
 }
