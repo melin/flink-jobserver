@@ -55,8 +55,8 @@ public class FlinkDriverEnv {
     private static void initFlink(Configuration flinkConf, Cluster cluster, DriverParam driverParam) {
         streamExecutionEnvironment = StreamExecutionEnvironment.getExecutionEnvironment(flinkConf);
         streamExecutionEnvironment.setRuntimeMode(driverParam.getRuntimeMode());
-        tableEnvironment = StreamTableEnvironment.create(streamExecutionEnvironment);
         streamExecutionEnvironment.registerJobListener(new LineageFlinkJobListener(streamExecutionEnvironment));
+        tableEnvironment = StreamTableEnvironment.create(streamExecutionEnvironment);
 
         flinkConfig = (Configuration) streamExecutionEnvironment.getConfiguration();
         applicationId = flinkConfig.get(HighAvailabilityOptions.HA_CLUSTER_ID);
