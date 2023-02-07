@@ -402,7 +402,7 @@ var Cluster = function () {
                     data.keytabBase64 = keytabBase64
                     data.kerberosFileName = kerberosFileName
 
-                    if (data.kerberosEnabled) {
+                    if (data.kerberosEnabled === "true") {
                         data.kerberosConfig = $.trim(krb5ConfEditor.getValue());
                     }
 
