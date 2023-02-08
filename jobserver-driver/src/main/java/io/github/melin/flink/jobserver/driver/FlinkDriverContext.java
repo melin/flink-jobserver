@@ -60,14 +60,14 @@ public class FlinkDriverContext {
     }
 
     public void startDriver() {
-        LOGGER.info("startQueySparkStageLog");
+        LOGGER.info("startQueyFlinkStageLog");
         this.setUserStopTask(false);
         status = DriverStatus.RUNNING;
         //logThread.startQueySparkStageLog();
     }
 
     public void stopDriver(InstanceDto instanceDto) {
-        LOGGER.info("stopQueySparkStageLog");
+        LOGGER.info("stopQueyFlinkStageLog");
         //logThread.stopQueySparkStageLog();
 
         ApplicationDriver driver = driverService.getEntity(instanceDto.getDriverId());

@@ -69,7 +69,7 @@ public class ApplicationDriverService extends BaseServiceImpl<ApplicationDriver,
     @Transactional(rollbackFor = Exception.class)
     public void updateServerFinished(String appId) {
         try {
-            String hql = "update FlinkDriver set status=:afterStatus, gmtModified=:gmtModified " +
+            String hql = "update ApplicationDriver set status=:afterStatus, gmtModified=:gmtModified " +
                     "where status=:beforeStatus and applicationId=:appId";
 
             int batch = this.deleteOrUpdateByHQL(hql,

@@ -8,7 +8,6 @@ import org.apache.calcite.rel.metadata.RelMetadataQueryBase;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.HighAvailabilityOptions;
-import org.apache.flink.configuration.ReadableConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.SqlDialect;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
@@ -16,6 +15,7 @@ import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.table.catalog.hive.HiveCatalog;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.security.UserGroupInformation;
+import org.apache.hudi.table.catalog.HoodieHiveCatalog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,12 +82,21 @@ public class FlinkDriverEnv {
                 HiveConf hiveConf = new HiveConf(hadoopConf, HiveConf.class);
                 hiveConf.addResource(new ByteArrayInputStream(cluster.getHiveConfig().getBytes(StandardCharsets.UTF_8)));
 
-                Catalog catalog = new HiveCatalog("hive_catalog", "default", hiveConf, null);
-                tableEnvironment.registerCatalog("hive_catalog", catalog);
-                tableEnvironment.useCatalog("hive_catalog");
+                Catalog catalog = new HiveCatalog("flink_hive", "default", hiveConf, null);
+                tableEnvironment.registerCatalog("flink_hive", catalog);
+                LOG.info("register hive catalog");
+                tableEnvironment.useCatalog("flink_hive");
                 tableEnvironment.getConfig().setSqlDialect(SqlDialect.HIVE);
                 metadataProvider = RelMetadataQueryBase.THREAD_PROVIDERS.get();
                 LOG.info("metadata {}", metadataProvider);
+
+                try {
+                    Catalog hudiCatalog = new HoodieHiveCatalog("flink_hudi", flinkConfig, hiveConf, false);
+                    tableEnvironment.registerCatalog("flink_hudi", hudiCatalog);
+                    LOG.info("register hudi catalog");
+                } catch (Throwable e) {
+                    LOG.warn("hudi-flink[version]-bundle-[version].jar not exist");
+                }
             }
         }
         LOG.info("StreamTableEnvironment inited");

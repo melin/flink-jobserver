@@ -9,6 +9,9 @@
 6. 更加灵活的对调度任务并发和优先级控制，例如单个用户最大并发数量，不完全依赖底层yarn、k8s等资源管理能力。例如一些调度框架是把作业直接传给yarn 资源管理器，如果yarn资源不够，提交上去的任务全部在yarn 等待队列中。CDH 默认是公平调度，会导致任务无法按照优先级运行。
 7. 对接superior-metastore 统一元数据中心, 引擎基于metastore 跨源计算: https://github.com/melin/superior-metastore
 
+![Flink 任务](imgs/jobserver.png)
+![集群管理](imgs/cluster.png)
+
 ## 一、Build
 
 ```
@@ -20,8 +23,8 @@ mvn clean package -Prelease,cdh6 -DlibScope=provided
 ## 二、作业实例接口
 包含作业实例提交、作业实例状态查询、作业实例运行日志查询、终止作业实例接口，具体接口：[Rest API](https://github.com/melin/flink-jobserver/blob/master/flink-admin/src/main/java/io/github/melin/flink/jobserver/web/rest/JobServerRestApi.java)
 
-### 1、Spark jar 作业
-请参考: [Spark jar](https://github.com/melin/flink-jobserver/tree/master/jobserver-api)
+### 1、Flink jar 作业
+请参考: [Flink jar](https://github.com/melin/flink-jobserver/tree/master/jobserver-api)
 
 ## 三、Yarn Cluster 模式部署
 ### 1、准备环境
@@ -29,10 +32,7 @@ Flink 任务运行环境：Hadoop 2.7.7，Spark 3.3.0。为避免每次任务运
 1. flink-jobserver-driver-0.1.0.jar  -- flink jobserver driver jar，jar 参考编译 flink jobserver 部分。
 2. aspectjweaver-1.9.9.1.jar  -- aspectj 拦截spark 相关代码，实现功能增强，直接maven 仓库下载 
 3. flink-1.16.0  --flink 依赖所有jar，从flink 官网下载: flink-1.16.0-bin-scala_2.12.tgz, 解压后把lib 目录下所有jar 上传到 flink-1.16.0 目录。
-
-> 编译 CDH6.3.2 版本：<br/>
-> mvn clean install -DskipTests -Dfast -Drat.skip=true -Dinclude-hadoop -Dflink.hadoop.version=3.0.0-cdh6.3.2 -Dhivemetastore.hadoop.version=3.0.0-cdh6.3.2 -Dmaven.compile.fork=true -Dhive.version=2.1.1-cdh6.3.2
-
+4. 如果使用hudi，上传 hudi-flink[version]-bundle-[version].jar 到 flink-1.16.0 目录。
 
 ### 2、Yarn 集群配置要求
 1. yarn 开启日志聚合，方便出现问题查看日志 
