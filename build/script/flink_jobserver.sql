@@ -11,11 +11,39 @@
  Target Server Version : 80031
  File Encoding         : 65001
 
- Date: 18/11/2022 23:54:37
+ Date: 10/02/2023 12:29:26
 */
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for fjs_application_driver
+-- ----------------------------
+DROP TABLE IF EXISTS `fjs_application_driver`;
+CREATE TABLE `fjs_application_driver` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `cluster_code` varchar(45) DEFAULT NULL COMMENT '集群Code',
+  `version` int DEFAULT '0' COMMENT '乐观锁，避免重复提交',
+  `server_ip` varchar(100) DEFAULT NULL,
+  `server_port` int NOT NULL,
+  `scheduler_type` varchar(45) DEFAULT NULL COMMENT '调度框架:YARN、K8S',
+  `status` varchar(45) NOT NULL COMMENT '状态',
+  `application_id` varchar(64) NOT NULL,
+  `log_server` varchar(64) DEFAULT NULL COMMENT 'spark 日志拉取server ip',
+  `instance_count` int DEFAULT '0' COMMENT '运行实例数量',
+  `server_cores` int NOT NULL COMMENT 'application占用core数',
+  `server_memory` int NOT NULL COMMENT 'Application占用内存大小',
+  `share_driver` tinyint(1) DEFAULT '0',
+  `runtime_mode` varchar(32) DEFAULT NULL COMMENT '运行模式: batch & stream',
+  `yarn_queue` varchar(255) DEFAULT NULL,
+  `creater` varchar(45) DEFAULT NULL,
+  `modifier` varchar(45) DEFAULT NULL,
+  `gmt_created` datetime NOT NULL,
+  `gmt_modified` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `idx_application_id` (`application_id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=320 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='application driver注册信息';
 
 -- ----------------------------
 -- Table structure for fjs_cluster
@@ -49,61 +77,28 @@ CREATE TABLE `fjs_cluster` (
   `gmt_modified` datetime DEFAULT NULL COMMENT 'gmt_modify',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code_UNIQUE` (`code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='计算集群';
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='计算集群';
 
 -- ----------------------------
--- Table structure for fjs_application_driver
+-- Table structure for fjs_data_connector
 -- ----------------------------
-DROP TABLE IF EXISTS `fjs_application_driver`;
-CREATE TABLE `fjs_application_driver` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `cluster_code` varchar(45) DEFAULT NULL COMMENT '集群Code',
-  `version` int DEFAULT '0' COMMENT '乐观锁，避免重复提交',
-  `server_ip` varchar(100) DEFAULT NULL,
-  `server_port` int NOT NULL,
-  `scheduler_type` varchar(45) DEFAULT 'YARN' COMMENT '调度框架:YARN、K8S',
-  `status` varchar(45) NOT NULL COMMENT '状态',
-  `application_id` varchar(64) NOT NULL,
-  `log_server` varchar(64) DEFAULT NULL COMMENT 'spark 日志拉取server ip',
-  `instance_count` int DEFAULT '0' COMMENT '运行实例数量',
-  `server_cores` int NOT NULL COMMENT 'application占用core数',
-  `server_memory` int NOT NULL COMMENT 'Application占用内存大小',
-  `share_driver` tinyint(1) DEFAULT '0',
-  `runtime_mode` varchar(32) DEFAULT NULL COMMENT '运行模式: batch & stream',
-  `yarn_queue` varchar(255) DEFAULT NULL,
-  `creater` varchar(45) DEFAULT NULL,
-  `modifier` varchar(45) DEFAULT NULL,
-  `gmt_created` datetime NOT NULL,
-  `gmt_modified` datetime DEFAULT NULL,
+DROP TABLE IF EXISTS `fjs_data_connector`;
+CREATE TABLE `fjs_data_connector` (
+  `id` int NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `code` varchar(64) DEFAULT NULL COMMENT 'Code，随机字符8位长',
+  `name` varchar(256) DEFAULT NULL COMMENT '数据源名称',
+  `ds_type` varchar(45) DEFAULT NULL COMMENT 'mysql, db2, pg等',
+  `username` varchar(45) DEFAULT NULL COMMENT '数据库账号',
+  `password` varchar(45) DEFAULT NULL COMMENT '密码',
+  `jdbc_url` varchar(256) DEFAULT NULL COMMENT '数据库连接地址',
+  `creater` varchar(45) DEFAULT NULL COMMENT '创建人',
+  `modifier` varchar(45) DEFAULT NULL COMMENT '修改人',
+  `gmt_created` datetime DEFAULT NULL COMMENT '创建者',
+  `gmt_modified` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`) USING BTREE,
-  KEY `idx_application_id` (`application_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='application driver注册信息';
+  UNIQUE KEY `index_code` (`code`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='数据连接管理';
 
--- ----------------------------
--- Table structure for fjs_session_cluster
--- ----------------------------
-DROP TABLE IF EXISTS `fjs_session_cluster`;
-CREATE TABLE `fjs_session_cluster` (
-    `id` int NOT NULL AUTO_INCREMENT,
-    `session_name` varchar(128) DEFAULT NULL COMMENT 'session name',
-    `cluster_code` varchar(45) DEFAULT NULL COMMENT '集群Code',
-    `config` longtext COMMENT '配置参数',
-    `version` int DEFAULT '0' COMMENT '乐观锁，避免重复提交',
-    `server_ip` varchar(100) DEFAULT NULL,
-    `server_port` int DEFAULT NULL,
-    `status` varchar(45) NOT NULL COMMENT '状态',
-    `application_id` varchar(64) DEFAULT NULL,
-    `log_server` varchar(64) DEFAULT NULL COMMENT 'spark 日志拉取server ip',
-    `server_cores` int DEFAULT NULL COMMENT 'application占用core数',
-    `server_memory` int DEFAULT NULL COMMENT 'Application占用内存大小',
-    `creater` varchar(45) DEFAULT NULL,
-    `modifier` varchar(45) DEFAULT NULL,
-    `gmt_created` datetime NOT NULL,
-    `gmt_modified` datetime DEFAULT NULL,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `index_session_name` (`session_name`),
-    KEY `idx_application_id` (`application_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='session driver注册信息';
 -- ----------------------------
 -- Table structure for fjs_job_instance
 -- ----------------------------
@@ -114,8 +109,9 @@ CREATE TABLE `fjs_job_instance` (
   `code` varchar(45) NOT NULL,
   `name` varchar(512) DEFAULT NULL,
   `cluster_code` varchar(64) DEFAULT 'default',
-  `deploy_mode` varchar(32) null comment '调度模式:session、application',
-  `scheduler_type` varchar(32) null comment '调度类型：Yarn、Kubernetes',
+  `deploy_mode` varchar(32) DEFAULT NULL COMMENT '调度模式:session、application',
+  `session_name` varchar(128) DEFAULT NULL COMMENT 'session 模式session name',
+  `scheduler_type` varchar(32) DEFAULT NULL COMMENT '调度类型：Yarn、Kubernetes',
   `yarn_queue` varchar(128) DEFAULT NULL,
   `dependent_code` varchar(1024) DEFAULT 'START' COMMENT '依赖上一个实例code',
   `job_type` varchar(32) NOT NULL,
@@ -143,7 +139,7 @@ CREATE TABLE `fjs_job_instance` (
   KEY `idx_application_id_index` (`application_id`) USING BTREE,
   KEY `idx_name` (`name`(128)) USING BTREE,
   KEY `idx_schedule_time` (`schedule_time`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='作业实例表';
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='作业实例表';
 
 -- ----------------------------
 -- Table structure for fjs_job_instance_content
@@ -157,7 +153,7 @@ CREATE TABLE `fjs_job_instance_content` (
   `error_msg` longtext COMMENT '错误信息',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE KEY `uk_code` (`code`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='实例内容表';
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='实例内容表';
 
 -- ----------------------------
 -- Table structure for fjs_job_instance_dependent
@@ -171,27 +167,32 @@ CREATE TABLE `fjs_job_instance_dependent` (
   UNIQUE KEY `uk_code` (`code`,`parent_code`) USING BTREE,
   KEY `idx_code` (`code`) USING BTREE,
   KEY `idx_dependent_code` (`parent_code`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='实例依赖表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='实例依赖表';
 
 -- ----------------------------
--- Table structure for sjs_data_connector
+-- Table structure for fjs_session_cluster
 -- ----------------------------
-DROP TABLE IF EXISTS `sjs_data_connector`;
-CREATE TABLE `sjs_data_connector` (
-    `id` int NOT NULL AUTO_INCREMENT COMMENT 'id',
-    `code` varchar(64) DEFAULT NULL COMMENT 'Code，随机字符8位长',
-    `name` varchar(128) DEFAULT NULL COMMENT '数据源名称',
-    `ds_type` varchar(45) DEFAULT NULL COMMENT 'mysql, db2, pg等',
-    `username` varchar(45) DEFAULT NULL COMMENT '数据库账号',
-    `password` varchar(45) DEFAULT NULL COMMENT '密码',
-    `db_url` varchar(256) DEFAULT NULL COMMENT '数据库连接地址',
-    `description` varchar(512) DEFAULT NULL COMMENT '数据源描述',
-    `creater` varchar(45) DEFAULT NULL COMMENT '创建人',
-    `modifier` varchar(45) DEFAULT NULL COMMENT '修改人',
-    `gmt_created` datetime DEFAULT NULL COMMENT '创建者',
-    `gmt_modified` datetime DEFAULT NULL COMMENT '修改时间',
-    PRIMARY KEY (`id`) USING BTREE,
-    UNIQUE KEY `index_code` (`code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='数据连接管理';
+DROP TABLE IF EXISTS `fjs_session_cluster`;
+CREATE TABLE `fjs_session_cluster` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `session_name` varchar(128) DEFAULT NULL COMMENT 'session name',
+  `cluster_code` varchar(45) DEFAULT NULL COMMENT '集群Code',
+  `config` longtext COMMENT '参数配置',
+  `version` int DEFAULT '0' COMMENT '乐观锁，避免重复提交',
+  `server_ip` varchar(100) DEFAULT NULL,
+  `server_port` int DEFAULT NULL,
+  `status` varchar(45) NOT NULL COMMENT '状态',
+  `application_id` varchar(64) DEFAULT NULL,
+  `log_server` varchar(64) DEFAULT NULL COMMENT 'spark 日志拉取server ip',
+  `server_cores` int DEFAULT NULL COMMENT 'application占用core数',
+  `server_memory` int DEFAULT NULL COMMENT 'Application占用内存大小',
+  `creater` varchar(45) DEFAULT NULL,
+  `modifier` varchar(45) DEFAULT NULL,
+  `gmt_created` datetime NOT NULL,
+  `gmt_modified` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_session_name` (`session_name`),
+  KEY `idx_application_id` (`application_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='session cluster注册信息';
 
 SET FOREIGN_KEY_CHECKS = 1;
