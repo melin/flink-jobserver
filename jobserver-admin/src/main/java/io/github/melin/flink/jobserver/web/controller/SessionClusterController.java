@@ -2,11 +2,15 @@ package io.github.melin.flink.jobserver.web.controller;
 
 import com.gitee.melin.bee.core.support.Pagination;
 import com.gitee.melin.bee.core.support.Result;
+import com.gitee.melin.bee.util.NetUtils;
 import com.google.common.collect.Lists;
 import io.github.melin.flink.jobserver.FlinkJobServerConf;
-import io.github.melin.flink.jobserver.core.entity.SessionCluster;
-import io.github.melin.flink.jobserver.core.enums.SessionClusterStatus;
-import io.github.melin.flink.jobserver.core.service.SessionClusterService;
+import io.github.melin.flink.jobserver.core.entity.ApplicationDriver;
+import io.github.melin.flink.jobserver.core.entity.Cluster;
+import io.github.melin.flink.jobserver.core.enums.DeployMode;
+import io.github.melin.flink.jobserver.core.enums.DriverStatus;
+import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
+import io.github.melin.flink.jobserver.core.service.ClusterService;
 import io.github.melin.flink.jobserver.submit.deployer.YarnSessionClusterDeployer;
 import io.github.melin.flink.jobserver.support.ClusterConfig;
 import io.github.melin.flink.jobserver.support.YarnClientService;
@@ -29,11 +33,10 @@ public class SessionClusterController {
 
     private static final Logger LOG = LoggerFactory.getLogger(SessionClusterController.class);
 
-    @Autowired
-    private SessionClusterService driverService;
+    private static final String hostName = NetUtils.getLocalHost();
 
     @Autowired
-    private SessionClusterService sessionClusterService;
+    private ApplicationDriverService driverService;
 
     @Autowired
     private YarnSessionClusterDeployer yarnSessionClusterDeployer;
@@ -44,6 +47,9 @@ public class SessionClusterController {
     @Autowired
     private YarnClientService yarnClientService;
 
+    @Autowired
+    private ClusterService clusterService;
+
     public static String flinkLauncherFailedMsg = "";
 
     @RequestMapping("/session")
@@ -53,7 +59,7 @@ public class SessionClusterController {
 
     @RequestMapping("/session/queryClusters")
     @ResponseBody
-    public Pagination<SessionCluster> queryClusters(String applicationId, int page, int limit, HttpServletRequest request) {
+    public Pagination<ApplicationDriver> queryClusters(String applicationId, int page, int limit, HttpServletRequest request) {
         String sort = request.getParameter("sort");
         String order = request.getParameter("order");
 
@@ -72,7 +78,11 @@ public class SessionClusterController {
             params.add("applicationId");
             values.add(applicationId);
         }
-        Pagination<SessionCluster> pagination = driverService.findPageByNamedParamAndOrder(params, values,
+
+        params.add("deployMode");
+        values.add(DeployMode.SESSION);
+
+        Pagination<ApplicationDriver> pagination = driverService.findPageByNamedParamAndOrder(params, values,
                 Lists.newArrayList(order1), page, limit);
 
         pagination.getResult().forEach(driver -> {
@@ -85,9 +95,9 @@ public class SessionClusterController {
 
     @RequestMapping("/session/queryCluster")
     @ResponseBody
-    public Result<SessionCluster> queryCluster(Long clusterId) {
+    public Result<ApplicationDriver> queryCluster(Long clusterId) {
         try {
-            SessionCluster cluster = sessionClusterService.getEntity(clusterId);
+            ApplicationDriver cluster = driverService.getEntity(clusterId);
             return Result.successDataResult(cluster);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
@@ -97,21 +107,27 @@ public class SessionClusterController {
 
     @RequestMapping("/session/saveCluster")
     @ResponseBody
-    public Result<Void> saveCluster(SessionCluster cluster) {
+    public Result<Void> saveCluster(ApplicationDriver sessionDriver) {
         try {
-            cluster.setGmtCreated(Instant.now());
-            cluster.setGmtModified(Instant.now());
+            sessionDriver.setGmtCreated(Instant.now());
+            sessionDriver.setGmtModified(Instant.now());
 
-            if (cluster.getId() == null) {
-                cluster.setCreater("jobserver");
-                cluster.setModifier("jobserver");
-                sessionClusterService.insertEntity(cluster);
+            Cluster cluster = clusterService.getClusterByCode(sessionDriver.getClusterCode());
+
+            if (sessionDriver.getId() == null) {
+                sessionDriver.setSchedulerType(cluster.getSchedulerType());
+                sessionDriver.setLogServer(hostName);
+                sessionDriver.setDeployMode(DeployMode.SESSION);
+                sessionDriver.setStatus(DriverStatus.CLOSED);
+                sessionDriver.setCreater("jobserver");
+                sessionDriver.setModifier("jobserver");
+                driverService.insertEntity(sessionDriver);
             } else {
-                SessionCluster old = sessionClusterService.getEntity(cluster.getId());
-                old.setConfig(cluster.getConfig());
-                old.setClusterCode(cluster.getClusterCode());
+                ApplicationDriver old = driverService.getEntity(sessionDriver.getId());
+                old.setConfig(sessionDriver.getConfig());
+                old.setClusterCode(sessionDriver.getClusterCode());
                 old.setGmtModified(Instant.now());
-                sessionClusterService.updateEntity(old);
+                driverService.updateEntity(old);
             }
             return Result.successResult();
         } catch (Exception e) {
@@ -124,8 +140,8 @@ public class SessionClusterController {
     @ResponseBody
     public Result<Void> deleteCluster(Long clusterId) {
         try {
-            SessionCluster cluster = sessionClusterService.getEntity(clusterId);
-            sessionClusterService.deleteEntity(cluster);
+            ApplicationDriver cluster = driverService.getEntity(clusterId);
+            driverService.deleteEntity(cluster);
             return Result.successResult();
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
@@ -137,7 +153,7 @@ public class SessionClusterController {
     @ResponseBody
     public Result<Void> startCluster(Long clusterId) {
         try {
-            SessionCluster sessionCluster = sessionClusterService.getEntity(clusterId);
+            ApplicationDriver sessionCluster = driverService.getEntity(clusterId);
             if (sessionCluster != null) {
                 yarnSessionClusterDeployer.startSessionCluster(sessionCluster);
                 return Result.successResult();
@@ -153,13 +169,13 @@ public class SessionClusterController {
     @ResponseBody
     public Result<Void> closeCluster(Long clusterId) {
         try {
-            SessionCluster cluster = sessionClusterService.getEntity(clusterId);
+            ApplicationDriver cluster = driverService.getEntity(clusterId);
             if (cluster != null) {
                 yarnClientService.killYarnApp(cluster.getClusterCode(), cluster.getApplicationId());
 
-                cluster.setStatus(SessionClusterStatus.CLOSED);
+                cluster.setStatus(DriverStatus.CLOSED);
                 cluster.setApplicationId(null);
-                sessionClusterService.updateEntity(cluster);
+                driverService.updateEntity(cluster);
                 return Result.successResult();
             }
 

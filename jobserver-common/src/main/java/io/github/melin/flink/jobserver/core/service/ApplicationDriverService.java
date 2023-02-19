@@ -2,6 +2,7 @@ package io.github.melin.flink.jobserver.core.service;
 
 import io.github.melin.flink.jobserver.core.dao.ApplicationDriverDao;
 import io.github.melin.flink.jobserver.core.entity.ApplicationDriver;
+import io.github.melin.flink.jobserver.core.enums.DeployMode;
 import io.github.melin.flink.jobserver.core.enums.DriverStatus;
 import com.gitee.melin.bee.core.hibernate5.HibernateBaseDao;
 import com.gitee.melin.bee.core.service.BaseServiceImpl;
@@ -44,8 +45,13 @@ public class ApplicationDriverService extends BaseServiceImpl<ApplicationDriver,
     }
 
     @Transactional(readOnly = true, rollbackFor = Exception.class)
-    public long queryDriverCount(String clusterCode) {
-        return this.queryCount("clusterCode", clusterCode);
+    public long queryApplcationDriverCount(String clusterCode) {
+        return this.queryCount("clusterCode", clusterCode, "deployMode", DeployMode.APPLICATION);
+    }
+
+    @Transactional(readOnly = true, rollbackFor = Exception.class)
+    public long querySessionDriverCount(String clusterCode) {
+        return this.queryCount("clusterCode", clusterCode, "deployMode", DeployMode.SESSION);
     }
 
     @Transactional(readOnly = true, rollbackFor = Exception.class)

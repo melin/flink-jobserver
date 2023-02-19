@@ -25,6 +25,9 @@ CREATE TABLE `fjs_application_driver` (
   `id` int NOT NULL AUTO_INCREMENT,
   `cluster_code` varchar(45) DEFAULT NULL COMMENT '集群Code',
   `version` int DEFAULT '0' COMMENT '乐观锁，避免重复提交',
+  `session_name` varchar(128) DEFAULT NULL COMMENT 'session name',
+  `config` longtext COMMENT '参数配置',
+  `deploy_mode` varchar(32) DEFAULT NULL COMMENT '调度模式:session、application',
   `server_ip` varchar(100) DEFAULT NULL,
   `server_port` int NOT NULL,
   `scheduler_type` varchar(45) DEFAULT NULL COMMENT '调度框架:YARN、K8S',
@@ -32,8 +35,8 @@ CREATE TABLE `fjs_application_driver` (
   `application_id` varchar(64) NOT NULL,
   `log_server` varchar(64) DEFAULT NULL COMMENT 'spark 日志拉取server ip',
   `instance_count` int DEFAULT '0' COMMENT '运行实例数量',
-  `server_cores` int NOT NULL COMMENT 'application占用core数',
-  `server_memory` int NOT NULL COMMENT 'Application占用内存大小',
+  `server_cores` int DEFAULT NULL COMMENT 'application占用core数',
+  `server_memory` int DEFAULT NULL COMMENT 'Application占用内存大小',
   `share_driver` tinyint(1) DEFAULT '0',
   `runtime_mode` varchar(32) DEFAULT NULL COMMENT '运行模式: batch & stream',
   `yarn_queue` varchar(255) DEFAULT NULL,
@@ -168,31 +171,5 @@ CREATE TABLE `fjs_job_instance_dependent` (
   KEY `idx_code` (`code`) USING BTREE,
   KEY `idx_dependent_code` (`parent_code`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='实例依赖表';
-
--- ----------------------------
--- Table structure for fjs_session_cluster
--- ----------------------------
-DROP TABLE IF EXISTS `fjs_session_cluster`;
-CREATE TABLE `fjs_session_cluster` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `session_name` varchar(128) DEFAULT NULL COMMENT 'session name',
-  `cluster_code` varchar(45) DEFAULT NULL COMMENT '集群Code',
-  `config` longtext COMMENT '参数配置',
-  `version` int DEFAULT '0' COMMENT '乐观锁，避免重复提交',
-  `server_ip` varchar(100) DEFAULT NULL,
-  `server_port` int DEFAULT NULL,
-  `status` varchar(45) NOT NULL COMMENT '状态',
-  `application_id` varchar(64) DEFAULT NULL,
-  `log_server` varchar(64) DEFAULT NULL COMMENT 'spark 日志拉取server ip',
-  `server_cores` int DEFAULT NULL COMMENT 'application占用core数',
-  `server_memory` int DEFAULT NULL COMMENT 'Application占用内存大小',
-  `creater` varchar(45) DEFAULT NULL,
-  `modifier` varchar(45) DEFAULT NULL,
-  `gmt_created` datetime NOT NULL,
-  `gmt_modified` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `index_session_name` (`session_name`),
-  KEY `idx_application_id` (`application_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='session cluster注册信息';
 
 SET FOREIGN_KEY_CHECKS = 1;

@@ -1,5 +1,6 @@
 package io.github.melin.flink.jobserver.core.entity;
 
+import io.github.melin.flink.jobserver.core.enums.DeployMode;
 import io.github.melin.flink.jobserver.core.enums.DriverStatus;
 import com.gitee.melin.bee.model.IEntity;
 import com.gitee.melin.bee.util.NetUtils;
@@ -30,6 +31,18 @@ public class ApplicationDriver implements IEntity {
     @Column(name = "cluster_code")
     private String clusterCode;
 
+    @Column(name = "deploy_mode", length = 32)
+    @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
+            parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
+                    value = "io.github.melin.flink.jobserver.core.enums.DeployMode")})
+    private DeployMode deployMode = DeployMode.APPLICATION;
+
+    @Column(name = "session_name")
+    private String sessionName;
+
+    @Column(name = "config")
+    private String config;
+
     @Column(name = "version")
     private Integer version;
 
@@ -37,7 +50,7 @@ public class ApplicationDriver implements IEntity {
     private String serverIp;
 
     @Column(name = "server_port", nullable = false)
-    private Integer serverPort;
+    private Integer serverPort = -1;
 
     @Column(name = "scheduler_type")
     @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
@@ -105,9 +118,32 @@ public class ApplicationDriver implements IEntity {
 
     private static final String hostName = NetUtils.getLocalHost();
 
+    public static ApplicationDriver buildSessionDriver(String clusterCode, String sessionName) {
+        ApplicationDriver jobServer = new ApplicationDriver();
+        jobServer.setClusterCode(clusterCode);
+        jobServer.setDeployMode(DeployMode.SESSION);
+        jobServer.setSessionName(sessionName);
+        jobServer.setVersion(0);
+        jobServer.setServerIp("0.0.0.0");
+        jobServer.setServerPort(-1);
+        jobServer.setSchedulerType(SchedulerType.YARN);
+        jobServer.setStatus(DriverStatus.INIT);
+        jobServer.setApplicationId("");
+        jobServer.setCreater("");
+        jobServer.setGmtCreated(Instant.now());
+        jobServer.setGmtModified(Instant.now());
+        jobServer.setInstanceCount(0);
+        jobServer.setServerCores(0);
+        jobServer.setServerMemory(0L);
+        jobServer.setShareDriver(false);
+        jobServer.setLogServer(hostName);
+        return jobServer;
+    }
+
     public static ApplicationDriver buildApplicationDriver(String clusterCode, Boolean shareDriver) {
         ApplicationDriver jobServer = new ApplicationDriver();
         jobServer.setClusterCode(clusterCode);
+        jobServer.setDeployMode(DeployMode.APPLICATION);
         jobServer.setVersion(0);
         jobServer.setServerIp("0.0.0.0");
         jobServer.setServerPort(-1);

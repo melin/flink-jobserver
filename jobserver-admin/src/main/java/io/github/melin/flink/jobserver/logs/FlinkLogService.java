@@ -36,9 +36,6 @@ public class FlinkLogService implements ApplicationContextAware, InitializingBea
     @Autowired
     private JobInstanceService instanceService;
 
-    @Autowired
-    private ConfigProperties configProperties;
-
     /**
      * jobinstance对日志线程的映射
      */

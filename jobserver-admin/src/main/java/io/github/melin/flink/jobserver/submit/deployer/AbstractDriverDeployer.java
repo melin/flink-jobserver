@@ -5,7 +5,6 @@ import com.gitee.melin.bee.util.NetUtils;
 import com.google.common.collect.Lists;
 import io.github.melin.flink.jobserver.ConfigProperties;
 import io.github.melin.flink.jobserver.core.entity.ApplicationDriver;
-import io.github.melin.flink.jobserver.core.entity.SessionCluster;
 import io.github.melin.flink.jobserver.core.enums.DriverInstance;
 import io.github.melin.flink.jobserver.core.enums.DriverStatus;
 import io.github.melin.flink.jobserver.core.exception.FlinkJobException;
@@ -149,7 +148,7 @@ abstract public class AbstractDriverDeployer<T> {
         }
 
         String appName = JobServerUtils.appNamePrefix(profiles);
-        if (deploymentInfo.getCluster() instanceof SessionCluster) {
+        if (deploymentInfo.getCluster() instanceof ApplicationDriver) {
             appName += "[session][" + clusterCode + "]";
         } else {
             appName += "[share]";
@@ -368,7 +367,7 @@ abstract public class AbstractDriverDeployer<T> {
         return new SubmitYarnResult(applicationId, sparkDriverUrl, yarnQueue);
     }
 
-    protected void addSessionConfig(Configuration flinkConf, SessionCluster sessionCluster) {
+    protected void addSessionConfig(Configuration flinkConf, ApplicationDriver sessionCluster) {
         String config = sessionCluster.getConfig();
         Map<String, String> map = JsonUtils.toJavaMap(config);
         long jobmanagerMemory = Long.parseLong(map.getOrDefault("jobmanagerMemory", "2")) * 1024 * 1024 * 1024;

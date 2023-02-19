@@ -76,13 +76,6 @@ public class FlinkJobServerConf extends BeeConf {
                     .stringConf()
                     .createWithDefault("default");
 
-    public static final ConfigEntry<String> JOBSERVER_DRIVER_DATATUNNEL_JARS_DIR =
-            buildConf("jobserver.driver.datatunnel.jars.dir")
-                    .doc("drirver datatunnel jar 目录名")
-                    .version("1.0.0")
-                    .stringConf()
-                    .createWithDefault("datatunnel-3.3.0");
-
     public static final ConfigEntry<Boolean> JOBSERVER_DRIVER_HIVE_ENABLED =
             buildConf("jobserver.driver.hive.enabled")
                     .doc("flink hive enabled")

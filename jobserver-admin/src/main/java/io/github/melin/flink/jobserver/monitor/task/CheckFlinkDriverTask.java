@@ -2,10 +2,8 @@ package io.github.melin.flink.jobserver.monitor.task;
 
 import io.github.melin.flink.jobserver.FlinkJobServerConf;
 import io.github.melin.flink.jobserver.core.entity.ApplicationDriver;
-import io.github.melin.flink.jobserver.core.entity.SessionCluster;
 import io.github.melin.flink.jobserver.core.service.JobInstanceService;
 import io.github.melin.flink.jobserver.core.service.ApplicationDriverService;
-import io.github.melin.flink.jobserver.core.service.SessionClusterService;
 import io.github.melin.flink.jobserver.support.ClusterConfig;
 import io.github.melin.flink.jobserver.support.ClusterManager;
 import io.github.melin.flink.jobserver.support.YarnClientService;
@@ -54,9 +52,6 @@ public class CheckFlinkDriverTask implements Runnable {
     private ApplicationDriverService driverService;
 
     @Autowired
-    private SessionClusterService sessionClusterService;
-
-    @Autowired
     private ClusterManager clusterManager;
 
     @Autowired
@@ -94,18 +89,10 @@ public class CheckFlinkDriverTask implements Runnable {
 
                                 if ((System.currentTimeMillis() - createTime) > (10 * 60 * 1000)) {
                                     boolean deleteYarnApp = false;
+                                    ApplicationDriver driver = driverService.queryDriverByAppId(appId);
 
-                                    if (StringUtils.startsWith(appName, sessionAppNamePrefix)) {
-                                        SessionCluster sessionCluster = sessionClusterService.querySessionClusterByAppId(appId);
-                                        if (sessionCluster == null) {
-                                            deleteYarnApp = true;
-                                        }
-                                    } else if (StringUtils.startsWith(appName, appNamePrefix)) {
-                                        ApplicationDriver driver = driverService.queryDriverByAppId(appId);
-
-                                        if (driver == null) {
-                                            deleteYarnApp = true;
-                                        }
+                                    if (driver == null) {
+                                        deleteYarnApp = true;
                                     }
 
                                     if (deleteYarnApp) {

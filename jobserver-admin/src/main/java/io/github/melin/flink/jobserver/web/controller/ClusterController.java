@@ -9,7 +9,6 @@ import io.github.melin.flink.jobserver.core.service.ClusterService;
 import com.gitee.melin.bee.core.support.Pagination;
 import com.gitee.melin.bee.core.support.Result;
 import com.google.common.collect.Lists;
-import io.github.melin.flink.jobserver.core.service.SessionClusterService;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.Order;
@@ -43,9 +42,6 @@ public class ClusterController {
     private ApplicationDriverService applicationDriverService;
 
     @Autowired
-    private SessionClusterService sessionClusterService;
-
-    @Autowired
     protected RestTemplate restTemplate;
 
     @RequestMapping("/cluster")
@@ -76,6 +72,7 @@ public class ClusterController {
             params.add("code");
             values.add(code);
         }
+
         return clusterService.findPageByNamedParamAndOrder(params, values,
                 Lists.newArrayList(order1), page, limit);
     }
@@ -200,8 +197,8 @@ public class ClusterController {
     public Result<Void> deleteCluster(Long clusterId) {
         try {
             Cluster cluster = clusterService.getEntity(clusterId);
-            long appDriverCount = applicationDriverService.queryDriverCount(cluster.getCode());
-            long sessionCount = sessionClusterService.querySessionClusterCount(cluster.getCode());
+            long appDriverCount = applicationDriverService.queryApplcationDriverCount(cluster.getCode());
+            long sessionCount = applicationDriverService.querySessionDriverCount(cluster.getCode());
 
             if (appDriverCount > 0 || sessionCount > 0) {
                 return Result.failureResult("The cluster " + cluster.getCode() + " is used and cannot be deleted");

@@ -127,14 +127,14 @@ public class DriverPoolManager implements InitializingBean {
     private void startMinJobServer(Cluster cluster) {
         try {
             int minDriverCount = clusterConfig.getInt(cluster.getCode(), JOBSERVER_DRIVER_MIN_COUNT);
-            long driverCount = driverService.queryDriverCount(cluster.getCode());
+            long driverCount = driverService.queryApplcationDriverCount(cluster.getCode());
             while (minDriverCount > driverCount) {
                 if (SchedulerType.YARN == cluster.getSchedulerType()) {
                     yarnApplicationDriverDeployer.buildJobServer(cluster, RuntimeMode.BATCH);
-                    driverCount = driverService.queryDriverCount(cluster.getCode());
+                    driverCount = driverService.queryApplcationDriverCount(cluster.getCode());
                 } else {
                     kubernetesApplicationDriverDeployer.buildJobServer(cluster, RuntimeMode.BATCH);
-                    driverCount = driverService.queryDriverCount(cluster.getCode());
+                    driverCount = driverService.queryApplcationDriverCount(cluster.getCode());
                 }
             }
         } catch (Throwable e) {

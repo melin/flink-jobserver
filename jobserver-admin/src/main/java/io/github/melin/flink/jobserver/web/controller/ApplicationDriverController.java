@@ -3,6 +3,7 @@ package io.github.melin.flink.jobserver.web.controller;
 import io.github.melin.flink.jobserver.ConfigProperties;
 import io.github.melin.flink.jobserver.FlinkJobServerConf;
 import io.github.melin.flink.jobserver.core.entity.ApplicationDriver;
+import io.github.melin.flink.jobserver.core.enums.DeployMode;
 import io.github.melin.flink.jobserver.logs.FlinkLogService;
 import io.github.melin.flink.jobserver.support.ClusterConfig;
 import io.github.melin.flink.jobserver.support.YarnClientService;
@@ -111,6 +112,10 @@ public class ApplicationDriverController implements InitializingBean {
             params.add("applicationId");
             values.add(applicationId);
         }
+
+        params.add("deployMode");
+        values.add(DeployMode.APPLICATION);
+
         Pagination<ApplicationDriver> pagination = driverService.findPageByNamedParamAndOrder(params, values,
                 Lists.newArrayList(order1), page, limit);
 

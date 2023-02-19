@@ -19,7 +19,9 @@ public enum DriverStatus implements BaseStringEnum {
 
     FINISHED("完成", "finished"),
 
-    LOCKED("锁定", "locked");
+    LOCKED("锁定", "locked"),
+
+    CLOSED("关闭", "closed");
 
     private final String name;
 
