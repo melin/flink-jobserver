@@ -1,8 +1,8 @@
 package io.github.melin.flink.jobserver.core.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.gitee.melin.bee.core.jdbc.ConnectionDesc;
-import com.gitee.melin.bee.core.jdbc.DataSourceType;
+import com.gitee.melin.bee.core.jdbc.enums.DataSourceType;
+import com.gitee.melin.bee.core.jdbc.relational.ConnectionInfo;
 import com.gitee.melin.bee.model.IEntity;
 import io.github.melin.flink.jobserver.core.util.AESUtils;
 import lombok.Getter;
@@ -46,7 +46,7 @@ public class DataConnector implements IEntity {
     @Column(name = "ds_type")
     @Type(type = "com.gitee.melin.bee.core.enums.StringValuedEnumType",
             parameters = {@org.hibernate.annotations.Parameter(name = "enumClass",
-                    value = "com.gitee.melin.bee.core.jdbc.DataSourceType")})
+                    value = "com.gitee.melin.bee.core.jdbc.enums.DataSourceType")})
     private DataSourceType dataSourceType;
 
     private String username;
@@ -57,13 +57,13 @@ public class DataConnector implements IEntity {
     @Column(name="jdbc_url")
     private String jdbcUrl;
 
-    public ConnectionDesc buildDataConnector() {
+    public ConnectionInfo buildDataConnector() {
         String decrypt = AESUtils.decrypt(password);
         if (decrypt == null) {
             decrypt = password;
         }
 
-        return ConnectionDesc.builder()
+        return ConnectionInfo.builder()
                 .withDataSourceType(dataSourceType)
                 .withUsername(username)
                 .withPassword(decrypt)
