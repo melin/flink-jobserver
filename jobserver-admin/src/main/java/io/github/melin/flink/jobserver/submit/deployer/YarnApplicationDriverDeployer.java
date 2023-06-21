@@ -18,6 +18,7 @@ import org.apache.flink.client.deployment.*;
 import org.apache.flink.client.deployment.application.ApplicationConfiguration;
 import org.apache.flink.client.program.ClusterClient;
 import org.apache.flink.configuration.*;
+import org.apache.flink.yarn.YarnClusterDescriptor;
 import org.apache.flink.yarn.configuration.YarnDeploymentTarget;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
@@ -124,7 +125,8 @@ public class YarnApplicationDriverDeployer extends AbstractDriverDeployer<Cluste
 
             DefaultClusterClientServiceLoader clusterClientServiceLoader = new DefaultClusterClientServiceLoader();
             ClusterClientFactory<ApplicationId> clientFactory = clusterClientServiceLoader.getClusterClientFactory(flinkConfig);
-            ClusterDescriptor<ApplicationId> clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig);
+
+            YarnClusterDescriptor clusterDescriptor = (YarnClusterDescriptor) clientFactory.createClusterDescriptor(flinkConfig);
             ClusterClient<ApplicationId> clusterClient = null;
             try {
                 ClusterSpecification clusterSpecification = clientFactory.getClusterSpecification(flinkConfig);

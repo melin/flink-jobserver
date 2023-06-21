@@ -8,6 +8,7 @@ import org.apache.calcite.rel.metadata.RelMetadataQueryBase;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.HighAvailabilityOptions;
+import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.SqlDialect;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
